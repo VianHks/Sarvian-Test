@@ -1,0 +1,50 @@
+{
+  "name": "food-buyer-app",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "prepare": "husky install",
+    "depcheck": "nextweb depcheck --prefer-wanted",
+    "clean": "nextweb clean",
+    "build": "cross-env NODE_ENV=production nextweb build",
+    "start": "nextweb start",
+    "test": "nextweb test",
+    "lint": "nextweb lint",
+    "help": "nextweb help",
+    "config": "nextweb config"
+  },
+  "devDependencies": {
+    "@nxweb/builder": "3.6.0-rc.40",
+    "@types/jest": "^29.5.6",
+    "@types/node": "^20.8.8",
+    "@types/react": "^18.2.31",
+    "@types/react-dom": "^18.2.14",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.52.0",
+    "husky": "^8.0.0",
+    "jest": "^29.6.4",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.23.2",
+    "@casl/ability": "^6.5.0",
+    "@casl/react": "^3.1.0",
+    "@emotion/cache": "^11.11.0",
+    "@emotion/react": "^11.11.1",
+    "@mui/material": "^5.14.15",
+    "@mui/utils": "^5.14.15",
+    "@nxweb/auth": "3.6.0-rc.19",
+    "@nxweb/core": "3.6.0-rc.35",
+    "@nxweb/icons": "3.6.0-rc.29",
+    "@nxweb/react": "3.6.0-rc.10",
+    "@nxweb/react-bootstrap": "^3.6.0-rc.0",
+    "hoist-non-react-statics": "^3.3.2",
+    "react": "^18.2.0",
+    "react-bootstrap": "^2.9.1",
+    "react-dom": "^18.2.0",
+    "react-popper": "^2.3.0",
+    "react-router-dom": "^6.17.0",
+    "stylis-plugin-rtl": "^2.1.1"
+  }
+}

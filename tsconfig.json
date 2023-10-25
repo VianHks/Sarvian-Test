@@ -1,0 +1,15 @@
+{
+  "extends": "@nxweb/builder/ts/react",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
+  },
+  "exclude": [
+    "**/~*"
+  ],
+  "include": [
+    "types/**/*",
+    "src/**/*"
+  ]
+}

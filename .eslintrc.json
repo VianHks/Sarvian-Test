@@ -1,0 +1,9 @@
+{
+  "root": true,
+  "extends": [
+    "@nxweb"
+  ],
+  "rules": {
+    "@typescript-eslint/no-magic-numbers": "off"
+  }
+}
