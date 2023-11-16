@@ -17,7 +17,7 @@ export const routes: Route[] = [
   },
   {
     auth: false,
-    element: lazy(() => import('@pages/home/index.js')),
+    element: lazy(() => import('@pages/home/pickup.js')),
     hash: true,
     layout: 'blank',
     path: '/beranda',

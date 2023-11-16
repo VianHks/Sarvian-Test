@@ -5,9 +5,9 @@ import type { NavItemsType } from '@layouts/types.js';
 export const navigation: readonly NavItemsType[] = [
   {
     icon: <SmartHome />,
-    id: 'home',
-    link: '/home',
-    text: 'Home'
+    id: 'beranda',
+    link: '/beranda',
+    text: 'Beranda'
   },
   {
     icon: <ShoppingCart />,
