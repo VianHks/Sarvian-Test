@@ -5,7 +5,7 @@ import type { Route } from '@nxweb/react';
 export const routes: Route[] = [
   {
     path: '/',
-    redirectTo: (_location, authenticated) => (authenticated ? '/home' : '/login')
+    redirectTo: (_location, authenticated) => (authenticated ? '/personalized-recomendation' : '/beranda')
   },
   // ** Fallback routes, must be the last route item
   {
@@ -14,5 +14,21 @@ export const routes: Route[] = [
     fallback: true,
     layout: 'blank',
     title: '404: Not Found'
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/home/index.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/beranda',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/personalized-recomendation/index.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/recomendation',
+    search: true
   }
 ];
