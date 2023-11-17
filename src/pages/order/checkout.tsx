@@ -2,6 +2,7 @@
 /* eslint-disable jsx-a11y/prefer-tag-over-role */
 /* eslint-disable linebreak-style */
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Global } from '@emotion/react';
 
@@ -14,6 +15,7 @@ import {
   Button,
   Container,
   IconButton,
+  Modal,
   styled,
   SwipeableDrawer,
   TextField,
@@ -50,6 +52,18 @@ import PickUp from '@assets/images/PickUp.svg';
 import Pisan from '@assets/images/Pisan.png';
 
 import type { Dayjs } from 'dayjs';
+
+const style = {
+  bgcolor: 'background.paper',
+  borderRadius: 2,
+  boxShadow: 24,
+  left: '50%',
+  p: 4,
+  position: 'absolute' as const,
+  top: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 300
+};
 
 interface PesananDataModel {
   count: number
@@ -116,6 +130,7 @@ const Delivery = [
 ];
 
 const Checkout: PageComponent = (props: Props) => {
+  const navigate = useNavigate();
   const theme = useTheme();
   const { window } = props;
   const [orders, setOrders] = useState<PesananDataModel[]>([DEFAULT_PESANAN]);
@@ -124,6 +139,9 @@ const Checkout: PageComponent = (props: Props) => {
   const [open, setOpen] = useState(false),
     [openSummary, setOpenSummary] = useState(false),
     [openTime, setOpenTime] = useState(false);
+
+  const [isCheckout, setIsCheckOut] = useState(false),
+    [openModal, setOpenModal] = useState(false);
 
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpen(newOpen);
@@ -135,6 +153,15 @@ const Checkout: PageComponent = (props: Props) => {
 
   const toggleDrawerTime = (newOpen: boolean) => () => {
     setOpenTime(newOpen);
+  };
+
+  const toggleOpenModalCheckout = () => {
+    setOpenModal(!openModal);
+  };
+
+  const handleConfirmCheckout = () => {
+    setIsCheckOut(true);
+    setOpenModal(!openModal);
   };
 
   const container =
@@ -167,7 +194,6 @@ const Checkout: PageComponent = (props: Props) => {
 
   const handlePilihButtonClick = () => {
     setOpenTime(false);
-    console.log(openTime)
   };
 
   useEffect(() => {
@@ -418,7 +444,7 @@ const Checkout: PageComponent = (props: Props) => {
                           size="small"
                           onClick={() => handleDecrement(index)}
                         >
-                          <IndeterminateCheckBoxFilled />
+                          <IndeterminateCheckBoxFilled size={24} />
                         </IconButton>
                         <Typography
                           style={{
@@ -434,7 +460,7 @@ const Checkout: PageComponent = (props: Props) => {
                           size="small"
                           onClick={() => handleIncrement(index)}
                         >
-                          <AddBoxFilled />
+                          <AddBoxFilled size={24} />
                         </IconButton>
                       </Box>
                     </Box>
@@ -448,23 +474,23 @@ const Checkout: PageComponent = (props: Props) => {
                     value={obj.detail}
                     variant="outlined" />
                 </Box>
-                <Typography
-                  sx={{ fontWeight: 'bold', marginBottom: '0.5rem' }}
-                  variant="body1"
-                >
-                  Catatan buat Resto:
-                </Typography>
-                <Box sx={{ marginBottom: '1rem' }}>
-                  <TextField
-                    fullWidth={true}
-                    id="detail"
-                    size="small"
-                    value="Jangan terlalu Gosong"
-                    variant="outlined" />
-                </Box>
               </div>
             );
           })}
+              <Typography
+                sx={{ fontWeight: 'bold', marginBottom: '0.5rem' }}
+                variant="body1"
+              >
+                Catatan buat Resto:
+              </Typography>
+              <Box sx={{ marginBottom: '1rem' }}>
+                <TextField
+                  fullWidth={true}
+                  id="detail"
+                  size="small"
+                  value="Jangan terlalu Gosong"
+                  variant="outlined" />
+              </Box>
         </AccordionDetails>
       </Accordion>
       <Typography
@@ -677,7 +703,7 @@ const Checkout: PageComponent = (props: Props) => {
           keepMounted: true
         }}
         anchor="bottom"
-        disableSwipeToOpen={true}
+        disableSwipeToOpen={false}
         open={openSummary}
         swipeAreaWidth={drawerBleeding}
         onClose={toggleDrawerSummary(false)}
@@ -700,13 +726,14 @@ const Checkout: PageComponent = (props: Props) => {
             <Typography sx={{ fontWeight: 'bold', marginTop: '1rem' }} variant="h5">Rp. 150.000</Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1rem 1rem 1rem' }}>
-            <Button
-              color="primary"
-              fullWidth={true}
-              variant="contained"
-            >
-              Proses Pesanan
-            </Button>
+          <Button
+            color="primary"
+            fullWidth={true}
+            variant="contained"
+            onClick={!isCheckout ? toggleOpenModalCheckout : () => navigate('./order')}
+          >
+            {isCheckout ? 'Checkout' : 'Proses Pesanan'}
+          </Button>
           </Box>
         </StyledBox>
       </SwipeableDrawer>
@@ -749,7 +776,7 @@ const Checkout: PageComponent = (props: Props) => {
               Pilih Waktu Penyiapan Pesanan
             </Typography>
             <hr />
-            <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center' }}>
+            <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', marginTop: '3rem' }}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <MobileTimePicker
                   value={selectedTime}
@@ -758,7 +785,7 @@ const Checkout: PageComponent = (props: Props) => {
             </Box>
           </Box>
           <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center' }}>
-            <Typography sx={{ textAlign: 'center' }}>Pesanan kamu akan disiapkan pada pukul <br/> {selectedTime.format('HH:mm')}</Typography>
+            <Typography sx={{ textAlign: 'center' }}>Pesanan kamu akan disiapkan pada pukul <br /> {selectedTime.format('HH:mm')}</Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1rem 1rem 1rem' }}>
             <Button
@@ -772,6 +799,50 @@ const Checkout: PageComponent = (props: Props) => {
           </Box>
         </StyledBox>
       </SwipeableDrawer>
+      <Modal
+        aria-describedby="modal-modal-description"
+        aria-labelledby="modal-modal-title"
+        open={openModal}
+        onClose={toggleOpenModalCheckout}
+      >
+        <Box sx={style}>
+          <Typography
+            component="h3"
+            id="modal-modal-title"
+            sx={{ color: `${theme?.palette?.error}`, fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'center' }}
+            variant="h3"
+          >
+            Udah yakin dengan pesananmu?
+          </Typography>
+          <Typography
+            id="modal-modal-description"
+            sx={{ marginBottom: '0.5rem', textAlign: 'center' }}
+            variant="body1"
+          >
+            Sebelum pesan, pastiin pesananmu udah bener-bener sesuai, ya!
+          </Typography>
+          <Box gap={2} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Button
+              color="primary"
+              size="medium"
+              sx={{ width: '100%' }}
+              variant="outlined"
+              onClick={toggleOpenModalCheckout}
+            >
+              Cek Ulang
+            </Button>
+            <Button
+              color="primary"
+              size="medium"
+              sx={{ width: '100%' }}
+              variant="contained"
+              onClick={handleConfirmCheckout}
+            >
+              Sesuai
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </Container>
   );
 };
