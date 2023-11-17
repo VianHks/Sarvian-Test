@@ -730,7 +730,7 @@ const Checkout: PageComponent = (props: Props) => {
             color="primary"
             fullWidth={true}
             variant="contained"
-            onClick={!isCheckout ? toggleOpenModalCheckout : () => navigate('./order')}
+            onClick={!isCheckout ? toggleOpenModalCheckout : () => navigate('./order-in-progress')}
           >
             {isCheckout ? 'Checkout' : 'Proses Pesanan'}
           </Button>
