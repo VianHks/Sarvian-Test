@@ -30,5 +30,21 @@ export const routes: Route[] = [
     layout: 'blank',
     path: '/recomendation',
     search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/product-view/index.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/produk-review',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/product-view/gantiitem.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/ganti-item',
+    search: true
   }
 ];
