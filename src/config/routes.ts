@@ -17,10 +17,18 @@ export const routes: Route[] = [
   },
   {
     auth: false,
-    element: lazy(() => import('@pages/home/pickup.js')),
+    element: lazy(() => import('@pages/home/dahsboard.js')),
     hash: true,
     layout: 'blank',
     path: '/beranda',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/home/search-result.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/beranda/search-result',
     search: true
   },
   {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Box, Card, CardContent, CardMedia, Chip, Divider, Grid, InputAdornment, TextField, Typography } from '@mui/material';
 
@@ -13,7 +14,31 @@ import recomendationImage from '@assets/images/pages/beranda/recomandation.svg';
 import restoImage from '@assets/images/pages/beranda/resto.svg';
 import verifyIcon from '@assets/images/pages/beranda/verify.svg';
 
-const DUMMY_MENU_RECOMDATION = [
+// eslint-disable-next-line import/exports-last
+export interface RestoItem {
+  id: number
+  location: number
+  open: string
+  orderMethode: string
+  rating: string
+  restoName: string
+  verified: boolean
+}
+
+// eslint-disable-next-line import/exports-last
+export interface MenuItem {
+  id: number
+  itemName: string
+  itemPrice: number
+  location: number
+  orderMethode: string
+  restoName: string
+  sold: number
+  verified: boolean
+}
+
+// eslint-disable-next-line import/exports-last
+export const DUMMY_MENU_RECOMDATION = [
   {
     id: 1,
     itemName: 'Ayam Goreng Pisan',
@@ -26,11 +51,11 @@ const DUMMY_MENU_RECOMDATION = [
   },
   {
     id: 2,
-    itemName: 'Ayam Goreng',
+    itemName: 'Bubur Sumsum',
     itemPrice: 120000,
     location: 1.5,
     orderMethode: 'Pesan Antar, Pick Up, Dine In',
-    restoName: 'Resto Sunda Gila 2',
+    restoName: 'Dapur Pak Raden',
     sold: 24,
     verified: false
   },
@@ -40,23 +65,44 @@ const DUMMY_MENU_RECOMDATION = [
     itemPrice: 130000,
     location: 1.5,
     orderMethode: 'Dine In',
-    restoName: 'Resto Sunda Gila 3',
+    restoName: 'Kedai Nyonyah',
     sold: 24,
     verified: true
   },
   {
     id: 4,
-    itemName: 'Ayam Goreng Kemarin',
+    itemName: 'Bebek Bubuk',
     itemPrice: 130000,
     location: 1.5,
     orderMethode: 'Dine In',
-    restoName: 'Resto Sunda Gila 3',
+    restoName: 'Warung Gusti',
+    sold: 24,
+    verified: true
+  },
+  {
+    id: 5,
+    itemName: 'Gorengan Rebus',
+    itemPrice: 130000,
+    location: 1.5,
+    orderMethode: 'Dine In',
+    restoName: 'Warung Cak Waluh',
+    sold: 24,
+    verified: true
+  },
+  {
+    id: 4,
+    itemName: 'Kopi Paste',
+    itemPrice: 130000,
+    location: 1.5,
+    orderMethode: 'Dine In',
+    restoName: 'Warung Kopas',
     sold: 24,
     verified: true
   }
 ];
 
-const DUMMY_RESTO = [
+// eslint-disable-next-line import/exports-last
+export const DUMMY_RESTO = [
   {
     id: 1,
     location: 1.5,
@@ -72,7 +118,7 @@ const DUMMY_RESTO = [
     open: '9.00 - 12.00 WIB',
     orderMethode: 'Pesan Antar, Pick Up, Dine In',
     rating: '4.8',
-    restoName: 'Resto Sunda Gila 2',
+    restoName: 'Dapur Pak Raden',
     verified: false
   },
   {
@@ -81,7 +127,7 @@ const DUMMY_RESTO = [
     open: '9.00 - 12.00 WIB',
     orderMethode: 'Dine In',
     rating: '5.0',
-    restoName: 'Resto Sunda Gila 3',
+    restoName: 'Kedai Nyonyah',
     verified: true
   },
   {
@@ -90,7 +136,7 @@ const DUMMY_RESTO = [
     open: '9.00 - 12.00 WIB',
     orderMethode: 'Pick Up',
     rating: '3.1',
-    restoName: 'Resto Sunda Gila 4',
+    restoName: 'Warung Gusti',
     verified: true
   },
   {
@@ -99,7 +145,7 @@ const DUMMY_RESTO = [
     open: '9.00 - 12.00 WIB',
     orderMethode: 'Dine In',
     rating: '1.4',
-    restoName: 'Resto Sunda Gila 5',
+    restoName: 'Warung Cak Waluh',
     verified: false
   },
   {
@@ -108,14 +154,17 @@ const DUMMY_RESTO = [
     open: '9.00 - 12.00 WIB',
     orderMethode: 'Pesan Antar, Dine In',
     rating: '2.6',
-    restoName: 'Resto Sunda Gila 6',
+    restoName: 'Warung Kopas',
     verified: true
   }
 ];
 
 const Home: PageComponent = () => {
+  const navigate = useNavigate();
+
   const [methode, setMethode] = useState('Pesan Antar');
   const [filteredResto, setFilteredResto] = useState(DUMMY_RESTO);
+  const [searchValue, setSearchValue] = useState('');
 
   const filterResto = (method: string) => {
     const filtered = DUMMY_RESTO.filter((resto) => {
@@ -134,6 +183,10 @@ const Home: PageComponent = () => {
     filterResto(newValue);
   };
 
+  const handleSearch = () => {
+    navigate(`/beranda/search-result?query=${searchValue}`);
+  };
+
   return (
     <Box sx={{ margin: '1rem 1.5rem' }}>
       <Typography color="neutral-90" sx={{ marginBottom: '0.5rem' }} variant="body2">
@@ -141,7 +194,7 @@ const Home: PageComponent = () => {
       </Typography>
       <Grid container={true} gap={1} sx={{ alignItems: 'center', marginBottom: '1rem' }}>
         <Grid item={true}>
-          <LocationOnFilled style={{ color: 'red' }} />
+          <LocationOnFilled size={16} style={{ color: 'red' }} />
         </Grid>
         <Grid item={true}>
           <Typography color="neutral-90" fontWeight="bold" variant="h5">
@@ -160,7 +213,7 @@ const Home: PageComponent = () => {
             </InputAdornment>
           ),
           startAdornment: (
-            <InputAdornment position="start">
+            <InputAdornment position="start" onClick={handleSearch}>
               <SearchFilled />
             </InputAdornment>
           )
@@ -169,7 +222,9 @@ const Home: PageComponent = () => {
         placeholder="Mau makan apa hari ini?"
         size="small"
         sx={{ marginBottom: '1rem' }}
-        variant="outlined" />
+        value={searchValue}
+        variant="outlined"
+        onChange={(e) => setSearchValue(e.target.value)} />
       <Grid container={true} gap={1.4} sx={{ justifyContent: 'center', marginBottom: '2rem' }}>
         <Grid item={true}>
           <Chip color={methode === 'Pesan Antar' ? 'primary' : 'default'} icon={<img alt="icon" src={pesanAntarIcon} />} label="Pesan Antar" onClick={() => handleMethode('Pesan Antar')} />
@@ -224,24 +279,24 @@ const Home: PageComponent = () => {
                       >
                         {obj.restoName}
                       </Typography>
-                      <Typography color="primary" fontWeight="bold" sx={{ marginBottom: '0.125' }} variant="h5">
+                      <Typography color="primary" fontWeight="bold" sx={{ marginBottom: '0.125' }} variant="h6">
                         Rp. {obj.itemPrice.toLocaleString('id-ID')}
                       </Typography>
                       <Grid container={true} justifyContent="space-between">
                         <Box>
                           <Grid container={true}>
                             <Grid item={true}>
-                              <LocationOnFilled style={{ color: 'red' }} />
+                              <LocationOnFilled size={12} style={{ color: 'red' }} />
                             </Grid>
                             <Grid item={true}>
-                              <Typography color="neutral-90" variant="body2">
+                              <Typography color="neutral-90" variant="caption">
                                 {obj.location}
                               </Typography>
                             </Grid>
                           </Grid>
                         </Box>
                         <Box>
-                          <Typography color="neutral-90" variant="body2">
+                          <Typography color="neutral-90" variant="caption">
                             Terjual {obj.sold}
                           </Typography>
                         </Box>
@@ -288,23 +343,23 @@ const Home: PageComponent = () => {
                 {resto.restoName}
               </Typography>
               <Box gap={1} sx={{ display: 'flex' }}>
-                <Box sx={{ display: 'flex' }}>
-                  <StarFilled style={{ color: 'yellow' }} />
-                  <Typography color="neutral-90" variant="body2">
+                <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
+                  <StarFilled size={10} style={{ color: 'yellow' }} />
+                  <Typography color="neutral-90" variant="caption">
                     {resto.rating}
                   </Typography>
                 </Box>
                 <Divider flexItem={true} orientation="vertical" />
-                <Box sx={{ display: 'flex' }}>
-                  <LocationOnFilled style={{ color: 'red' }} />
-                  <Typography color="neutral-90" variant="body2">
+                <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
+                  <LocationOnFilled size={10} style={{ color: 'red' }} />
+                  <Typography color="neutral-90" variant="caption">
                     {resto.location}
                   </Typography>
                 </Box>
                 <Divider flexItem={true} orientation="vertical" />
-                <Box sx={{ display: 'flex' }}>
-                  <AccessTimeFilled />
-                  <Typography color="neutral-90" variant="body2">
+                <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
+                  <AccessTimeFilled size={10} />
+                  <Typography color="neutral-90" variant="caption">
                     {resto.open}
                   </Typography>
                 </Box>
