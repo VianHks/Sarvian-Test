@@ -7,7 +7,7 @@
     "prepare": "husky install",
     "depcheck": "nextweb depcheck --prefer-wanted",
     "clean": "nextweb clean",
-    "build": "cross-env NODE_ENV=production nextweb build",
+    "build": "cross-env NODE_ENV=development nextweb build",
     "start": "nextweb start",
     "test": "nextweb test",
     "lint": "nextweb lint",
