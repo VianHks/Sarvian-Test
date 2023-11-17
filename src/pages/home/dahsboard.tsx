@@ -236,7 +236,7 @@ const Home: PageComponent = () => {
           <Chip color={methode === 'Dine In' ? 'primary' : 'default'} icon={<img alt="icon" src={dineInIcon} />} label="Dine In" onClick={() => handleMethode('Dine In')} />
         </Grid>
       </Grid>
-      <Card sx={{ borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '1rem', marginInline: '-1.5rem', padding: '1rem 2rem' }}>
+      <Card sx={{ borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '1rem', marginInline: '-1.5rem', padding: '1rem 1.5rem' }}>
         <Box gap={1} sx={{ display: 'flex', marginBottom: '0.875rem' }}>
           <img alt="test" src={recomendationIcon} />
           <Typography color="neutral-90" fontWeight="bold" variant="h5">
