@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM nginx:stable-alpine
 ENV USER=nextplatform
 ENV UID=5000
 ENV GROUP=nextplatform
@@ -14,3 +14,5 @@ COPY ./deploy/nginx/ /etc/nginx
 COPY ./dist/ /app
 WORKDIR /app
 USER $UID
+EXPOSE 8080
+ENTRYPOINT ["nginx", "-g", "daemon off;"]

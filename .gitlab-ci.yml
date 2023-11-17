@@ -1,0 +1,52 @@
+stages:
+  - build
+  - release
+
+variables:
+  HUSKY: 0
+  GIT_STRATEGY: fetch
+  GIT_DEPTH: 1
+  DOCKER_DRIVER: overlay2
+  OUTPUT_DIR: "dist"
+  STAGING_REGISTRY: "registry.gitlab.com"
+  CONTAINER_STAGING: $STAGING_REGISTRY/$CI_PROJECT_PATH
+
+build:
+  image: node:19-slim
+  stage: build
+  cache:
+    paths:
+      - node_modules/
+  before_script:
+    - npm install -g pnpm
+  script:
+    - pnpm install
+    - OUTPUT=$OUTPUT_DIR VERSION=$CI_COMMIT_TAG pnpm build
+  artifacts:
+    paths:
+      - bin/
+      - $OUTPUT_DIR/
+  only:
+    - tags
+
+release:
+  stage: release
+  needs:
+    - build
+  image: docker:stable
+  services:
+    - name: docker:dind
+      command: ["--experimental"]
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v?([0-9]+)(?:\.([0-9]+))(?:\.([0-9]+))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-.]*)))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-.]+)*))?$/
+      when: on_success
+    - when: never
+  before_script:
+    - export CONTAINER_STAGING=`echo "$CONTAINER_STAGING" | tr '[:upper:]' '[:lower:]'`
+  script:
+    - echo "Deploying image for $CONTAINER_STAGING:${CI_COMMIT_TAG#v}"
+    - ls
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $STAGING_REGISTRY
+    - docker build --squash -t "$CONTAINER_STAGING:${CI_COMMIT_TAG#v}" -t "$CONTAINER_STAGING:latest" .
+    - docker push "$CONTAINER_STAGING:${CI_COMMIT_TAG#v}"
+    - docker push "$CONTAINER_STAGING:latest"
