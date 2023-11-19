@@ -36,19 +36,19 @@ type SelectedItemsAyam = Record<string, boolean>;
 type SelectedItemsSambel = Record<string, boolean>;
 const items = [
   { id: 'nasiPutih', label: 'Nasi Putih', price: 'Gratis' },
-  { id: 'nasiKecap', label: 'Nasi Kecap', price: 'Rp. 1000'},
-  { id: 'nasiUduk', label: 'Nasi Uduk', price: 'Rp. 2000'}
+  { id: 'nasiKecap', label: 'Nasi Kecap', price: '+ Rp. 1000' },
+  { id: 'nasiUduk', label: 'Nasi Uduk', price: '+ Rp. 2000' }
 ];
 const itemsAyam = [
-  { id: 'ayamGorengMadu', label: 'Ayam Goreng Madu' },
-  { id: 'ayamGorengKuning', label: 'Ayam Goreng Kuning' },
-  { id: 'ayamGorengGosong', label: 'Ayam Goreng Gosong' }
+  { id: 'ayamGorengMadu', label: 'Ayam Goreng Madu', price: 'Gratis' },
+  { id: 'ayamGorengKuning', label: 'Ayam Goreng Kuning', price: 'Gratis' },
+  { id: 'ayamGorengGosong', label: 'Ayam Goreng Gosong', price: 'Gratis' }
 ];
 const itemsSambel = [
-  { id: 'sambelJeruk', label: 'Sambel Jeruk' },
-  { id: 'sambelDadak', label: 'Sambel Dadak' },
-  { id: 'sambelGoyang', label: 'Sambel Goyang' },
-  { id: 'sambelMatah', label: 'Sambel Matah' }
+  { id: 'sambelJeruk', label: 'Sambel Jeruk', price: 'Gratis' },
+  { id: 'sambelDadak', label: 'Sambel Dadak', price: 'Gratis' },
+  { id: 'sambelGoyang', label: 'Sambel Goyang', price: 'Gratis' },
+  { id: 'sambelMatah', label: 'Sambel Matah', price: '+ RP. 2500' }
 ];
 
 const itemsAddNasi = [
@@ -69,8 +69,10 @@ const DEFAULT_PESANAN: PesananDataModel = {
 
 const ProductView = () => {
   const theme = useTheme();
-  const [activeStep, setActiveStep] = React.useState(0);
-  const maxSteps = images.length;
+  /*
+   * Const [activeStep, setActiveStep] = React.useState(0);
+   * const maxSteps = images.length;
+   */
 
   const [count, setCount] = useState(0);
   const [checkedAyam, setCheckedAyam] = useState<SelectedItemsAyam>({
@@ -89,11 +91,6 @@ const ProductView = () => {
     sambelGoyang: false,
     sambelMatah: false
   });
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  const handleChange = (_: unknown, newIndex: number[] | number) => {
-    setCurrentImageIndex(newIndex as number);
-  };
 
   const handleChangeCheckbox = (itemName: keyof SelectedItemsNasi) => {
     setCheckedNasi((prevItems) => ({
@@ -103,6 +100,12 @@ const ProductView = () => {
   };
   const handleChangeCheckboxAyam = (itemName: keyof SelectedItemsAyam) => {
     setCheckedAyam((prevItems) => ({
+      ...prevItems,
+      [itemName]: !prevItems[itemName]
+    }));
+  };
+  const handleChangeCheckboxSambel = (itemName: keyof SelectedItemsSambel) => {
+    setCheckedSambel((prevItems) => ({
       ...prevItems,
       [itemName]: !prevItems[itemName]
     }));
@@ -155,7 +158,7 @@ const ProductView = () => {
         }}
       >
         <Card sx={{ padding: '0.625rem' }}>
-          <Typography sx={{ marginBottom: '0.25rem' }} variant="h4">
+          <Typography sx={{ marginBottom: '0.5rem' }} variant="h4">
             Paket Ayam Bakar
           </Typography>
           <Grid container={true} justifyContent="space-between" spacing={2}>
@@ -217,12 +220,13 @@ const ProductView = () => {
             <FormControlLabel
               control={
               <Checkbox
-                checked={true}
-                style={{ borderRadius: '50%' }} />
+                checked={checkedNasi[item.id]}
+                style={{ borderRadius: '50%' }}
+                onClick={() => handleChangeCheckbox(item.id as keyof SelectedItemsNasi)} />
             }
               label={<>{item.label}</>} />
             </Grid>
-            <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'end' }} xs={4} >
+            <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'end' }} xs={4}>
                 <Typography>
                   {item.price}
                 </Typography>
@@ -240,21 +244,27 @@ const ProductView = () => {
             >
               Ayam
             </Typography>
-            <FormGroup sx={{ marginBottom: '1rem' }}>
-              {itemsAyam.map((item) => (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={checkedAyam[item.id]}
-                      style={{ borderRadius: '50%' }}
-                      onChange={() => handleChangeCheckboxAyam(
-                        item.id as keyof SelectedItemsAyam
-                      )} />
-                  }
-                  key={item.id}
-                  label={item.label} />
-              ))}
-            </FormGroup>
+            {itemsAyam.map((item) => (
+      <Grid container={true} key={item.id} sx={{ alignItem: 'center', display: 'flex', justifyContent: 'space-between' }}>
+            <Grid item={true} xs={8}>
+            <FormControlLabel
+              control={
+              <Checkbox
+                checked={checkedAyam[item.id]}
+                style={{ borderRadius: '50%' }}
+                onClick={() => handleChangeCheckboxAyam(item.id as keyof SelectedItemsAyam)}
+                />
+            }
+              label={<>{item.label}</>} />
+            </Grid>
+            <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'end' }} xs={4}>
+                <Typography>
+                  {item.price}
+                </Typography>
+            </Grid>
+
+      </Grid>
+            ))}
             <Typography
               sx={{
                 marginBottom: '0.25rem',
@@ -276,6 +286,27 @@ const ProductView = () => {
             >
               Sambel
             </Typography>
+            {itemsSambel.map((item) => (
+      <Grid container={true} key={item.id} sx={{ alignItem: 'center', display: 'flex', justifyContent: 'space-between' }}>
+            <Grid item={true} xs={8}>
+            <FormControlLabel
+              control={
+              <Checkbox
+                checked={checkedSambel[item.id]}
+                style={{ borderRadius: '50%' }}
+                onClick={() => handleChangeCheckboxSambel(item.id as keyof SelectedItemsSambel)}
+                />
+            }
+              label={<>{item.label}</>} />
+            </Grid>
+            <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'end' }} xs={4}>
+                <Typography>
+                  {item.price}
+                </Typography>
+            </Grid>
+
+      </Grid>
+            ))}
           </Box>
           <Typography
             sx={{
@@ -316,6 +347,7 @@ const ProductView = () => {
                           aria-label="min"
                           size="small"
                           onClick={() => handleDecrement()}
+                          sx={{ color: 'black' }}
                         >
                           <IndeterminateCheckBoxFilled />
                         </IconButton>
@@ -332,6 +364,7 @@ const ProductView = () => {
                           aria-label="plus"
                           size="small"
                           onClick={() => handleIncrement()}
+                          sx={{ color: 'black' }}
                         >
                           <AddBoxFilled />
                         </IconButton>

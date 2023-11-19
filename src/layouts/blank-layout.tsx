@@ -38,7 +38,7 @@ const BlankLayout: FC<BlankLayoutProps> = ({
       <Box
         className="app-content"
         sx={{
-          minHeight: '150vh',
+          minHeight: '200vh',
           overflow: 'hidden',
           position: 'relative'
         }}

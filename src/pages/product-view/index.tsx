@@ -106,7 +106,7 @@ const ProductView = () => {
         }}
       >
         <Card sx={{ padding: '0.625rem' }}>
-          <Typography sx={{ marginBottom: '0.25rem' }} variant="h4">
+          <Typography sx={{ marginBottom: '0.5rem' }} variant="h4">
             Paket Ayam Bakar
           </Typography>
           <Grid container={true} justifyContent="space-between" spacing={2}>
@@ -120,7 +120,7 @@ const ProductView = () => {
             </Grid>
             <Grid item={true} xs="auto">
               <Typography
-                sx={{ marginBottom: '0.25rem', color: '#1F66D0' }}
+                sx={{ marginBottom: '0.25rem' }}
                 variant="body2"
               >
                 Terjual 24
@@ -177,6 +177,7 @@ const ProductView = () => {
                           aria-label="min"
                           size="small"
                           onClick={() => handleDecrement()}
+                          sx={{ color: 'black' }}
                         >
                           <IndeterminateCheckBoxFilled />
                         </IconButton>
@@ -193,6 +194,7 @@ const ProductView = () => {
                           aria-label="plus"
                           size="small"
                           onClick={() => handleIncrement()}
+                          sx={{ color: 'black' }}
                         >
                           <AddBoxFilled />
                         </IconButton>
