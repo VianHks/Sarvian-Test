@@ -1,35 +1,23 @@
 /* eslint-disable linebreak-style */
-import { count } from 'console';
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import {
-  Alert,
   Box,
   Button,
   Card,
   Checkbox,
   Container,
   FormControlLabel,
-  FormGroup,
+  Grid,
   IconButton,
-  Paper,
-  Slider,
   TextField,
   Typography
 } from '@mui/material';
-import MobileStepper from '@mui/material/MobileStepper';
-import { useTheme } from '@mui/material/styles';
 
 import { AddBoxFilled, IndeterminateCheckBoxFilled } from '@nxweb/icons/material';
 
-import { Grid } from '@components/material.js';
-
-import Pict1 from '@assets/images/Video.svg';
-import Pict2 from '@assets/images/Video2.svg';
-
-const images = [Pict1, Pict2];
+import SwipeableTextMobileStepper from './slidergambar';
 
 type SelectedItemsNasi = Record<string, boolean>;
 type SelectedItemsAyam = Record<string, boolean>;
@@ -51,29 +39,7 @@ const itemsSambel = [
   { id: 'sambelMatah', label: 'Sambel Matah', price: '+ RP. 2500' }
 ];
 
-const itemsAddNasi = [
-  { id: 'gratis', label: 'Gratis' },
-  { id: 'seribu', label: '+ Rp. 1.000' },
-  { id: 'duaribu', label: '+ Rp. 2.000' }
-
-];
-
-interface PesananDataModel {
-  count: number
-
-}
-
-const DEFAULT_PESANAN: PesananDataModel = {
-  count: 0
-};
-
 const ProductView = () => {
-  const theme = useTheme();
-  /*
-   * Const [activeStep, setActiveStep] = React.useState(0);
-   * const maxSteps = images.length;
-   */
-
   const [count, setCount] = useState(0);
   const [checkedAyam, setCheckedAyam] = useState<SelectedItemsAyam>({
     ayamGorengMadu: false,
@@ -125,28 +91,14 @@ const ProductView = () => {
     <>
       <Container
         sx={{
-          //   BackgroundColor: '#E4F3FF',
+          marginTop: '1rem',
           height: '16rem',
-          padding: '1.5rem',
           position: 'relative',
           display: 'flex',
           alignItems: 'center'
         }}
       >
-
-        {/* <Slider
-          max={images.length - 1}
-          value={currentImageIndex}
-          onChange={handleChange}
-        >
-          {images.map((image, index) => (
-            <img
-              alt={`Slide ${index + 1}`}
-              key={index}
-              src={image}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          ))}
-        </Slider> */}
+        <SwipeableTextMobileStepper />
       </Container>
 
       <Container
@@ -252,8 +204,7 @@ const ProductView = () => {
               <Checkbox
                 checked={checkedAyam[item.id]}
                 style={{ borderRadius: '50%' }}
-                onClick={() => handleChangeCheckboxAyam(item.id as keyof SelectedItemsAyam)}
-                />
+                onClick={() => handleChangeCheckboxAyam(item.id as keyof SelectedItemsAyam)} />
             }
               label={<>{item.label}</>} />
             </Grid>
@@ -294,8 +245,7 @@ const ProductView = () => {
               <Checkbox
                 checked={checkedSambel[item.id]}
                 style={{ borderRadius: '50%' }}
-                onClick={() => handleChangeCheckboxSambel(item.id as keyof SelectedItemsSambel)}
-                />
+                onClick={() => handleChangeCheckboxSambel(item.id as keyof SelectedItemsSambel)} />
             }
               label={<>{item.label}</>} />
             </Grid>
@@ -346,8 +296,8 @@ const ProductView = () => {
                         <IconButton
                           aria-label="min"
                           size="small"
-                          onClick={() => handleDecrement()}
                           sx={{ color: 'black' }}
+                          onClick={() => handleDecrement()}
                         >
                           <IndeterminateCheckBoxFilled />
                         </IconButton>
@@ -363,8 +313,8 @@ const ProductView = () => {
                         <IconButton
                           aria-label="plus"
                           size="small"
-                          onClick={() => handleIncrement()}
                           sx={{ color: 'black' }}
+                          onClick={() => handleIncrement()}
                         >
                           <AddBoxFilled />
                         </IconButton>

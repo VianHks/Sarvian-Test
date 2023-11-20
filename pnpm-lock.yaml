@@ -88,6 +88,12 @@ devDependencies:
   '@types/react-dom':
     specifier: ^18.2.14
     version: 18.2.14
+  '@types/react-swipeable-views':
+    specifier: ^0.13.5
+    version: 0.13.5
+  '@types/react-swipeable-views-utils':
+    specifier: ^0.13.7
+    version: 0.13.7
   cross-env:
     specifier: ^7.0.3
     version: 7.0.3
@@ -2489,6 +2495,12 @@ packages:
     resolution: {integrity: sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==}
     dev: true
 
+  /@material-ui/types@4.1.1:
+    resolution: {integrity: sha512-AN+GZNXytX9yxGi0JOfxHrRTbhFybjUJ05rnsBVjcB+16e466Z0Xe5IxawuOayVZgTBNDxmPKo5j4V6OnMtaSQ==}
+    dependencies:
+      '@types/react': 18.2.31
+    dev: true
+
   /@microsoft/tsdoc-config@0.16.2:
     resolution: {integrity: sha512-OGiIzzoBLgWWR0UdRJX98oYO+XKGf7tiK4Zk6tQ/E4IJqGCe7dvkTvgDZV5cFJUzLGDOjeAXrnZoA6QkVySuxw==}
     dependencies:
@@ -3599,6 +3611,20 @@ packages:
     resolution: {integrity: sha512-V835xgdSVmyQmI1KLV2BEIUgqEuinxp9O4G6g3FqO/SqLac049E53aysv0oEFD2kHfejeKU+ZqL2bcFWj9gLAQ==}
     dependencies:
       '@types/react': 18.2.31
+
+  /@types/react-swipeable-views-utils@0.13.7:
+    resolution: {integrity: sha512-ED8pf8dq3S79uWtP8EnSdrg7dUCrxyL9Uapq1dSA2mz+H83SjS8vsqmlFWmmBQoTuEHsQp5Ru9fxxsofQ+bI9Q==}
+    dependencies:
+      '@material-ui/types': 4.1.1
+      '@types/react': 18.2.31
+      '@types/react-swipeable-views': 0.13.5
+    dev: true
+
+  /@types/react-swipeable-views@0.13.5:
+    resolution: {integrity: sha512-ni6WjO7gBq2xB2Y/ZiRdQOgjGOxIik5ow2s7xKieDq8DxsXTdV46jJslSBVK2yoIJHf6mG3uqNTwxwgzbXRRzg==}
+    dependencies:
+      '@types/react': 18.2.31
+    dev: true
 
   /@types/react-transition-group@4.4.7:
     resolution: {integrity: sha512-ICCyBl5mvyqYp8Qeq9B5G/fyBSRC0zx3XM3sCC6KkcMsNeAHqXBKkmat4GqdJET5jtYUpZXrxI5flve5qhi2Eg==}

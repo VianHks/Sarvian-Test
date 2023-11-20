@@ -62,7 +62,7 @@ const ProductView = () => {
         sx={{
         //   BackgroundColor: '#E4F3FF',
           height: '16rem',
-          padding: '1.5rem',
+          // padding: '1rem',
           position: 'relative',
           display: 'flex',
           alignItems: 'center'

@@ -55,9 +55,8 @@ const SwipeableTextMobileStepper = () => {
       >
         <Typography>{images[activeStep]}</Typography>
       </Paper>
-      <AutoPlaySwipeableViews
+      <SwipeableViews
         axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
-        enableMouseEvents={true}
         index={activeStep}
         onChangeIndex={handleStepChange}
       >
@@ -80,7 +79,7 @@ const SwipeableTextMobileStepper = () => {
               : null}
           </div>
         ))}
-      </AutoPlaySwipeableViews>
+      </SwipeableViews>
       <MobileStepper
         activeStep={activeStep}
         backButton={
