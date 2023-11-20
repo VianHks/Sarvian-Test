@@ -56,7 +56,7 @@ export const Card = () => {
             paddingTop: 0
           },
           '&:last-of-type': {
-            paddingBottom: theme.spacing(6)
+            paddingBottom: theme.spacing(0)
           }
         })
       }

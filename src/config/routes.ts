@@ -17,10 +17,18 @@ export const routes: Route[] = [
   },
   {
     auth: false,
-    element: lazy(() => import('@pages/home/index.js')),
+    element: lazy(() => import('@pages/home/dahsboard.js')),
     hash: true,
     layout: 'blank',
     path: '/beranda',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/home/search-result.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/beranda/search-result',
     search: true
   },
   {
@@ -29,6 +37,33 @@ export const routes: Route[] = [
     hash: true,
     layout: 'blank',
     path: '/recomendation',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/order/checkout.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Halaman Checkout' },
+    path: '/checkout',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/order/order-in-progress.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Pesanan Berlangsung' },
+    path: '/checkout/order-in-progress',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/order/order.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Pesanan' },
+    path: '/order',
     search: true
   },
   {

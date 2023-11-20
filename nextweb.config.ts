@@ -8,7 +8,37 @@ export default {
      * build with sri fails when resource name contains percent encoded character
      * see: https://github.com/waysact/webpack-subresource-integrity/issues/221
      */
-    sri: false
+    sri: false,
+    csp: {
+      policy: {
+        'connect-src': [
+          'default',
+          'apigateway-dev.tokrum.com:*',
+          'apigateway.tokrum.com:*'
+        ],
+        'frame-src': [
+          'default',
+          'www.youtube.com',
+          'www.google.com'
+        ],
+        'img-src': [
+          'default',
+          'apigateway.tokrum.com:*',
+          'apigateway-dev.tokrum.com:*'
+        ],
+        'style-src': [
+          'default',
+          'cdn.cloud.nextplatform.ai'
+        ],
+        'script-src': [
+          'default',
+          'www.googletagmanager.com',
+          'www.google-analytics.com',
+          'www.google.com',
+          'www.gstatic.com'
+        ]
+      }
+    }
   },
   optimization: {
     /*
