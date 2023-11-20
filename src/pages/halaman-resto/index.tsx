@@ -103,7 +103,7 @@ interface PaketHematDataModel {
   
   const MENU_REKOMEND: MenuRekomendDataModel[] = [
     {
-      count: 0,
+      count: 1,
       foto: `${Pisan}`,
       harga: 24000,
       title: 'Ayam Goreng Pisan',
@@ -111,7 +111,7 @@ interface PaketHematDataModel {
       customized: true
     },
     {
-      count: 0,
+      count: 1,
       foto: `${Bakar}`,
       harga: 22000,
       title: 'Ayam Bakar',
@@ -121,7 +121,7 @@ interface PaketHematDataModel {
   ];
   const PAKET_HEMAT: PaketHematDataModel[] = [
     {
-      count: 0,
+      count: 1,
       foto: `${Pisan}`,
       harga: 24000,
       title: 'Ayam Goreng Pisan',
@@ -129,13 +129,21 @@ interface PaketHematDataModel {
       customized: true
     },
     {
-      count: 0,
+      count: 1,
       foto: `${Bakar}`,
       harga: 22000,
       title: 'Ayam Bakar',
       terjual: 3,
       customized: false
-    }
+    },
+    {
+        count: 0,
+        foto: `${Bakar}`,
+        harga: 22000,
+        title: 'Ayam Bakar Pedes',
+        terjual: 7,
+        customized: false
+      }
   ];
   
   const DEFAULT_MENUREKOMEND: MenuRekomendDataModel = {
@@ -380,7 +388,8 @@ const HalamanResto: PageComponent = () => {
                       <img
                         alt={obj.title}
                         src={obj.foto}
-                        style={{ maxHeight: '100%', maxWidth: '100%' }} />
+                        style={{ maxHeight: '100%', maxWidth: '100%',marginTop: '0.5rem' }}
+                         />
                     </div>
                   </Grid>
                   <Grid
@@ -394,7 +403,7 @@ const HalamanResto: PageComponent = () => {
                   >
                     <Box
                       sx={{
-                        marginTop: '2rem',
+                        marginTop: obj.count > 0 ? '2.5rem' : '1rem',
                         alignItems: 'center',
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -406,8 +415,22 @@ const HalamanResto: PageComponent = () => {
                       >
                         {obj.title}
                       </Typography>
-                     
+                      
                     </Box>
+                    {obj.count === 0 && (
+                        <Typography
+                        sx={{
+                            fontWeight: 'bold',
+                            textAlign: 'start',
+                            color: 'red'
+                        }}
+                        variant="body2"
+                        >
+                        Persediaan Habis
+                        </Typography>
+                    )}
+                    {obj.count > 0 && (
+                        <div>
                     <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
                         <Grid item={true} xs={6}>
                             <Typography
@@ -439,7 +462,7 @@ const HalamanResto: PageComponent = () => {
                         {obj.customized && (
                     <Grid container={true} xs={12} sx={{ alignItems: 'center', display: 'flex' }}>
                         <Grid item={true} xs={2} sx={{ textAlign: 'left' }}>
-                        <DiningRoundedIcon fontSize="small"/>
+                        <DiningRoundedIcon fontSize="small" />
                         </Grid>
                         <Grid item={true} xs={9} sx={{ textAlign: 'left' }}>
                         <Typography
@@ -461,7 +484,7 @@ const HalamanResto: PageComponent = () => {
                           <IndeterminateCheckBoxFilled size={24} />
                         </IconButton>
                         <Typography
-                         style={{
+                          style={{
                             display: 'inline-block',
                             margin: '0 0.5rem',
                             marginTop: '0.5rem'
@@ -474,13 +497,18 @@ const HalamanResto: PageComponent = () => {
                           aria-label="plus"
                           size="small"
                           sx={{ color: 'black' }}
+                          
                           onClick={() => handleIncrement(index)}
                         >
                           <AddBoxFilled size={24} />
                         </IconButton>
                       </Grid>
+                      
                     </Box>
+                    </div>       
+                  )}
                   </Grid>
+                  
                 </Grid>
                 </Card>
               </div>
@@ -519,7 +547,8 @@ const HalamanResto: PageComponent = () => {
                       <img
                         alt={obj.title}
                         src={obj.foto}
-                        style={{ maxHeight: '100%', maxWidth: '100%' }} />
+                        style={{ maxHeight: '100%', maxWidth: '100%',marginTop: '0.5rem' }}
+                         />
                     </div>
                   </Grid>
                   <Grid
@@ -533,7 +562,7 @@ const HalamanResto: PageComponent = () => {
                   >
                     <Box
                       sx={{
-                        marginTop: '2rem',
+                        marginTop: obj.count > 0 ? '2.5rem' : '1rem',
                         alignItems: 'center',
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -545,8 +574,22 @@ const HalamanResto: PageComponent = () => {
                       >
                         {obj.title}
                       </Typography>
-                     
+                      
                     </Box>
+                    {obj.count === 0 && (
+                        <Typography
+                        sx={{
+                            fontWeight: 'bold',
+                            textAlign: 'start',
+                            color: 'red'
+                        }}
+                        variant="body2"
+                        >
+                        Persediaan Habis
+                        </Typography>
+                    )}
+                    {obj.count > 0 && (
+                        <div>
                     <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
                         <Grid item={true} xs={6}>
                             <Typography
@@ -619,8 +662,12 @@ const HalamanResto: PageComponent = () => {
                           <AddBoxFilled size={24} />
                         </IconButton>
                       </Grid>
+                      
                     </Box>
+                    </div>       
+                  )}
                   </Grid>
+                  
                 </Grid>
                 </Card>
               </div>
