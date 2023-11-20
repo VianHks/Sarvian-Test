@@ -24,6 +24,8 @@ import { AddBoxFilled, IndeterminateCheckBoxFilled } from '@nxweb/icons/material
 
 import { Grid } from '@components/material.js';
 
+import SwipeableTextMobileStepper from './slidergambar';
+
 import Pict1 from '@assets/images/Video.svg';
 import Pict2 from '@assets/images/Video2.svg';
 
@@ -66,35 +68,8 @@ const ProductView = () => {
           alignItems: 'center'
         }}
       >
-      <Slider
-        max={images.length - 1}
-        value={currentImageIndex}
-        onChange={handleChange}
-      >
-        {images.map((image, index) => (
-          <img
-            alt={`Slide ${index + 1}`}
-            key={index}
-            src={image}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        ))}
-      </Slider>
-         {/* <Carousel
-           animation="slide"
-           autoPlay={false}
-           index={currentImageIndex}
-           indicators={false}
-           onChange={(index: number) => handleChange(index)}
-         >
-          {images.map((image, index) => (
-           <Carousel.Item key={index}>
-           <img
-             alt={`Slide ${index + 1}`}
-             className="d-block w-100"
-             src={image} />
-           </Carousel.Item>
-          ))}
-         </Carousel> */}
+     <SwipeableTextMobileStepper />
+
       </Container>
 
       <Container
@@ -176,8 +151,8 @@ const ProductView = () => {
                         <IconButton
                           aria-label="min"
                           size="small"
-                          onClick={() => handleDecrement()}
                           sx={{ color: 'black' }}
+                          onClick={() => handleDecrement()}
                         >
                           <IndeterminateCheckBoxFilled />
                         </IconButton>
@@ -193,8 +168,8 @@ const ProductView = () => {
                         <IconButton
                           aria-label="plus"
                           size="small"
-                          onClick={() => handleIncrement()}
                           sx={{ color: 'black' }}
+                          onClick={() => handleIncrement()}
                         >
                           <AddBoxFilled />
                         </IconButton>
