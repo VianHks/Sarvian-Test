@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Avatar, Box, Button, Card, Divider, Grid, IconButton, InputAdornment, TextField, Typography } from '@mui/material';
+import { Alert, Avatar, Box, Button, Card, Divider, Grid, IconButton, InputAdornment, TextField, Typography } from '@mui/material';
 
 import { AccessTimeFilled, AddBoxFilled, LocationOnFilled, StarFilled, IndeterminateCheckBoxFilled } from '@nxweb/icons/material';
 import DiningRoundedIcon from '@mui/icons-material/DiningRounded';
@@ -103,7 +103,7 @@ interface PaketHematDataModel {
   
   const MENU_REKOMEND: MenuRekomendDataModel[] = [
     {
-      count: 1,
+      count: 0,
       foto: `${Pisan}`,
       harga: 24000,
       title: 'Ayam Goreng Pisan',
@@ -111,7 +111,7 @@ interface PaketHematDataModel {
       customized: true
     },
     {
-      count: 1,
+      count: 0,
       foto: `${Bakar}`,
       harga: 22000,
       title: 'Ayam Bakar',
@@ -121,7 +121,7 @@ interface PaketHematDataModel {
   ];
   const PAKET_HEMAT: PaketHematDataModel[] = [
     {
-      count: 1,
+      count: 0,
       foto: `${Pisan}`,
       harga: 24000,
       title: 'Ayam Goreng Pisan',
@@ -129,7 +129,7 @@ interface PaketHematDataModel {
       customized: true
     },
     {
-      count: 1,
+      count: 0,
       foto: `${Bakar}`,
       harga: 22000,
       title: 'Ayam Bakar',
@@ -139,6 +139,7 @@ interface PaketHematDataModel {
   ];
   
   const DEFAULT_MENUREKOMEND: MenuRekomendDataModel = {
+
     count: 0,
     foto: '',
     harga: 0,
@@ -159,10 +160,10 @@ interface PaketHematDataModel {
 const HalamanResto: PageComponent = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<MenuRekomendDataModel[]>([DEFAULT_MENUREKOMEND]);
+  const [ordersPaketHemat, setOrdersPaketHemat] = useState<PaketHematDataModel[]>([DEFAULT_PAKETHEMAT]);
   const [methode, setMethode] = useState('Pesan Antar');
   const [filteredResto, setFilteredResto] = useState(DUMMY_RESTO);
  
-
 
   const handleIncrement = (index: number) => {
     const updatedOrders = [...orders];
@@ -179,14 +180,43 @@ const HalamanResto: PageComponent = () => {
       setOrders(updatedOrders);
     }
   };
+
+  const handleIncrementPaketHemat = (index: number) => {
+    const updatedOrders = [...ordersPaketHemat];
+
+    updatedOrders[index].count += 1;
+    setOrdersPaketHemat(updatedOrders);
+  };
+
+  const handleDecrementPaketHemat = (index: number) => {
+    if (ordersPaketHemat[index].count > 0) {
+      const updatedOrders = [...ordersPaketHemat];
+
+      updatedOrders[index].count -= 1;
+      setOrdersPaketHemat(updatedOrders);
+    }
+  };
+
   const handleLihatSemuaClick = () => {
     navigate('./ulasan-rating');
   };
 
+  useEffect(() => {
+    if (MENU_REKOMEND) {
+      setOrders(MENU_REKOMEND);
+    }
+    if (PAKET_HEMAT) {
+        setOrdersPaketHemat(PAKET_HEMAT);
+      }
+  }, [orders, ordersPaketHemat]);
+
+  console.log('cekcount', orders);
   return (
     <Box sx={{ margin: '1rem 1.5rem' }}>
 
-      
+        <Grid item={true} xs={12}>
+            <Alert color="info" severity="info" sx={{ alignItems: 'center', display: 'flex' }}>Resto ini lagi tutup, buka lagi besok jam 09.00 WIB ya!</Alert>
+        </Grid>
       {filteredResto.map((resto) => (
         <Card key={resto.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem', marginTop: '2rem' }}>
           <Grid container={true} spacing={2}>
@@ -565,7 +595,7 @@ const HalamanResto: PageComponent = () => {
                           aria-label="min"
                           size="small"
                           sx={{ color: 'black' }}
-                          onClick={() => handleDecrement(index)}
+                          onClick={() => handleDecrementPaketHemat(index)}
                         >
                           <IndeterminateCheckBoxFilled size={24} />
                         </IconButton>
@@ -584,7 +614,7 @@ const HalamanResto: PageComponent = () => {
                           size="small"
                           sx={{ color: 'black' }}
                           
-                          onClick={() => handleIncrement(index)}
+                          onClick={() => handleIncrementPaketHemat(index)}
                         >
                           <AddBoxFilled size={24} />
                         </IconButton>
