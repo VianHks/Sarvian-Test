@@ -357,7 +357,7 @@ const HalamanResto: PageComponent = () => {
             <Grid item={true} sx={{ display: 'flex', justifyContent: 'space-between' }}>
               {DUMMY_MENU_RECOMDATION.map((obj) => {
                 return (
-                    <Card key={obj.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem' }}>
+                <Card key={obj.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem' }}>
                     <Grid container={true} spacing={2}>
                   <Grid
                     item={true}

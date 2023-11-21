@@ -2745,6 +2745,9 @@ packages:
     peerDependencies:
       eslint: ^8.52.0
       typescript: ^5.2.2
+    peerDependenciesMeta:
+      typescript:
+        optional: true
     dependencies:
       '@babel/eslint-parser': 7.23.3(@babel/core@7.23.3)(eslint@8.54.0)
       '@babel/preset-env': 7.23.3(@babel/core@7.23.3)

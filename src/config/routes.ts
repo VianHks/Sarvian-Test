@@ -97,5 +97,30 @@ export const routes: Route[] = [
     layout: 'blank',
     path: '/page-resto/ulasan-rating',
     search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/chat-and-call/index.js')),
+    hash: true,
+    meta: { description: 'Chat' },
+    layout: 'blank',
+    path: '/chat-list',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/chat-and-call/chat-ui')),
+    hash: true,
+    layout: 'blank',
+    path: '/chat-detail',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/chat-and-call/call-ui')),
+    hash: true,
+    layout: 'blank',
+    path: '/call',
+    search: true
   }
 ];
