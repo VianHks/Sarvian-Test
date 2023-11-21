@@ -1,24 +1,24 @@
-import { ShoppingCart, SmartHome, TestPipe } from '@nxweb/icons/tabler';
+import { HomeSharp, ListAltFilled, TextsmsOutlined } from '@nxweb/icons/material';
 
 import type { NavItemsType } from '@layouts/types.js';
 
 export const navigation: readonly NavItemsType[] = [
   {
-    icon: <SmartHome />,
+    icon: <HomeSharp />,
     id: 'beranda',
     link: '/beranda',
     text: 'Beranda'
   },
   {
-    icon: <ShoppingCart />,
-    id: 'products-page',
-    link: '/products',
-    text: 'Products'
+    icon: <ListAltFilled />,
+    id: 'order-page',
+    link: '/order',
+    text: 'Pesanan'
   },
   {
-    icon: <TestPipe />,
-    id: 'other-page',
-    link: '/other-page',
-    text: 'Other Page'
+    icon: <TextsmsOutlined />,
+    id: 'chat-page',
+    link: '/chat',
+    text: 'Chat'
   }
 ];

@@ -61,9 +61,18 @@ export const routes: Route[] = [
     auth: false,
     element: lazy(() => import('@pages/order/order.js')),
     hash: true,
-    layout: 'appbar',
+    layout: 'bottomnav',
     meta: { description: 'Pesanan' },
     path: '/order',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/order/penilaian.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Penilaian Saya' },
+    path: '/order/penilaian-saya',
     search: true
   }
 ];
