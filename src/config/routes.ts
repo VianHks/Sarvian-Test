@@ -81,5 +81,37 @@ export const routes: Route[] = [
     layout: 'blank',
     path: '/ganti-item',
     search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/location/location-by-gps.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/location-by-gps',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/location/location.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/location',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/location/add-location')),
+    hash: true,
+    layout: 'blank',
+    path: '/add-location',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/location/gps.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/GPS',
+    search: true
   }
 ];
