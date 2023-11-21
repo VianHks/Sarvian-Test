@@ -2,8 +2,9 @@
 /* eslint-disable @typescript-eslint/indent */
 /* eslint-disable @typescript-eslint/no-redeclare */
 /* eslint-disable linebreak-style */
-import type { ChangeEvent } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import CallIcon from '@mui/icons-material/Call';
+import MicNoneIcon from '@mui/icons-material/MicNone';
 
 import {
   Box,
@@ -11,6 +12,8 @@ import {
   Button,
 
   Grid,
+
+  IconButton,
 
   Typography,
   useTheme
@@ -78,7 +81,7 @@ const CallUI: React.FC = () => {
                   </Typography>
                 </Grid>
     </Grid>
-        <Grid sx={{ display: 'flex', justifyContent: 'center', marginBottom: '3rem' }} xs={12}>
+        <Grid sx={{ display: 'flex', justifyContent: 'center', marginBottom: '5rem', marginTop: '0.5rem' }} xs={12}>
           <Typography
             color="#D0D5DD"
             fontWeight="medium"
@@ -95,49 +98,28 @@ const CallUI: React.FC = () => {
                 style={{
                   height: 'auto',
                         paddingLeft: '0rem !important',
-                        width: '50%'
+                        width: '60%'
                       }} />
         </Grid>
         <Grid
           container={true}
           spacing={3}
-          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}
+          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', marginTop: '1rem' }}
         >
             <Grid item={true} sx={{ display: 'flex', justifyContent: 'end' }} xs={4}>
-            <Button
-              color="primary"
-              sx={{
-
-              borderRadius: '50%',
-              width: '60px',
-              height: '60px'
-
-            }}
-              variant="contained" />
+            <IconButton sx={{ borderRadius: '50%', width: '70px', height: '70px', backgroundColor: 'ButtonShadow' }} color="primary">
+              <VolumeUpIcon style={{ color: '#1050AE' }}/>
+            </IconButton>
             </Grid>
             <Grid item={true} sx={{ display: 'flex', justifyContent: 'center' }} xs={4}>
-            <Button
-              color="primary"
-              sx={{
-
-              borderRadius: '50%',
-              width: '60px',
-              height: '60px'
-
-            }}
-              variant="contained" />
+            <IconButton sx={{ borderRadius: '50%', width: '70px', height: '70px', backgroundColor: 'ButtonShadow' }} color="primary">
+              <MicNoneIcon style={{ color: '#1050AE' }}/>
+            </IconButton>
             </Grid>
             <Grid item={true} sx={{ display: 'flex', justifyContent: 'start' }} xs={4}>
-            <Button
-              color="primary"
-              sx={{
-
-              borderRadius: '50%',
-              width: '60px',
-              height: '60px'
-
-            }}
-              variant="contained" />
+            <IconButton sx={{ borderRadius: '50%', width: '70px', height: '70px', backgroundColor: '#D92D20' }}>
+              <CallIcon style={{ color: 'white' }}/>
+            </IconButton>
             </Grid>
         </Grid>
     </Box>

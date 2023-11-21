@@ -38,7 +38,7 @@ const ChatDetail: React.FC<MessageProps> = ({ message }) => {
           alignItems: 'center'
         }}
       >
-        <Box sx={{ alignItems: 'center', display: 'flex', gap: '0.25rem' }}>
+        <Box sx={{ alignItems: 'center', display: 'flex', gap: '0.25rem', justifyContent: isBot ? 'flex-start' : 'flex-end' }}>
           <Avatar
             sx={{
               bgcolor: 'secondary.main',
@@ -47,11 +47,11 @@ const ChatDetail: React.FC<MessageProps> = ({ message }) => {
           >
            <img src={isBot ? SellerImage : fotoOrang} alt="User" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
           </Avatar>
-          <Typography>{isBot ? 'Resto' : 'Anda'}</Typography>
+          <Typography sx={{ color: 'black' }}>{isBot ? 'Resto' : 'Anda'}</Typography>
         </Box>
         <Paper
           sx={{
-            backgroundColor: isBot ? theme.palette.grey[100] : 'primary.light',
+            backgroundColor: isBot ? theme.palette.grey[100] : '#1F66D0',
             borderRadius: isBot
               ? '0px var(--1, 8px) var(--1, 8px) var(--1, 8px)'
               : 'var(--1, 8px) 0px var(--1, 8px) var(--1, 8px)',
@@ -64,7 +64,7 @@ const ChatDetail: React.FC<MessageProps> = ({ message }) => {
           <Typography sx={{ color: getMessageColor() }} variant="body2">{message.text}</Typography>
           <Box sx={{ alignItems: 'center', display: 'flex', gap: '1.5rem', justifyContent: 'space-between' }}>
             <Typography sx={{ color: getMessageColor(), fontSize: '8px', lineHeight: '12px' }}>{message.date}</Typography>
-            <DoneAllIcon sx={{ fontSize: '1rem', color: 'blue', alignItems: 'end', marginTop: '5px' }} />
+            <DoneAllIcon sx={{ fontSize: '1rem', color: isBot ? '#1F66D0' : 'white', alignItems: 'end', marginTop: '5px' }} />
           </Box>
         </Paper>
       </Box>

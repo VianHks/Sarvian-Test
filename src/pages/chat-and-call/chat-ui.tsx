@@ -20,21 +20,16 @@ import {
   useTheme
 } from '@mui/material';
 
-
-import { useAuth } from '@hooks/use-auth';
-
-import { useStore } from '@models/store';
-
-import Message from './message-style';
-
-import SellerImage from '@assets/images/MieBaso.png';
-import ProductImage from '@assets/images/Bakar.png';
-
 import {
     AttachmentFilled,
     CameraAltFilled,
     SendFilled
   } from '@nxweb/icons/material';
+
+import Message from './message-style';
+
+import ProductImage from '@assets/images/Bakar.png';
+import SellerImage from '@assets/images/MieBaso.png';
 
   interface ChatListDetail {
     id: number
@@ -43,7 +38,7 @@ import {
     sender: 'bot' | 'user'
   }
 
-export const chatOutput: ChatListDetail[]= [
+const chatOutput: ChatListDetail[] = [
     {
         id: 1,
         date: '10:00, 02 Agustus 2023',
@@ -71,9 +66,8 @@ export const chatOutput: ChatListDetail[]= [
   ];
 
 const ChatUI: React.FC = () => {
-
   const theme = useTheme();
-  
+
   const [input, setInput] = useState<string>('');
 
   const handleSend = () => {
@@ -85,7 +79,6 @@ const ChatUI: React.FC = () => {
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setInput(event.target.value);
   };
-
 
   return (
     <Box
@@ -116,8 +109,8 @@ const ChatUI: React.FC = () => {
             </Typography>
           </Box>
         </div>
-        
-          <Box>
+
+          <Box sx={{ paddingInline: '0.5rem' }}>
             <Card sx={{ marginBottom: '1rem', padding: '1rem' }}>
               <Box>
                 <Grid
@@ -126,7 +119,12 @@ const ChatUI: React.FC = () => {
                 >
                   <Grid item={true} xs={true}>
                     <Typography color="neutral-90" variant="body2">
-                      No. Pesanan: #FFDA2023
+                      No. Pesanan:
+                    </Typography>
+                  </Grid>
+                  <Grid item={true} xs={true}>
+                    <Typography color="black" variant="body2">
+                      #FFDA2023
                     </Typography>
                   </Grid>
                   <Grid item={true} xs="auto">
@@ -169,7 +167,7 @@ const ChatUI: React.FC = () => {
                         width: '50%'
                       }} />
                   </Grid>
-                  <Grid item={true} xs={true} sx={{ marginLeft: '-2rem' }}>
+                  <Grid item={true} sx={{ marginLeft: '-2rem' }} xs={true}>
                     <Typography
                       color="neutral-90"
                       fontWeight="bold"
@@ -228,13 +226,13 @@ const ChatUI: React.FC = () => {
                   value="Gg. Tumpah 2 No.25"
                   variant="outlined" />
                   <Grid
-                  container={true}
-                  sx={{
+                    container={true}
+                    sx={{
                     justifyContent: 'space-between',
                     marginBottom: '0.75rem',
                     marginTop: '-0.25rem'
                   }}
-                >
+                  >
                   <Grid item={true} sx={{ marginRight: '1rem' }} xs="auto">
                     <img alt="Profile" src={ProductImage} />
                   </Grid>
@@ -259,7 +257,7 @@ const ChatUI: React.FC = () => {
                       3 Item
                     </Typography>
                   </Grid>
-                </Grid>
+                  </Grid>
                 <TextField
                   disabled={true}
                   size="small"
@@ -275,7 +273,7 @@ const ChatUI: React.FC = () => {
           </Box>
 
       {chatOutput.map((message) => (
-  <div key={message.id}>
+  <div key={message.id} style={{ paddingInline: '10px' }}>
     <Message message={message} />
   </div>
 ))}

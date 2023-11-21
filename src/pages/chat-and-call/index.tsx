@@ -1,12 +1,15 @@
+/* eslint-disable linebreak-style */
+/* eslint-disable @typescript-eslint/indent */
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Alert, Avatar, Badge, Box, Button, Card, Chip, Grid, TextField, Typography } from '@mui/material';
-
-import RestoFoto from '@assets/images/RestoFoto.svg';
 import CheckIcon from '@mui/icons-material/Check';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
+import { Alert, Avatar, Badge, Box, Button, Card, Chip, Grid, TextField, Typography } from '@mui/material';
+
 import type { PageComponent } from '@nxweb/react';
+
+import RestoFoto from '@assets/images/RestoFoto.svg';
 // eslint-disable-next-line import/exports-last
 export const DUMMY_ChatList = [
   {
@@ -31,44 +34,47 @@ export const DUMMY_ChatList = [
     status: 'read'
   }
 
-  
 ];
 
 const Chat: PageComponent = () => {
   const navigate = useNavigate();
 
   const [chatList, setChatList] = useState(DUMMY_ChatList);
- 
 
+  const handleClick = () => {
+    // Navigate to your desired route
+    navigate('/chat-detail');
+  };
 
   return (
     <Box sx={{ margin: '1rem 1.5rem' }}>
       <Grid item={true} xs={12}>
-      
         <Alert color="warning" severity="warning" sx={{ alignItems: 'center', display: 'flex' }}>
+        <Typography sx={{ fontSize: '12px' }} variant="h5">
           Chat akan hilang dalam 2x24 jam dan akan dikirim melalui email.
+        </Typography>
         </Alert>
 
-    </Grid>
+      </Grid>
     {chatList.map((obj) => (
-      <Card key={obj.id} sx={{ borderColor: 'transparent', marginBottom: '-1rem', padding: '0.5rem', marginTop: '2rem' }}>
+      <Card key={obj.id} sx={{ borderColor: 'transparent', marginBottom: '-1.5rem', padding: '0.5rem', marginTop: '2rem' }} onClick={handleClick}>
           <Grid container={true} spacing={1}>
               <Grid
-                    item={true}
-                    sx={{
+                item={true}
+                sx={{
                       alignItems: 'center',
                       display: 'flex',
                       justifyContent: 'center'
                     }}
-                    xs={2}
-                  >
+                xs={2}
+              >
                     <Avatar src={RestoFoto} sx={{ height: '50px', width: '50px' }} />
-                  </Grid>
+              </Grid>
                   <Grid item={true} sx={{ marginLeft: '10px', alignItems: 'center', display: 'flex', justifyContent: 'start', paddingTop: '0rem!important' }} xs={6}>
                     <Box>
-    
+
                       <Typography
-                        sx={{ marginLeft: '5px', fontWeight: 'bold', textAlign: 'start' }}
+                        sx={{ marginLeft: '5px', fontWeight: 'bold', textAlign: 'start', color: 'black' }}
                         variant="h6"
                       >
                         {obj.userName}
@@ -78,7 +84,7 @@ const Chat: PageComponent = () => {
                         </Box>
                     </Box>
                   </Grid>
-                  <Grid xs="auto" sx={{ alignItems: 'center', display: 'flex', justifyContent: 'end' }}>
+                  <Grid sx={{ alignItems: 'center', display: 'flex', justifyContent: 'end' }} xs="auto">
                       <Box>
                       <Typography
                         sx={{ marginLeft: '5px', fontWeight: 'medium', textAlign: 'start', fontSize: '0.6rem', marginTop: '0.25rem' }}
@@ -104,12 +110,12 @@ const Chat: PageComponent = () => {
                       </Box>
 
                   </Grid>
-                </Grid>
-              
+          </Grid>
+
       </Card>
     ))}
-      
-  </Box>
+
+    </Box>
   );
 };
 
