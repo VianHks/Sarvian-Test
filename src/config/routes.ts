@@ -84,6 +84,22 @@ export const routes: Route[] = [
   },
   {
     auth: false,
+    element: lazy(() => import('@pages/halaman-resto/index.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/page-resto',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/halaman-resto/view-rating.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/page-resto/ulasan-rating',
+    search: true
+  },
+  {
+    auth: false,
     element: lazy(() => import('@pages/location/location-by-gps.js')),
     hash: true,
     layout: 'blank',
@@ -112,6 +128,14 @@ export const routes: Route[] = [
     hash: true,
     layout: 'blank',
     path: '/GPS',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/rating/rating.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/rating',
     search: true
   }
 ];
