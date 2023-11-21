@@ -15,6 +15,7 @@ import Rating from './rating';
 import Pisan from '@assets/images/Pisan.png';
 import RestoFoto from '@assets/images/RestoFoto.svg';
 import ProfilFoto from '@assets/images/Orang.svg';
+import FloatingShoppingButton from './floatingshopping-button';
 
 // eslint-disable-next-line import/exports-last
 export interface RestoItem {
@@ -91,6 +92,7 @@ interface MenuRekomendDataModel {
     title: string
     terjual: number
     customized: boolean
+    stok: number
   }
 interface PaketHematDataModel {
     count: number
@@ -99,42 +101,47 @@ interface PaketHematDataModel {
     title: string
     terjual: number
     customized: boolean
+    stok: number
   }
   
   const MENU_REKOMEND: MenuRekomendDataModel[] = [
     {
-      count: 1,
+      count: 0,
       foto: `${Pisan}`,
       harga: 24000,
       title: 'Ayam Goreng Pisan',
       terjual: 4,
-      customized: true
+      customized: true,
+      stok: 5,
     },
     {
-      count: 1,
+      count: 0,
       foto: `${Bakar}`,
       harga: 22000,
       title: 'Ayam Bakar',
       terjual: 3,
-      customized: false
+      customized: false,
+      stok: 3
     }
   ];
   const PAKET_HEMAT: PaketHematDataModel[] = [
     {
-      count: 1,
+      count: 0,
       foto: `${Pisan}`,
       harga: 24000,
       title: 'Ayam Goreng Pisan',
       terjual: 4,
-      customized: true
+      customized: true,
+      stok: 4
     },
     {
-      count: 1,
+      count: 0,
       foto: `${Bakar}`,
       harga: 22000,
       title: 'Ayam Bakar',
       terjual: 3,
-      customized: false
+      customized: false,
+      stok: 3
     },
     {
         count: 0,
@@ -142,7 +149,8 @@ interface PaketHematDataModel {
         harga: 22000,
         title: 'Ayam Bakar Pedes',
         terjual: 7,
-        customized: false
+        customized: false,
+        stok: 0
       }
   ];
   
@@ -153,7 +161,8 @@ interface PaketHematDataModel {
     harga: 0,
     title: '',
     terjual: 0,
-    customized: false
+    customized: false,
+    stok: 0
   };
   const DEFAULT_PAKETHEMAT: PaketHematDataModel = {
     count: 0,
@@ -161,11 +170,20 @@ interface PaketHematDataModel {
     harga: 0,
     title: '',
     terjual: 0,
-    customized: false
+    customized: false,
+    stok: 0
   };
   
 
 const HalamanResto: PageComponent = () => {
+    interface MenuItem {
+        count: number;
+        harga: number;
+        
+      }
+    const [restoIsOpen, setRestoIsOpen] = useState(true);
+    const [totalAmount, setTotalAmount] = useState(0);
+    const [totalItems, setTotalItems] = useState(0);
   const navigate = useNavigate();
   const [orders, setOrders] = useState<MenuRekomendDataModel[]>([DEFAULT_MENUREKOMEND]);
   const [ordersPaketHemat, setOrdersPaketHemat] = useState<PaketHematDataModel[]>([DEFAULT_PAKETHEMAT]);
@@ -178,53 +196,83 @@ const HalamanResto: PageComponent = () => {
 
     updatedOrders[index].count += 1;
     setOrders(updatedOrders);
+    calculateTotal([...updatedOrders, ...ordersPaketHemat]);
   };
 
   const handleDecrement = (index: number) => {
     if (orders[index].count > 0) {
-      const updatedOrders = [...orders];
-
-      updatedOrders[index].count -= 1;
-      setOrders(updatedOrders);
-    }
+        const updatedOrders = [...orders];
+    
+        updatedOrders[index].count -= 1;
+        setOrders(updatedOrders);
+        calculateTotal([...updatedOrders, ...ordersPaketHemat]);
+      }
   };
 
   const handleIncrementPaketHemat = (index: number) => {
     const updatedOrders = [...ordersPaketHemat];
 
     updatedOrders[index].count += 1;
-    setOrdersPaketHemat(updatedOrders);
+    setOrdersPaketHemat (updatedOrders);
+    calculateTotal([...orders, ...updatedOrders]);
   };
 
   const handleDecrementPaketHemat = (index: number) => {
     if (ordersPaketHemat[index].count > 0) {
-      const updatedOrders = [...ordersPaketHemat];
-
-      updatedOrders[index].count -= 1;
-      setOrdersPaketHemat(updatedOrders);
-    }
+        const updatedOrders = [...ordersPaketHemat];
+    
+        updatedOrders[index].count -= 1;
+        setOrdersPaketHemat(updatedOrders);
+        calculateTotal([...orders, ...updatedOrders]);
+      }
   };
 
   const handleLihatSemuaClick = () => {
     navigate('./ulasan-rating');
   };
 
+  const calculateTotal = (selectedItems: MenuItem[]) => {
+    let amount: number = 0;
+    let items: number = 0;
+  
+    selectedItems.forEach((item: MenuItem) => {
+      amount += item.count * item.harga;
+      items += item.count;
+    });
+  
+    setTotalAmount(amount);
+    setTotalItems(items);
+  };
+  const handleShoppingButtonClick = () => {
+    
+    console.log('Tombol Belanja Diklik');
+  };
   useEffect(() => {
+    const currentHour = new Date().getHours();
+    const [openHour, closeHour] = DUMMY_RESTO[0].open.split(' - ').map(time => parseInt(time));
+    const isOpen = currentHour >= openHour && currentHour <= closeHour;
+
     if (MENU_REKOMEND) {
       setOrders(MENU_REKOMEND);
     }
     if (PAKET_HEMAT) {
         setOrdersPaketHemat(PAKET_HEMAT);
       }
+    
+    setRestoIsOpen(isOpen);
   }, [orders, ordersPaketHemat]);
 
   console.log('cekcount', orders);
   return (
     <Box sx={{ margin: '1rem 1.5rem' }}>
 
-        <Grid item={true} xs={12}>
-            <Alert color="info" severity="info" sx={{ alignItems: 'center', display: 'flex' }}>Resto ini lagi tutup, buka lagi besok jam 09.00 WIB ya!</Alert>
-        </Grid>
+    <Grid item={true} xs={12}>
+      {!restoIsOpen && (
+        <Alert color="warning" severity="warning" sx={{ alignItems: 'center', display: 'flex' }}>
+          Resto ini tutup sekarang. Buka lagi besok jam {DUMMY_RESTO[0].open} ya!
+        </Alert>
+      )}
+    </Grid>
       {filteredResto.map((resto) => (
         <Card key={resto.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem', marginTop: '2rem' }}>
           <Grid container={true} spacing={2}>
@@ -303,9 +351,9 @@ const HalamanResto: PageComponent = () => {
         </Grid>
       </Grid>
        
-      <Card sx={{ borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '1rem', marginInline: '-1.5rem', padding: '1rem 1.5rem' }}>
+      <Card sx={{ borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '1rem', marginInline: '-1.5rem', padding: '1rem 1.5rem', position: 'relative', zIndex: 100 }}>
          <Box sx={{ overflowX: 'auto' }}>
-          <Grid container={true} sx={{ width: '100rem' }}>
+          <Grid container={true} sx={{ width: '100rem', overflowX: 'auto' }}>
             <Grid item={true} sx={{ display: 'flex', justifyContent: 'space-between' }}>
               {DUMMY_MENU_RECOMDATION.map((obj) => {
                 return (
@@ -403,7 +451,7 @@ const HalamanResto: PageComponent = () => {
                   >
                     <Box
                       sx={{
-                        marginTop: obj.count > 0 ? '2.5rem' : '1rem',
+                        marginTop: obj.stok > 0 ? '2.5rem' : '1rem',
                         alignItems: 'center',
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -417,7 +465,7 @@ const HalamanResto: PageComponent = () => {
                       </Typography>
                       
                     </Box>
-                    {obj.count === 0 && (
+                    {obj.stok === 0 && (
                         <Typography
                         sx={{
                             fontWeight: 'bold',
@@ -429,7 +477,7 @@ const HalamanResto: PageComponent = () => {
                         Persediaan Habis
                         </Typography>
                     )}
-                    {obj.count > 0 && (
+                    {obj.stok > 0 && (
                         <div>
                     <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
                         <Grid item={true} xs={6}>
@@ -562,7 +610,7 @@ const HalamanResto: PageComponent = () => {
                   >
                     <Box
                       sx={{
-                        marginTop: obj.count > 0 ? '2.5rem' : '1rem',
+                        marginTop: obj.stok > 0 ? '2.5rem' : '1rem',
                         alignItems: 'center',
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -576,7 +624,7 @@ const HalamanResto: PageComponent = () => {
                       </Typography>
                       
                     </Box>
-                    {obj.count === 0 && (
+                    {obj.stok === 0 && (
                         <Typography
                         sx={{
                             fontWeight: 'bold',
@@ -588,7 +636,7 @@ const HalamanResto: PageComponent = () => {
                         Persediaan Habis
                         </Typography>
                     )}
-                    {obj.count > 0 && (
+                    {obj.stok > 0 && (
                         <div>
                     <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
                         <Grid item={true} xs={6}>
@@ -669,10 +717,44 @@ const HalamanResto: PageComponent = () => {
                   </Grid>
                   
                 </Grid>
+                
                 </Card>
               </div>
             );
           })}
+                <Typography
+                sx={{ fontWeight: 'medium', textAlign: 'start', color: '#1F66D0' }}
+                    variant="body2"
+                    >
+                    {totalItems} Item
+                </Typography>
+        <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
+                <Grid item={true} xs={6}>
+                    <Typography
+                    sx={{ fontWeight: 'medium', textAlign: 'start', color: 'black' }}
+                        variant="h6"
+                        >
+                        Total Pembayaran
+                    </Typography>
+                </Grid>
+                <Grid item={true} xs={6}>
+                    <Typography
+                    sx={{ fontWeight: 'medium', textAlign: 'end', color: 'black' }}
+                        variant="h6"
+                        >
+                        Rp. {totalAmount.toLocaleString('id-ID')}
+                    </Typography>
+                </Grid>
+        </Grid>
+            <Button
+                 color="primary"
+                 size="medium"
+                 sx={{ textTransform: 'none', width: '100%' }}
+                 variant="contained"
+               >
+                Lanjut Pembayaran
+            </Button>
+            <FloatingShoppingButton onClick={handleShoppingButtonClick} />
     </Box>
   );
 };
