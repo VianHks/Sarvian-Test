@@ -5,7 +5,7 @@ import type { Route } from '@nxweb/react';
 export const routes: Route[] = [
   {
     path: '/',
-    redirectTo: (_location, authenticated) => (authenticated ? '/personalized-recomendation' : '/beranda')
+    redirectTo: (_location, authenticated) => (authenticated ? '/recomendation' : '/beranda')
   },
   // ** Fallback routes, must be the last route item
   {
@@ -96,6 +96,15 @@ export const routes: Route[] = [
     hash: true,
     layout: 'blank',
     path: '/page-resto/ulasan-rating',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/pencarian/index.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Cari' },
+    path: '/pencarian',
     search: true
   }
 ];
