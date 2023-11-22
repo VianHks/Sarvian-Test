@@ -5,6 +5,7 @@ import {
   createCommandHook, createDispatchHook, createStoreHook, createStoreProvider
 } from '@nxweb/react';
 
+import { FAQReducer } from './faq/reducers.js';
 import { productsCommand } from './products/commands.js';
 import { productsReducer } from './products/reducers.js';
 
@@ -12,6 +13,7 @@ import type { RootAction, RootModel } from './types.js';
 
 // ** Init reducers
 const rootReducer = combineReducers({
+  faq: FAQReducer,
   products: productsReducer
 });
 
