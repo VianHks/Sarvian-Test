@@ -5,7 +5,7 @@ import type { Route } from '@nxweb/react';
 export const routes: Route[] = [
   {
     path: '/',
-    redirectTo: (_location, authenticated) => (authenticated ? '/personalized-recomendation' : '/beranda')
+    redirectTo: (_location, authenticated) => (authenticated ? '/recomendation' : '/beranda')
   },
   // ** Fallback routes, must be the last route item
   {
@@ -121,6 +121,55 @@ export const routes: Route[] = [
     hash: true,
     layout: 'blank',
     path: '/call',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/location/location-by-gps.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/location-by-gps',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/location/location.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/location',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/location/add-location')),
+    hash: true,
+    layout: 'blank',
+    path: '/add-location',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/location/gps.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/GPS',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/rating/rating.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/rating',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/pencarian/index.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Cari' },
+    path: '/pencarian',
     search: true
   }
 ];
