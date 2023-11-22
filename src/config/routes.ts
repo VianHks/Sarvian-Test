@@ -100,6 +100,31 @@ export const routes: Route[] = [
   },
   {
     auth: false,
+    element: lazy(() => import('@pages/chat-and-call/index.js')),
+    hash: true,
+    meta: { description: 'Chat' },
+    layout: 'blank',
+    path: '/chat-list',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/chat-and-call/chat-ui')),
+    hash: true,
+    layout: 'blank',
+    path: '/chat-detail',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/chat-and-call/call-ui')),
+    hash: true,
+    layout: 'blank',
+    path: '/call',
+    search: true
+  },
+  {
+    auth: false,
     element: lazy(() => import('@pages/location/location-by-gps.js')),
     hash: true,
     layout: 'blank',
