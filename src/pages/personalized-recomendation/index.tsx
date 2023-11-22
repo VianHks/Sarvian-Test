@@ -1,3 +1,4 @@
+/* eslint-disable import/exports-last */
 /* eslint-disable complexity */
 /* eslint-disable linebreak-style */
 import { useState } from 'react';
@@ -32,13 +33,13 @@ import Roti from '@assets/images/Roti.png';
 import Sate from '@assets/images/Sate.png';
 import Sunda from '@assets/images/Sunda.png';
 
-interface FoodsDataModel {
+export interface FoodsDataModel {
   id: string
   photo: string
   title: string
 }
 
-interface FoodsListDataModel {
+export interface FoodsListDataModel {
   [key: string]: FoodsDataModel[]
   breakfast: FoodsDataModel[]
   dinner: FoodsDataModel[]
@@ -110,7 +111,7 @@ const DUMMY_FOODS: FoodsDataModel[] = [
   }
 ];
 
-const DEFAULT_FOODS_LIST: FoodsListDataModel = {
+export const DEFAULT_FOODS_LIST: FoodsListDataModel = {
   breakfast: [],
   dinner: [],
   lunch: []
