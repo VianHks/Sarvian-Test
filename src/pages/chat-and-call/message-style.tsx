@@ -39,6 +39,8 @@ const ChatDetail: React.FC<MessageProps> = ({ message }) => {
         }}
       >
         <Box sx={{ alignItems: 'center', display: 'flex', gap: '0.25rem', justifyContent: isBot ? 'flex-start' : 'flex-end' }}>
+
+          <Typography sx={{ color: 'black' }}>{isBot ? 'Resto' : 'Anda'}</Typography>
           <Avatar
             sx={{
               bgcolor: 'secondary.main',
@@ -47,7 +49,6 @@ const ChatDetail: React.FC<MessageProps> = ({ message }) => {
           >
            <img src={isBot ? SellerImage : fotoOrang} alt="User" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
           </Avatar>
-          <Typography sx={{ color: 'black' }}>{isBot ? 'Resto' : 'Anda'}</Typography>
         </Box>
         <Paper
           sx={{
