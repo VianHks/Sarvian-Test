@@ -146,5 +146,14 @@ export const routes: Route[] = [
     meta: { description: 'Cari' },
     path: '/pencarian',
     search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/pusat-bantuan/index.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Pusat Bantuan' },
+    path: '/pusat-bantuan',
+    search: true
   }
 ];
