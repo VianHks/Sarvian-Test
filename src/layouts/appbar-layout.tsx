@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
-import { Avatar, Dialog, DialogContent, Grid, IconButton, styled } from '@mui/material';
+import { Avatar, Button, Dialog, DialogContent, Grid, IconButton, styled } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -32,6 +32,8 @@ const ContentWrapper = styled('main')(({ theme }) => ({
 const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, readonly action?: ActionType }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const action = searchParams.get('action');
   let dynamicIcon = null;
   let dynamicHandler: React.ReactNode = null;
 
@@ -68,6 +70,19 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
           >
             {dynamicIcon}
           </IconButton>
+        </div>
+      );
+      break;
+    case 'keranjang':
+      dynamicHandler = (
+        <div>
+          <Button
+            color="primary"
+            variant="text"
+            onClick={() => navigate(action === 'edit' ? '/keranjang' : '/keranjang?action=edit')}
+          >
+            {action === 'edit' ? 'Selesai' : 'Edit'}
+          </Button>
         </div>
       );
       break;

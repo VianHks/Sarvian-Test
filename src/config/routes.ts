@@ -189,5 +189,14 @@ export const routes: Route[] = [
     meta: { description: 'Pusat Bantuan' },
     path: '/pusat-bantuan',
     search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/order/keranjang.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { appBarId: 'keranjang', description: 'Keranjang' },
+    path: '/keranjang',
+    search: true
   }
 ];
