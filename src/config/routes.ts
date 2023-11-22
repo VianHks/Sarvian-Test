@@ -171,5 +171,23 @@ export const routes: Route[] = [
     meta: { description: 'Cari' },
     path: '/pencarian',
     search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/checkout-multi-order/index.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Halaman Checkout' },
+    path: '/multi-order',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/checkout-multi-order/multi-order-in-progress.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Pesanan Berlangsung' },
+    path: '/multi-order/in-progress',
+    search: true
   }
 ];
