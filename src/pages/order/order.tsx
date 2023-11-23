@@ -5,25 +5,58 @@ import { useNavigate } from 'react-router-dom';
 import {
   Avatar,
   Box,
+  Button,
   Card,
+  Chip,
   Container,
   Grid,
   styled,
   Tab,
   Tabs,
-  Typography
+  TextField,
+  Typography,
+  useTheme
 } from '@mui/material';
 
+import { CircleFilled, StarBorderOutlined, StarFilled } from '@nxweb/icons/material';
+import { BorderTop } from '@nxweb/icons/tabler';
 import type { PageComponent } from '@nxweb/react';
 
 import { useAuth } from '@hooks/use-auth';
 
+import Bakar from '@assets/images/Bakar.png';
 import MieBaso from '@assets/images/MieBaso.png';
 
 interface StyledTabProps {
   label: string
   value: string
 }
+
+interface OrderDataModel {
+  comment: string
+  foto: string
+  item: number
+  price: number
+  title: string
+}
+
+const DATA_ORDER_DUMMY: OrderDataModel[] = [
+  {
+    comment: 'Gg. Jalanin Dulu Aja No.171',
+    foto: `${Bakar}`,
+    item: 2,
+    price: 25000,
+    title: 'Paket Ayam Bakar'
+  },
+  {
+    comment: 'Gg. Jalanin Dulu Aja No.1711',
+    foto: `${Bakar}`,
+    item: 2,
+    price: 27000,
+    title: 'Paket Ayam Bakar2'
+  }
+];
+
 const CustomTabs = styled(Tabs)({
   '& .MuiTabs-indicator': {
     backgroundColor: '#002B6A'
@@ -76,6 +109,7 @@ const Order: PageComponent = () => {
   const navigate = useNavigate();
   const { auth } = useAuth();
 
+  const theme = useTheme();
   const [tabValue, setTabValue] = useState('Diproses');
 
   const handleTabChange = (
@@ -85,9 +119,19 @@ const Order: PageComponent = () => {
     setTabValue(newValue);
   };
 
+  const totalPrice = DATA_ORDER_DUMMY.reduce(
+    (accumulator, currentValue) => accumulator + currentValue.price,
+    0
+  );
+
   return (
     <>
-      <Box sx={{ marginBottom: '1rem', marginTop: '1rem' }}>
+      <Box sx={{ backgroundColor: 'white', marginBottom: '1rem' }}>
+        <Box sx={{ padding: '2.5rem 1.75rem 1rem 1.75rem' }}>
+          <Typography color="black" sx={{ fontWeight: 'bold' }} variant="h4">
+            Pesanan
+          </Typography>
+        </Box>
         <CustomTabs
           aria-label="tabs"
           centered={true}
@@ -103,22 +147,223 @@ const Order: PageComponent = () => {
           <CustomTab label="Dibatalkan" value="Dibatalkan" />
         </CustomTabs>
       </Box>
-      <Container sx={{ paddingInline: '0.5rem', paddingTop: '1.5rem' }}>
-          <div>
-            {tabValue === 'Diproses' &&
+      <Container sx={{ paddingInline: '0.5rem' }}>
+        <div>
+          {tabValue === 'Diproses' &&
             <Card sx={{ padding: '1rem' }}>
-                <Grid container={true} sx={{ display: 'flex' }}>
-                    <Grid item={true} sx={{ textAlign: 'start' }} xs={4}>
-                        <Typography variant="caption">No. Pesanan</Typography>
-                    </Grid>
-                    <Grid item={true} sx={{ fontWeight: 'bold', textAlign: 'center' }} xs={4}>
-                        <Typography variant="caption">#FFDA21223</Typography>
-                    </Grid>
-                    <Grid item={true} sx={{ textAlign: 'end' }} xs={4}>
-                        <Typography color="primary" variant="caption">Single Order</Typography>
-                    </Grid>
+              <Grid container={true} sx={{ alignItems: 'center', display: 'flex', marginBottom: '0.75rem' }}>
+                <Grid item={true} sx={{ textAlign: 'start' }} xs={4}>
+                  <Typography color="black" variant="caption">No. Pesanan</Typography>
                 </Grid>
-                <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
+                <Grid item={true} sx={{ textAlign: 'center' }} xs={4}>
+                  <Typography sx={{ color: 'black', fontWeight: 'medium' }} variant="caption">#FFDA21223</Typography>
+                </Grid>
+                <Grid item={true} sx={{ alignItems: 'end', textAlign: 'end', width: 'fit-content' }} xs={4}>
+                  <Typography color="primary" sx={{ backgroundColor: '#E4F3FF', borderRadius: '4px', padding: '0.25rem 0.5rem' }} variant="caption">
+                    Single Order
+                  </Typography>
+                </Grid>
+              </Grid>
+              <hr style={{ opacity: '0.2' }} />
+              <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <Box
+                  sx={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    gap: '0.5rem',
+                    justifyContent: 'start'
+                  }}
+                >
+                  <Avatar src={MieBaso} sx={{ height: '24px', width: '24px' }} />
+                  <Typography color="black" fontWeight="bold" variant="body1">
+                    Resto Bunda Gila
+                  </Typography>
+                </Box>
+                <Box sx={{ textAlign: 'end' }}>
+                  <Typography color="black" variant="caption">2 Aug 2023</Typography>
+                </Box>
+              </Box>
+              {DATA_ORDER_DUMMY.map((obj) => {
+                return (
+                  <div key={obj.title}>
+                    <Grid
+                      container={true}
+                      spacing={3}
+                      sx={{ marginBottom: '0.5rem' }}
+                    >
+                      <Grid item={true}>
+                        <img alt="Foto" src={obj.foto} />
+                      </Grid>
+                      <Grid item={true}>
+                        <Typography
+                          color="black"
+                          fontWeight="medium"
+                          variant="body2"
+                        >
+                          {obj.title}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                        >
+                          Rp. {obj.price.toLocaleString('id-ID')}
+                        </Typography>
+                      </Grid>
+                      <Grid
+                        item={true}
+                        sx={{
+                          textAlign: 'end'
+                        }}
+                        xs={true}
+                      >
+                        <Typography
+                          color="black"
+                          fontWeight="medium"
+                          variant="caption"
+                        >
+                          {obj.item} item
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Box sx={{ marginBottom: '0.75rem' }}>
+                      <TextField
+                        fullWidth={true}
+                        placeholder={obj.comment}
+                        size="small"
+                        variant="outlined" />
+                    </Box>
+                  </div>
+                );
+              })}
+              <hr style={{ borderTop: 'dotted 1px', opacity: '0.1' }} />
+              <Grid
+                container={true}
+                sx={{ marginBottom: '0.75rem' }}
+              >
+                <Grid item={true}>
+                  <Typography
+                    color="black"
+                    fontWeight="Bold"
+                    variant="h6"
+                  >
+                    Total Pembayaran
+                  </Typography>
+                </Grid>
+                <Grid
+                  item={true}
+                  sx={{
+                    textAlign: 'end'
+                  }}
+                  xs={true}
+                >
+                  <Typography
+                    color="primary"
+                    fontWeight="Bold"
+                    variant="h6"
+                  >
+                    Rp. {totalPrice.toLocaleString('id-ID')}
+                  </Typography>
+                </Grid>
+              </Grid>
+              <Box>
+                <Button
+                  color="primary"
+                  fullWidth={true}
+                  size="medium"
+                  variant="contained"
+                >
+                  Lihat Pesanan
+                </Button>
+              </Box>
+            </Card>}
+          {tabValue === 'Selesai' &&
+            <>
+              <Card sx={{ marginBottom: '0.5rem', padding: '1rem' }}>
+                <Grid container={true} sx={{ alignItems: 'center', display: 'flex', marginBottom: '0.75rem' }}>
+                  <Grid item={true} sx={{ textAlign: 'start' }} xs={4}>
+                    <Typography color="black" variant="caption">No. Pesanan</Typography>
+                  </Grid>
+                  <Grid item={true} sx={{ textAlign: 'center' }} xs={4}>
+                    <Typography sx={{ color: 'black', fontWeight: 'medium' }} variant="caption">#FFDA21223</Typography>
+                  </Grid>
+                  <Grid item={true} sx={{ alignItems: 'end', textAlign: 'end', width: 'fit-content' }} xs={4}>
+                    <Typography color="primary" sx={{ backgroundColor: '#E4F3FF', borderRadius: '4px', padding: '0.25rem 0.5rem' }} variant="caption">
+                      Multi-Order
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <hr style={{ opacity: '0.2' }} />
+                <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <Box
+                    sx={{
+                      alignItems: 'center',
+                      display: 'flex',
+                      gap: '0.5rem',
+                      justifyContent: 'start'
+                    }}
+                  >
+                    <Avatar src={MieBaso} sx={{ height: '24px', width: '24px' }} />
+                    <Typography color="black" fontWeight="bold" variant="body1">
+                      Resto Bunda Gila
+                    </Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'end' }}>
+                    <Typography color="black" variant="caption">2 Aug 2023</Typography>
+                  </Box>
+                </Box>
+                {DATA_ORDER_DUMMY.map((obj) => {
+                  return (
+                    <div key={obj.title}>
+                      <Grid
+                        container={true}
+                        spacing={3}
+                        sx={{ marginBottom: '0.5rem' }}
+                      >
+                        <Grid item={true}>
+                          <img alt="Foto" src={obj.foto} />
+                        </Grid>
+                        <Grid item={true}>
+                          <Typography
+                            color="black"
+                            fontWeight="medium"
+                            variant="body2"
+                          >
+                            {obj.title}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                          >
+                            Rp. {obj.price.toLocaleString('id-ID')}
+                          </Typography>
+                        </Grid>
+                        <Grid
+                          item={true}
+                          sx={{
+                            textAlign: 'end'
+                          }}
+                          xs={true}
+                        >
+                          <Typography
+                            color="black"
+                            fontWeight="medium"
+                            variant="caption"
+                          >
+                            {obj.item} item
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                      <Box sx={{ marginBottom: '0.75rem' }}>
+                        <TextField
+                          fullWidth={true}
+                          placeholder={obj.comment}
+                          size="small"
+                          variant="outlined" />
+                      </Box>
+                    </div>
+                  );
+                })}
+                <hr style={{ opacity: '0.2' }} />
+                <div style={{ opacity: '0.4' }}>
+                  <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                     <Box
                       sx={{
                         alignItems: 'center',
@@ -127,22 +372,529 @@ const Order: PageComponent = () => {
                         justifyContent: 'start'
                       }}
                     >
-                        <Avatar src={MieBaso} sx={{ height: '24px', width: '24px' }} />
-                        <Typography sx={{ fontWeight: 'bold' }} variant="body1">
+                      <Avatar src={MieBaso} sx={{ height: '24px', width: '24px' }} />
+                      <Typography color="black" fontWeight="bold" variant="body1">
                         Resto Bunda Gila
-                        </Typography>
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        alignItems: 'center',
+                        display: 'flex',
+                        justifyContent: 'start'
+                      }}
+                    >
+                      <CircleFilled color={theme.palette.error.main} size={4} />
+                      <Typography
+                        color="error"
+                        fontWeight="bold"
+                        variant="h6"
+                      >
+                        Gagal
+                      </Typography>
                     </Box>
                     <Box sx={{ textAlign: 'end' }}>
-                        <Typography variant="caption">2 Aug 2023</Typography>
+                      <Typography color="black" variant="caption">2 Aug 2023</Typography>
                     </Box>
+                  </Box>
+                  {DATA_ORDER_DUMMY.map((obj) => {
+                    return (
+                      <div key={obj.title}>
+                        <Grid
+                          container={true}
+                          spacing={3}
+                          sx={{ marginBottom: '0.5rem' }}
+                        >
+                          <Grid item={true}>
+                            <img alt="Foto" src={obj.foto} />
+                          </Grid>
+                          <Grid item={true}>
+                            <Typography
+                              color="black"
+                              fontWeight="medium"
+                              variant="body2"
+                            >
+                              {obj.title}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                            >
+                              Rp. {obj.price.toLocaleString('id-ID')}
+                            </Typography>
+                          </Grid>
+                          <Grid
+                            item={true}
+                            sx={{
+                              textAlign: 'end'
+                            }}
+                            xs={true}
+                          >
+                            <Typography
+                              color="black"
+                              fontWeight="medium"
+                              variant="caption"
+                            >
+                              {obj.item} item
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                        <Box sx={{ marginBottom: '0.75rem' }}>
+                          <TextField
+                            fullWidth={true}
+                            placeholder={obj.comment}
+                            size="small"
+                            variant="outlined" />
+                        </Box>
+                      </div>
+                    );
+                  })}
+                </div>
+                <hr style={{ borderTop: 'dotted 1px', opacity: '0.1' }} />
+                <Grid
+                  container={true}
+                  sx={{ marginBottom: '0.75rem' }}
+                >
+                  <Grid item={true}>
+                    <Typography
+                      color="black"
+                      fontWeight="Bold"
+                      variant="h6"
+                    >
+                      Total Pembayaran
+                    </Typography>
+                  </Grid>
+                  <Grid
+                    item={true}
+                    sx={{
+                      textAlign: 'end'
+                    }}
+                    xs={true}
+                  >
+                    <Typography
+                      color="primary"
+                      fontWeight="Bold"
+                      variant="h6"
+                    >
+                      Rp. {totalPrice.toLocaleString('id-ID')}
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <Grid
+                  container={true}
+                  sx={{ marginBottom: '0.75rem' }}
+                >
+                  <Grid item={true}>
+                    <Typography
+                      color="black"
+                      fontWeight="Bold"
+                      variant="h6"
+                    >
+                      Total Refund
+                    </Typography>
+                  </Grid>
+                  <Grid
+                    item={true}
+                    sx={{
+                      textAlign: 'end'
+                    }}
+                    xs={true}
+                  >
+                    <Typography
+                      color="primary"
+                      fontWeight="Bold"
+                      variant="h6"
+                    >
+                      Rp. 10.000
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <Grid
+                  container={true}
+                  sx={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginBottom: '0.75rem'
+                  }}
+                >
+                  <Grid item={true}>
+                    <Typography
+                      color="black"
+                      fontWeight="Bold"
+                      variant="h6"
+                    >
+                      Rating Driver
+                    </Typography>
+                  </Grid>
+                  <Grid
+                    item={true}
+                    sx={{
+                      alignItems: 'center',
+                      display: 'flex',
+                      justifyContent: 'flex-end'
+                    }}
+                    xs={true}
+                  >
+                    <StarFilled color="#FBD600" fontSize="medium" />
+                    <StarFilled color="#FBD600" fontSize="medium" />
+                    <StarFilled color="#FBD600" fontSize="medium" />
+                    <StarFilled color="#FBD600" fontSize="medium" />
+                    <StarFilled color="#FBD600" fontSize="medium" />
+                  </Grid>
+                </Grid>
+                <Box
+                  sx={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    gap: '0.25rem',
+                    width: '100%'
+                  }}
+                >
+                  <Button
+                    color="primary"
+                    endIcon={false}
+                    size="medium"
+                    startIcon={false}
+                    sx={{ flex: 1, padding: '0.5rem 1.375rem' }}
+                    variant="outlined"
+                  >
+                    Lihat Penilaian
+                  </Button>
+                  <Button
+                    color="primary"
+                    endIcon={false}
+                    size="medium"
+                    startIcon={false}
+                    sx={{ flex: 1 }}
+                    variant="contained"
+                  >
+                    Beli Lagi
+                  </Button>
                 </Box>
-                <hr />
+              </Card>
+              <Card sx={{ padding: '1rem' }}>
+                <Grid container={true} sx={{ alignItems: 'center', display: 'flex', marginBottom: '0.75rem' }}>
+                  <Grid item={true} sx={{ textAlign: 'start' }} xs={4}>
+                    <Typography color="black" variant="caption">No. Pesanan</Typography>
+                  </Grid>
+                  <Grid item={true} sx={{ textAlign: 'center' }} xs={4}>
+                    <Typography sx={{ color: 'black', fontWeight: 'medium' }} variant="caption">#FFDA21223</Typography>
+                  </Grid>
+                  <Grid item={true} sx={{ alignItems: 'end', textAlign: 'end', width: 'fit-content' }} xs={4}>
+                    <Typography color="primary" sx={{ backgroundColor: '#E4F3FF', borderRadius: '4px', padding: '0.25rem 0.5rem' }} variant="caption">
+                      Single Order
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <hr style={{ opacity: '0.2' }} />
+                <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <Box
+                    sx={{
+                      alignItems: 'center',
+                      display: 'flex',
+                      gap: '0.5rem',
+                      justifyContent: 'start'
+                    }}
+                  >
+                    <Avatar src={MieBaso} sx={{ height: '24px', width: '24px' }} />
+                    <Typography color="black" fontWeight="bold" variant="body1">
+                      Resto Bunda Gila
+                    </Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'end' }}>
+                    <Typography color="black" variant="caption">2 Aug 2023</Typography>
+                  </Box>
+                </Box>
+                {DATA_ORDER_DUMMY.map((obj) => {
+                  return (
+                    <div key={obj.title}>
+
+                      <Grid
+                        container={true}
+                        spacing={3}
+                        sx={{ marginBottom: '0.5rem' }}
+                      >
+                        <Grid item={true}>
+                          <img alt="Foto" src={obj.foto} />
+                        </Grid>
+                        <Grid item={true}>
+                          <Typography
+                            color="black"
+                            fontWeight="medium"
+                            variant="body2"
+                          >
+                            {obj.title}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                          >
+                            Rp. {obj.price.toLocaleString('id-ID')}
+                          </Typography>
+                        </Grid>
+                        <Grid
+                          item={true}
+                          sx={{
+                            textAlign: 'end'
+                          }}
+                          xs={true}
+                        >
+                          <Typography
+                            color="black"
+                            fontWeight="medium"
+                            variant="caption"
+                          >
+                            {obj.item} item
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                      <Box sx={{ marginBottom: '0.75rem' }}>
+                        <TextField
+                          fullWidth={true}
+                          placeholder={obj.comment}
+                          size="small"
+                          variant="outlined" />
+                      </Box>
+                    </div>
+                  );
+                })}
+                <hr style={{ borderTop: 'dotted 1px', opacity: '0.1' }} />
+                <Grid
+                  container={true}
+                  sx={{ marginBottom: '0.75rem' }}
+                >
+                  <Grid item={true}>
+                    <Typography
+                      color="black"
+                      fontWeight="Bold"
+                      variant="h6"
+                    >
+                      Total Pembayaran
+                    </Typography>
+                  </Grid>
+                  <Grid
+                    item={true}
+                    sx={{
+                      textAlign: 'end'
+                    }}
+                    xs={true}
+                  >
+                    <Typography
+                      color="primary"
+                      fontWeight="Bold"
+                      variant="h6"
+                    >
+                      Rp. {totalPrice.toLocaleString(('id-ID'))}
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <Grid
+                  container={true}
+                  sx={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginBottom: '0.75rem'
+                  }}
+                >
+                  <Grid item={true}>
+                    <Typography
+                      color="black"
+                      fontWeight="Bold"
+                      variant="h6"
+                    >
+                      Rating Driver
+                    </Typography>
+                  </Grid>
+                  <Grid
+                    item={true}
+                    sx={{
+                      alignItems: 'center',
+                      display: 'flex',
+                      justifyContent: 'flex-end'
+                    }}
+                    xs={true}
+                  >
+                    <StarBorderOutlined fontSize="medium" />
+                    <StarBorderOutlined fontSize="medium" />
+                    <StarBorderOutlined fontSize="medium" />
+                    <StarBorderOutlined fontSize="medium" />
+                    <StarBorderOutlined fontSize="medium" />
+                  </Grid>
+                </Grid>
+                <Box
+                  sx={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    gap: '0.25rem',
+                    width: '100%'
+                  }}
+                >
+                  <Button
+                    color="primary"
+                    endIcon={false}
+                    size="medium"
+                    startIcon={false}
+                    sx={{ flex: 1 }}
+                    variant="outlined"
+                  >
+                    Lihat Penilaian
+                  </Button>
+                  <Button
+                    color="primary"
+                    endIcon={false}
+                    size="medium"
+                    startIcon={false}
+                    sx={{ flex: 1 }}
+                    variant="contained"
+                  >
+                    Beli Lagi
+                  </Button>
+                </Box>
+              </Card>
+            </>}
+          {tabValue === 'Dibatalkan' &&
+            <Card sx={{ padding: '1rem' }}>
+              <Grid container={true} sx={{ alignItems: 'center', display: 'flex', marginBottom: '0.75rem' }}>
+                <Grid item={true} sx={{ textAlign: 'start' }} xs={4}>
+                  <Typography color="black" variant="caption">No. Pesanan</Typography>
+                </Grid>
+                <Grid item={true} sx={{ textAlign: 'center' }} xs={4}>
+                  <Typography sx={{ color: 'black', fontWeight: 'medium' }} variant="caption">#FFDA21223</Typography>
+                </Grid>
+                <Grid item={true} sx={{ alignItems: 'end', textAlign: 'end', width: 'fit-content' }} xs={4}>
+                  <Typography color="primary" sx={{ backgroundColor: '#E4F3FF', borderRadius: '4px', padding: '0.25rem 0.5rem' }} variant="caption">
+                    Single Order
+                  </Typography>
+                </Grid>
+              </Grid>
+              <hr style={{ opacity: '0.2' }} />
+              <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <Box
+                  sx={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    gap: '0.5rem',
+                    justifyContent: 'start'
+                  }}
+                >
+                  <Avatar src={MieBaso} sx={{ height: '24px', width: '24px' }} />
+                  <Typography color="black" fontWeight="bold" variant="body1">
+                    Resto Bunda Gila
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    justifyContent: 'start'
+                  }}
+                >
+                  <CircleFilled color={theme.palette.error.main} size={4} />
+                  <Typography
+                    color="error"
+                    fontWeight="bold"
+                    variant="h6"
+                  >
+                    Gagal
+                  </Typography>
+                </Box>
+                <Box sx={{ textAlign: 'end' }}>
+                  <Typography color="black" variant="caption">2 Aug 2023</Typography>
+                </Box>
+              </Box>
+              {DATA_ORDER_DUMMY.map((obj) => {
+                return (
+                  <div key={obj.title}>
+                    <Grid
+                      container={true}
+                      spacing={3}
+                      sx={{ marginBottom: '0.5rem' }}
+                    >
+                      <Grid item={true}>
+                        <img alt="Foto" src={obj.foto} />
+                      </Grid>
+                      <Grid item={true}>
+                        <Typography
+                          color="black"
+                          fontWeight="medium"
+                          variant="body2"
+                        >
+                          {obj.title}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                        >
+                          Rp. {obj.price.toLocaleString('id-ID')}
+                        </Typography>
+                      </Grid>
+                      <Grid
+                        item={true}
+                        sx={{
+                          textAlign: 'end'
+                        }}
+                        xs={true}
+                      >
+                        <Typography
+                          color="black"
+                          fontWeight="medium"
+                          variant="caption"
+                        >
+                          {obj.item} item
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Box sx={{ marginBottom: '0.75rem' }}>
+                      <TextField
+                        fullWidth={true}
+                        placeholder={obj.comment}
+                        size="small"
+                        variant="outlined" />
+                    </Box>
+                  </div>
+                );
+              })}
+              <hr style={{ borderTop: 'dotted 1px', opacity: '0.1' }} />
+              <Grid
+                container={true}
+                sx={{ marginBottom: '0.75rem' }}
+              >
+                <Grid item={true}>
+                  <Typography
+                    color="black"
+                    fontWeight="Bold"
+                    variant="h6"
+                  >
+                    Total Refund
+                  </Typography>
+                </Grid>
+                <Grid
+                  item={true}
+                  sx={{
+                    textAlign: 'end'
+                  }}
+                  xs={true}
+                >
+                  <Typography
+                    color="primary"
+                    fontWeight="Bold"
+                    variant="h6"
+                  >
+                    Rp. {totalPrice.toLocaleString('id-ID')}
+                  </Typography>
+                </Grid>
+              </Grid>
+              <Box>
+                <Button
+                  color="primary"
+                  fullWidth={true}
+                  size="medium"
+                  variant="contained"
+                >
+                  Beli Lagi
+                </Button>
+              </Box>
             </Card>}
-            {tabValue === 'Selesai' &&
-              <> TEST 2 </>}
-            {tabValue === 'Dibatalkan' &&
-              <> TEST 3 </>}
-          </div>
+        </div>
       </Container>
     </>
   );

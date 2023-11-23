@@ -1,6 +1,7 @@
 import type { FetchInstance } from '@nxweb/core';
 import { applyMock } from '@nxweb/core';
 
+import { faq } from './mock/faq.js';
 import { products } from './mock/products.js';
 
 export const apiMock = (instance: FetchInstance) => {
@@ -8,7 +9,7 @@ export const apiMock = (instance: FetchInstance) => {
     ? instance
     : applyMock(instance, [
       // Add mock initializers here
-      products
+      products, faq
     ], {
       // Add mock options here
       delayResponse: 1000

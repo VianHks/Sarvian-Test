@@ -61,9 +61,18 @@ export const routes: Route[] = [
     auth: false,
     element: lazy(() => import('@pages/order/order.js')),
     hash: true,
-    layout: 'appbar',
+    layout: 'bottomnav',
     meta: { description: 'Pesanan' },
     path: '/order',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/order/penilaian.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Penilaian Saya' },
+    path: '/order/penilaian-saya',
     search: true
   },
   {
@@ -197,6 +206,24 @@ export const routes: Route[] = [
     layout: 'appbar',
     meta: { description: 'Halaman Checkout' },
     path: '/single-order-pesan-antar',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/pusat-bantuan/index.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Pusat Bantuan' },
+    path: '/pusat-bantuan',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/order/keranjang.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { appBarId: 'keranjang', description: 'Keranjang' },
+    path: '/keranjang',
     search: true
   }
 ];
