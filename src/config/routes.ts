@@ -189,5 +189,14 @@ export const routes: Route[] = [
     meta: { description: 'Pesanan Berlangsung' },
     path: '/multi-order/in-progress',
     search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/checkout-single-order-pesan-antar/index.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Halaman Checkout' },
+    path: '/single-order-pesan-antar',
+    search: true
   }
 ];

@@ -391,7 +391,7 @@ const MultiOrderInProgress: PageComponent = () => {
           expandIcon={<KeyboardArrowDownFilled />}
           id="panel1a-header"
           sx={{ padding: '0.5rem, 1rem, 0.5rem, 1rem!important' }}
-        >
+        >     
           <Box
             sx={{
               alignItems: 'center',
