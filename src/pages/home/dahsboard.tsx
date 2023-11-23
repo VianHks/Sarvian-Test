@@ -338,7 +338,7 @@ const Home: PageComponent = () => {
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
-              <FilterAltFilled style={{ color: 'blue' }} />
+              <FilterAltFilled style={{ color: '#317FF2' }} />
             </InputAdornment>
           ),
           startAdornment: (
