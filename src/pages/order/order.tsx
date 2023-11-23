@@ -7,7 +7,6 @@ import {
   Box,
   Button,
   Card,
-  Chip,
   Container,
   Grid,
   styled,
@@ -19,10 +18,7 @@ import {
 } from '@mui/material';
 
 import { CircleFilled, StarBorderOutlined, StarFilled } from '@nxweb/icons/material';
-import { BorderTop } from '@nxweb/icons/tabler';
 import type { PageComponent } from '@nxweb/react';
-
-import { useAuth } from '@hooks/use-auth';
 
 import Bakar from '@assets/images/Bakar.png';
 import MieBaso from '@assets/images/MieBaso.png';
@@ -32,28 +28,74 @@ interface StyledTabProps {
   value: string
 }
 
-interface OrderDataModel {
-  comment: string
-  foto: string
-  item: number
-  price: number
-  title: string
+interface OrderItemDataModel {
+  COMMENT: string
+  ITEM: number
+  PHOTO: string
+  PRICE: number
+  TITLE: string
 }
 
-const DATA_ORDER_DUMMY: OrderDataModel[] = [
+// eslint-disable-next-line import/exports-last
+export interface OrderDataModel {
+  DELIVERY_STATUS: string
+  NO_ORDER: number
+  ORDER_DATE: string
+  ORDER_ITEM: OrderItemDataModel[]
+  ORDER_STATUS: string
+  RESTO_NAME: string
+  SINGLE_ORDER: boolean
+}
+
+// eslint-disable-next-line import/exports-last
+export const DUMMY_ORDER = [
   {
-    comment: 'Gg. Jalanin Dulu Aja No.171',
-    foto: `${Bakar}`,
-    item: 2,
-    price: 25000,
-    title: 'Paket Ayam Bakar'
+    DELIVERY_STATUS: 'Pickup',
+    NO_ORDER: 1,
+    ORDER_DATE: '2 Aug 2023',
+    ORDER_ITEM: [
+      {
+        COMMENT: 'Gg. Jalanin Dulu Aja No.171',
+        ITEM: 2,
+        PHOTO: `${Bakar}`,
+        PRICE: 25000,
+        TITLE: 'Paket Ayam Bakar'
+      },
+      {
+        COMMENT: 'Gg. Jalanin Dulu Aja No.1711',
+        ITEM: 2,
+        PHOTO: `${Bakar}`,
+        PRICE: 27000,
+        TITLE: 'Paket Ayam Bakar2'
+      }
+    ],
+    ORDER_STATUS: 'Diproses',
+    RESTO_NAME: 'Resto Bunda Gila',
+    SINGLE_ORDER: false
   },
   {
-    comment: 'Gg. Jalanin Dulu Aja No.1711',
-    foto: `${Bakar}`,
-    item: 2,
-    price: 27000,
-    title: 'Paket Ayam Bakar2'
+    DELIVERY_STATUS: 'Delivery Order',
+    NO_ORDER: 2,
+    ORDER_DATE: '2 Aug 2023',
+    ORDER_ITEM: [
+      {
+        COMMENT: 'Gg. Jalan jalan hati ku senang.172',
+        ITEM: 2,
+        PHOTO: `${Bakar}`,
+        PRICE: 25000,
+        TITLE: 'Paket Ayam Bakar'
+      },
+      {
+        COMMENT: 'Gg. Jalan jalan hati ku senang.172',
+        ITEM: 2,
+        PHOTO: `${Bakar}`,
+        PRICE: 27000,
+        TITLE: 'Paket Ayam Bakar2'
+      }
+    ],
+    ORDER_STATUS: 'Diproses',
+    RESTO_NAME: 'Resto Bunda Gila',
+    SINGLE_ORDER: true
   }
 ];
 
@@ -107,8 +149,6 @@ const CustomTab = styled((props: StyledTabProps) => <Tab disableRipple={true} {.
 
 const Order: PageComponent = () => {
   const navigate = useNavigate();
-  const { auth } = useAuth();
-
   const theme = useTheme();
   const [tabValue, setTabValue] = useState('Diproses');
 
@@ -119,10 +159,9 @@ const Order: PageComponent = () => {
     setTabValue(newValue);
   };
 
-  const totalPrice = DATA_ORDER_DUMMY.reduce(
-    (accumulator, currentValue) => accumulator + currentValue.price,
-    0
-  );
+  const handleLihatPesanana = (orderNumber: string) => {
+    navigate(`/order-in-progress/single-order?id=${orderNumber}`);
+  };
 
   return (
     <>
@@ -149,8 +188,8 @@ const Order: PageComponent = () => {
       </Box>
       <Container sx={{ paddingInline: '0.5rem' }}>
         <div>
-          {tabValue === 'Diproses' &&
-            <Card sx={{ padding: '1rem' }}>
+          {tabValue === 'Diproses' && DUMMY_ORDER.map((order) => (
+            <Card key={order.NO_ORDER} sx={{ marginBottom: '1rem', padding: '1rem' }}>
               <Grid container={true} sx={{ alignItems: 'center', display: 'flex', marginBottom: '0.75rem' }}>
                 <Grid item={true} sx={{ textAlign: 'start' }} xs={4}>
                   <Typography color="black" variant="caption">No. Pesanan</Typography>
@@ -183,16 +222,16 @@ const Order: PageComponent = () => {
                   <Typography color="black" variant="caption">2 Aug 2023</Typography>
                 </Box>
               </Box>
-              {DATA_ORDER_DUMMY.map((obj) => {
+              {order.ORDER_ITEM.map((obj) => {
                 return (
-                  <div key={obj.title}>
+                  <div key={obj.TITLE}>
                     <Grid
                       container={true}
                       spacing={3}
                       sx={{ marginBottom: '0.5rem' }}
                     >
                       <Grid item={true}>
-                        <img alt="Foto" src={obj.foto} />
+                        <img alt="Foto" src={obj.PHOTO} />
                       </Grid>
                       <Grid item={true}>
                         <Typography
@@ -200,12 +239,12 @@ const Order: PageComponent = () => {
                           fontWeight="medium"
                           variant="body2"
                         >
-                          {obj.title}
+                          {obj.TITLE}
                         </Typography>
                         <Typography
                           variant="body2"
                         >
-                          Rp. {obj.price.toLocaleString('id-ID')}
+                          Rp. {obj.PRICE.toLocaleString('id-ID')}
                         </Typography>
                       </Grid>
                       <Grid
@@ -220,14 +259,14 @@ const Order: PageComponent = () => {
                           fontWeight="medium"
                           variant="caption"
                         >
-                          {obj.item} item
+                          {obj.ITEM} item
                         </Typography>
                       </Grid>
                     </Grid>
                     <Box sx={{ marginBottom: '0.75rem' }}>
                       <TextField
                         fullWidth={true}
-                        placeholder={obj.comment}
+                        placeholder={obj.COMMENT}
                         size="small"
                         variant="outlined" />
                     </Box>
@@ -260,7 +299,7 @@ const Order: PageComponent = () => {
                     fontWeight="Bold"
                     variant="h6"
                   >
-                    Rp. {totalPrice.toLocaleString('id-ID')}
+                    Rp. 33333333
                   </Typography>
                 </Grid>
               </Grid>
@@ -270,11 +309,13 @@ const Order: PageComponent = () => {
                   fullWidth={true}
                   size="medium"
                   variant="contained"
+                  onClick={() => handleLihatPesanana(order.NO_ORDER as unknown as string)}
                 >
                   Lihat Pesanan
                 </Button>
               </Box>
-            </Card>}
+            </Card>
+          ))}
           {tabValue === 'Selesai' &&
             <>
               <Card sx={{ marginBottom: '0.5rem', padding: '1rem' }}>
@@ -310,16 +351,16 @@ const Order: PageComponent = () => {
                     <Typography color="black" variant="caption">2 Aug 2023</Typography>
                   </Box>
                 </Box>
-                {DATA_ORDER_DUMMY.map((obj) => {
+                {DUMMY_ORDER[0].ORDER_ITEM.map((obj) => {
                   return (
-                    <div key={obj.title}>
+                    <div key={obj.TITLE}>
                       <Grid
                         container={true}
                         spacing={3}
                         sx={{ marginBottom: '0.5rem' }}
                       >
                         <Grid item={true}>
-                          <img alt="Foto" src={obj.foto} />
+                          <img alt="Foto" src={obj.PHOTO} />
                         </Grid>
                         <Grid item={true}>
                           <Typography
@@ -327,12 +368,12 @@ const Order: PageComponent = () => {
                             fontWeight="medium"
                             variant="body2"
                           >
-                            {obj.title}
+                            {obj.TITLE}
                           </Typography>
                           <Typography
                             variant="body2"
                           >
-                            Rp. {obj.price.toLocaleString('id-ID')}
+                            Rp. {obj.PRICE.toLocaleString('id-ID')}
                           </Typography>
                         </Grid>
                         <Grid
@@ -347,14 +388,14 @@ const Order: PageComponent = () => {
                             fontWeight="medium"
                             variant="caption"
                           >
-                            {obj.item} item
+                            {obj.ITEM} item
                           </Typography>
                         </Grid>
                       </Grid>
                       <Box sx={{ marginBottom: '0.75rem' }}>
                         <TextField
                           fullWidth={true}
-                          placeholder={obj.comment}
+                          placeholder={obj.COMMENT}
                           size="small"
                           variant="outlined" />
                       </Box>
@@ -397,16 +438,16 @@ const Order: PageComponent = () => {
                       <Typography color="black" variant="caption">2 Aug 2023</Typography>
                     </Box>
                   </Box>
-                  {DATA_ORDER_DUMMY.map((obj) => {
+                  {DUMMY_ORDER[0].ORDER_ITEM.map((obj) => {
                     return (
-                      <div key={obj.title}>
+                      <div key={obj.TITLE}>
                         <Grid
                           container={true}
                           spacing={3}
                           sx={{ marginBottom: '0.5rem' }}
                         >
                           <Grid item={true}>
-                            <img alt="Foto" src={obj.foto} />
+                            <img alt="Foto" src={obj.PHOTO} />
                           </Grid>
                           <Grid item={true}>
                             <Typography
@@ -414,12 +455,12 @@ const Order: PageComponent = () => {
                               fontWeight="medium"
                               variant="body2"
                             >
-                              {obj.title}
+                              {obj.TITLE}
                             </Typography>
                             <Typography
                               variant="body2"
                             >
-                              Rp. {obj.price.toLocaleString('id-ID')}
+                              Rp. {obj.PRICE.toLocaleString('id-ID')}
                             </Typography>
                           </Grid>
                           <Grid
@@ -434,14 +475,14 @@ const Order: PageComponent = () => {
                               fontWeight="medium"
                               variant="caption"
                             >
-                              {obj.item} item
+                              {obj.ITEM} item
                             </Typography>
                           </Grid>
                         </Grid>
                         <Box sx={{ marginBottom: '0.75rem' }}>
                           <TextField
                             fullWidth={true}
-                            placeholder={obj.comment}
+                            placeholder={obj.COMMENT}
                             size="small"
                             variant="outlined" />
                         </Box>
@@ -475,7 +516,7 @@ const Order: PageComponent = () => {
                       fontWeight="Bold"
                       variant="h6"
                     >
-                      Rp. {totalPrice.toLocaleString('id-ID')}
+                      Rp. 2222222
                     </Typography>
                   </Grid>
                 </Grid>
@@ -605,9 +646,9 @@ const Order: PageComponent = () => {
                     <Typography color="black" variant="caption">2 Aug 2023</Typography>
                   </Box>
                 </Box>
-                {DATA_ORDER_DUMMY.map((obj) => {
+                {DUMMY_ORDER[0].ORDER_ITEM.map((obj) => {
                   return (
-                    <div key={obj.title}>
+                    <div key={obj.TITLE}>
 
                       <Grid
                         container={true}
@@ -615,7 +656,7 @@ const Order: PageComponent = () => {
                         sx={{ marginBottom: '0.5rem' }}
                       >
                         <Grid item={true}>
-                          <img alt="Foto" src={obj.foto} />
+                          <img alt="Foto" src={obj.PHOTO} />
                         </Grid>
                         <Grid item={true}>
                           <Typography
@@ -623,12 +664,12 @@ const Order: PageComponent = () => {
                             fontWeight="medium"
                             variant="body2"
                           >
-                            {obj.title}
+                            {obj.TITLE}
                           </Typography>
                           <Typography
                             variant="body2"
                           >
-                            Rp. {obj.price.toLocaleString('id-ID')}
+                            Rp. {obj.PRICE.toLocaleString('id-ID')}
                           </Typography>
                         </Grid>
                         <Grid
@@ -643,14 +684,14 @@ const Order: PageComponent = () => {
                             fontWeight="medium"
                             variant="caption"
                           >
-                            {obj.item} item
+                            {obj.ITEM} item
                           </Typography>
                         </Grid>
                       </Grid>
                       <Box sx={{ marginBottom: '0.75rem' }}>
                         <TextField
                           fullWidth={true}
-                          placeholder={obj.comment}
+                          placeholder={obj.COMMENT}
                           size="small"
                           variant="outlined" />
                       </Box>
@@ -683,7 +724,7 @@ const Order: PageComponent = () => {
                       fontWeight="Bold"
                       variant="h6"
                     >
-                      Rp. {totalPrice.toLocaleString(('id-ID'))}
+                      Rp. 111111
                     </Typography>
                   </Grid>
                 </Grid>
@@ -802,16 +843,16 @@ const Order: PageComponent = () => {
                   <Typography color="black" variant="caption">2 Aug 2023</Typography>
                 </Box>
               </Box>
-              {DATA_ORDER_DUMMY.map((obj) => {
+              {DUMMY_ORDER[0].ORDER_ITEM.map((obj) => {
                 return (
-                  <div key={obj.title}>
+                  <div key={obj.TITLE}>
                     <Grid
                       container={true}
                       spacing={3}
                       sx={{ marginBottom: '0.5rem' }}
                     >
                       <Grid item={true}>
-                        <img alt="Foto" src={obj.foto} />
+                        <img alt="Foto" src={obj.PHOTO} />
                       </Grid>
                       <Grid item={true}>
                         <Typography
@@ -819,12 +860,12 @@ const Order: PageComponent = () => {
                           fontWeight="medium"
                           variant="body2"
                         >
-                          {obj.title}
+                          {obj.TITLE}
                         </Typography>
                         <Typography
                           variant="body2"
                         >
-                          Rp. {obj.price.toLocaleString('id-ID')}
+                          Rp. {obj.PRICE.toLocaleString('id-ID')}
                         </Typography>
                       </Grid>
                       <Grid
@@ -839,14 +880,14 @@ const Order: PageComponent = () => {
                           fontWeight="medium"
                           variant="caption"
                         >
-                          {obj.item} item
+                          {obj.ITEM} item
                         </Typography>
                       </Grid>
                     </Grid>
                     <Box sx={{ marginBottom: '0.75rem' }}>
                       <TextField
                         fullWidth={true}
-                        placeholder={obj.comment}
+                        placeholder={obj.COMMENT}
                         size="small"
                         variant="outlined" />
                     </Box>
@@ -879,7 +920,7 @@ const Order: PageComponent = () => {
                     fontWeight="Bold"
                     variant="h6"
                   >
-                    Rp. {totalPrice.toLocaleString('id-ID')}
+                    Rp. 0000
                   </Typography>
                 </Grid>
               </Grid>
