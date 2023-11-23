@@ -183,6 +183,33 @@ export const routes: Route[] = [
   },
   {
     auth: false,
+    element: lazy(() => import('@pages/checkout-multi-order/index.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Halaman Checkout' },
+    path: '/multi-order',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/checkout-multi-order/multi-order-in-progress.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Pesanan Berlangsung' },
+    path: '/multi-order/in-progress',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/checkout-single-order-pesan-antar/index.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Halaman Checkout' },
+    path: '/single-order-pesan-antar',
+    search: true
+  },
+  {
+    auth: false,
     element: lazy(() => import('@pages/pusat-bantuan/index.js')),
     hash: true,
     layout: 'appbar',
