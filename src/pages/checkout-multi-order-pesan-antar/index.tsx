@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 
 import { Global } from '@emotion/react';
 
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import MailOutlineRoundedIcon from '@mui/icons-material/MailOutlineRounded';
 import {
   Accordion,
   AccordionDetails,
@@ -14,6 +16,7 @@ import {
   Box,
   Button,
   Container,
+  Icon,
   IconButton,
   Modal,
   styled,
@@ -48,13 +51,14 @@ import Bike from '@assets/images/Bike.svg';
 import Cake from '@assets/images/Cake.svg';
 import Vodka from '@assets/images/Dessert.png';
 import DineIn from '@assets/images/DineIn.svg';
+import QR from '@assets/images/Dummy_QR.svg';
+import TelponLogo from '@assets/images/FotoTelpon.svg';
 import MieBaso from '@assets/images/MieBaso.png';
 import PesanAntar from '@assets/images/PesanAntar.svg';
 import PickUp from '@assets/images/PickUp.svg';
 import Pisan from '@assets/images/Pisan.png';
 import Roti from '@assets/images/Roti.png';
 import TokoHw from '@assets/images/TokoHw.svg';
-import TelponLogo from '@assets/images/FotoTelpon.svg';
 
 import type { Dayjs } from 'dayjs';
 
@@ -84,6 +88,8 @@ interface PesananDataModel {
   restoFoto: string
   detailOrder: DetailOrder[]
   catatan: string
+  orderApproved: boolean
+  status: string
 }
 
 const DUMMY_PESANAN: PesananDataModel[] = [
@@ -93,21 +99,23 @@ const DUMMY_PESANAN: PesananDataModel[] = [
     restoFoto: `${MieBaso}`,
     detailOrder: [
       {
-        count: 0,
+        count: 1,
         detail: 'Nasi di pisah',
         foto: `${Pisan}`,
         harga: 25000,
         title: 'Ayam Goreng Pisan'
       },
       {
-        count: 0,
+        count: 1,
         detail: 'Kuah Yang Banyak',
         foto: `${MieBaso}`,
         harga: 20000,
         title: 'Baso Campur'
       }
     ],
-    catatan: 'Baso nya jangan sampai dingin'
+    catatan: 'Baso nya jangan sampai dingin',
+    orderApproved: false,
+    status: 'Resto tidak konfirmasi'
   },
   {
     restoId: 2,
@@ -115,21 +123,23 @@ const DUMMY_PESANAN: PesananDataModel[] = [
     restoFoto: `${TelponLogo}`,
     detailOrder: [
       {
-        count: 0,
+        count: 1,
         detail: 'Gulanya Sedikit',
         foto: `${Cake}`,
         harga: 100000,
         title: 'Cake Wonder'
       },
       {
-        count: 0,
+        count: 1,
         detail: 'Rotinya Potong dulu',
         foto: `${Roti}`,
         harga: 150000,
         title: 'Roti isi'
       }
     ],
-    catatan: 'Rotinya Harus anget'
+    catatan: 'Rotinya Harus anget',
+    orderApproved: true,
+    status: 'Pesanan disiapkan resto'
   },
   {
     restoId: 3,
@@ -137,21 +147,23 @@ const DUMMY_PESANAN: PesananDataModel[] = [
     restoFoto: `${TokoHw}`,
     detailOrder: [
       {
-        count: 0,
+        count: 1,
         detail: 'Dingin Ya',
         foto: `${Vodka}`,
         harga: 400000,
         title: 'Vodka Crystal'
       },
       {
-        count: 0,
+        count: 1,
         detail: 'Extra Keju',
         foto: `${Bakar}`,
         harga: 75000,
         title: 'Chicken Wings HW'
       }
     ],
-    catatan: 'Vodkanya Yang Crystal'
+    catatan: 'Vodkanya Yang Crystal',
+    orderApproved: true,
+    status: 'Pesanan sudah siap'
   }
 ];
 
@@ -168,8 +180,9 @@ const DEFAULT_PESANAN: PesananDataModel = {
       title: ''
     }
   ],
-  catatan: ''
-
+  catatan: '',
+  orderApproved: true,
+  status: ''
 };
 
 const drawerBleeding = 120;
@@ -203,16 +216,20 @@ const Delivery = [
   { text: 'SiJabat', icon: `${Bike}` }
 ];
 
-const CheckoutMultiOrder: PageComponent = (props: Props) => {
-  const [menuCost, setMenuCost] = useState(0);
-  const [biayaLayanan, setBiayaLayanan] = useState(2000);
-  const [fasPembayaran, setFasPembayaran] = useState(600);
-  const [totalmenuCost, settotalMenuCost] = useState(0);
+const CheckoutMultiPesanAntar: PageComponent = (props: Props) => {
   const navigate = useNavigate();
   const theme = useTheme();
   const { window } = props;
+  const [biayaLayanan, setBiayaLayanan] = useState(2000);
+  const [biayaParkir, setBiayaParkir] = useState(2000);
+  const [biayaOngkir, setBiayaOngkir] = useState(2000);
+  const [fasPembayaran, setFasPembayaran] = useState(600);
+  const [totalmenuCost, settotalMenuCost] = useState(0);
+  const [totalPembayaran, settotalPembayaran] = useState(0);
   const [orders, setOrders] = useState<PesananDataModel[]>([DEFAULT_PESANAN]);
-  const [delivery, setDelivery] = useState('Dine In');
+  const [selectedDeliveryTypes, setSelectedDeliveryTypes] = useState<Set<string>>(new Set());
+  const [selectedDelivery, setSelectedDelivery] = useState<Set<string>>(new Set());
+  const [selectedItemDelivery, setSelectedItemDelivery] = useState<string[]>([]);
   const [selectedTime, setSelectedTime] = useState(dayjs());
   const [open, setOpen] = useState(false),
     [openSummary, setOpenSummary] = useState(false),
@@ -220,6 +237,9 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
 
   const [isCheckout, setIsCheckOut] = useState(false),
     [openModal, setOpenModal] = useState(false);
+
+  const [isTambahResto, setIsTambahResto] = useState(false),
+    [openModalTambahResto, setOpenModalTambahResto] = useState(false);
 
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpen(newOpen);
@@ -237,9 +257,18 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
     setOpenModal(!openModal);
   };
 
+  const toggleOpenModalTambahResto = () => {
+    setOpenModalTambahResto(!openModalTambahResto);
+  };
+
   const handleConfirmCheckout = () => {
     setIsCheckOut(true);
     setOpenModal(!openModal);
+  };
+
+  const handleConfirmTambahResto = () => {
+    setIsTambahResto(true);
+    setOpenModalTambahResto(!openModalTambahResto);
   };
 
   const container =
@@ -261,9 +290,44 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
     }
   };
 
+  const handleDeliveryType = (item: string) => {
+    const updatedSet = new Set(selectedDeliveryTypes);
+
+    if (updatedSet.has(item)) {
+      updatedSet.delete(item);
+    } else {
+      DeliveryType.forEach((obj) => {
+        if (obj.text !== item) {
+          updatedSet.delete(obj.text);
+        }
+      });
+      updatedSet.add(item);
+    }
+
+    setSelectedDeliveryTypes(updatedSet);
+  };
+
   const handleDelivery = (item: string) => {
-    setDelivery(item);
-    setOpen(false);
+    const updatedSet = new Set(selectedDelivery);
+
+    if (updatedSet.has(item)) {
+      updatedSet.delete(item);
+    } else {
+      Delivery.forEach((obj) => {
+        if (obj.text !== item) {
+          updatedSet.delete(obj.text);
+        }
+      });
+      updatedSet.add(item);
+    }
+
+    setSelectedDelivery(updatedSet);
+  };
+  const handlePilihDelivery = () => {
+    const selectedDeliveryArray = Array.from<string>(selectedDelivery);
+
+    setSelectedItemDelivery(selectedDeliveryArray);
+    setOpen(!open);
   };
 
   const handleTimeChange = (newTime: Dayjs) => {
@@ -287,19 +351,59 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
       return total + orderCost;
     }, 0);
 
-    setMenuCost(newTotalMenuCost);
-    settotalMenuCost(newTotalMenuCost + biayaLayanan + fasPembayaran);
+    settotalMenuCost(newTotalMenuCost);
+    settotalPembayaran(newTotalMenuCost + biayaLayanan + fasPembayaran + biayaParkir + biayaOngkir);
+    // Const menuCost = orders.reduce((acc, order) => acc + order.harga * order.count, 0);
+
+    // settotalMenuCost(menuCost);
+
+    /*
+     * const totalPayment =
+     *   menuCost + biayaLayanan + biayaParkir + biayaOngkir + fasPembayaran;
+     */
+
+    // settotalPembayaran(totalPayment);
   }, [orders]);
 
   return (
     <Container>
-      <Typography
-        sx={{ fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'start' }}
-        variant="h5"
-      >
-        Alamat Resto:
-      </Typography>
-      <Grid container={true} spacing={2} sx={{ marginBottom: '1rem' }}>
+        <Grid container={true} spacing={1} sx={{ marginBottom: '1rem', justifyContent: 'space-between' }}>
+            <Grid
+              item={true}
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                justifyContent: 'flex-start'
+              }}
+              xs={6}
+            >
+            <Typography
+              sx={{ fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '0.25rem', textAlign: 'start' }}
+              variant="body1"
+            >
+                Alamat Pengantaran:
+            </Typography>
+            </Grid>
+            <Box
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                gap: '0.5rem',
+                justifyContent: 'flex-end'
+              }}
+            >
+            <Typography
+              color="primary"
+              sx={{ fontSize: '0.9rem', fontWeight: 'bold' }}
+              variant="body1"
+            >
+              Ganti Alamat
+            </Typography>
+            <ChevronRightFilled color={theme.palette.primary.main} size={20} />
+            </Box>
+        </Grid>
+
+      <Grid container={true} spacing={2} sx={{ marginBottom: '1rem', backgroundColor: '#D5ECFE' }}>
         <Grid
           item={true}
           sx={{
@@ -313,6 +417,7 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
             <MYLocationFilled size={24} />
           </Avatar>
         </Grid>
+
         <Grid item={true} xs={10}>
           <Box>
             <Typography
@@ -327,6 +432,37 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
           </Box>
         </Grid>
       </Grid>
+      <Typography
+        sx={{ fontWeight: 'medium', textAlign: 'start', marginBottom: '0.5rem' }}
+        variant="h6"
+      >
+        Patokan:
+      </Typography>
+        <Box
+          sx={{
+            alignItems: 'center',
+            display: 'flex',
+            marginBottom: '1.5rem',
+            gap: '0.5rem',
+            justifyContent: 'start'
+          }}
+        >
+            <TextField
+              InputProps={{
+                startAdornment: (
+        <MailOutlineRoundedIcon
+          sx={{ height: '24px', width: '24px', marginRight: '0.5rem' }} />
+                ),
+                endAdornment: (
+                    <HelpOutlineIcon
+                      sx={{ height: '24px', width: '24px', marginLeft: '0.5rem' }} />
+                )
+              }}
+              fullWidth={true}
+              placeholder="Pinggir Ismile"
+              size="small"
+              variant="outlined" />
+        </Box>
       <Card
         sx={{ borderColor: theme.palette.primary.main, marginBottom: '1rem' }}
         onClick={toggleDrawer(true)}
@@ -358,44 +494,7 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
               sx={{ fontWeight: 'bold' }}
               variant="body1"
             >
-              {delivery}
-            </Typography>
-            <ChevronRightFilled color={theme.palette.primary.main} size={20} />
-          </Box>
-        </CardContent>
-      </Card>
-      <Card
-        sx={{ borderColor: theme.palette.primary.main, marginBottom: '1rem' }}
-        onClick={toggleDrawerTime(true)}
-      >
-        <CardContent
-          sx={{
-            alignItems: 'center',
-            display: 'flex',
-            justifyContent: 'space-between',
-            padding: '0.5rem 1rem 0.5rem 1rem!important'
-          }}
-        >
-          <Typography
-            sx={{ fontWeight: 'bold', textAlign: 'start' }}
-            variant="h5"
-          >
-            Waktu Penyiapan
-          </Typography>
-          <Box
-            sx={{
-              alignItems: 'center',
-              display: 'flex',
-              gap: '0.5rem',
-              justifyContent: 'end'
-            }}
-          >
-            <Typography
-              color="primary"
-              sx={{ fontWeight: 'bold' }}
-              variant="body1"
-            >
-              {selectedTime.format('HH:mm')}
+              {selectedItemDelivery || 'SiJago'}
             </Typography>
             <ChevronRightFilled color={theme.palette.primary.main} size={20} />
           </Box>
@@ -404,6 +503,7 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
       <Typography sx={{ fontWeight: 'bold' }} variant="h5">
         Pesanan Kamu
       </Typography>
+
       {DUMMY_PESANAN.map((order, orderIndex) => (
       <Accordion key={order.restoId} sx={{ marginBottom: '1rem' }}>
         <AccordionSummary
@@ -590,7 +690,7 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
         Tambah resto
       </Typography>
       <Box sx={{ marginBottom: '1rem' }}>
-        <Button color="secondary" fullWidth={true} variant="contained">
+        <Button color="primary" fullWidth={true} variant="contained" onClick={toggleOpenModalTambahResto}>
           Tambah Resto
         </Button>
       </Box>
@@ -649,7 +749,7 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
               }}
               variant="body2"
             >
-              Rp. {menuCost.toLocaleString('id-ID')}
+              Rp. {totalmenuCost.toLocaleString('id-ID')}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -675,6 +775,42 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
               sx={{ marginBottom: '0.5rem', textAlign: 'start' }}
               variant="body2"
             >
+              Biaya Parkir
+            </Typography>
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+                marginBottom: '0.5rem',
+                textAlign: 'end'
+              }}
+              variant="body2"
+            >
+              Rp. {biayaParkir.toLocaleString('id-ID')}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography
+              sx={{ marginBottom: '0.5rem', textAlign: 'start' }}
+              variant="body2"
+            >
+              Biaya Ongkir
+            </Typography>
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+                marginBottom: '0.5rem',
+                textAlign: 'end'
+              }}
+              variant="body2"
+            >
+            Rp. {biayaOngkir.toLocaleString('id-ID')}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography
+              sx={{ marginBottom: '0.5rem', textAlign: 'start' }}
+              variant="body2"
+            >
               Biaya Fasilitas Pembayaran
             </Typography>
             <Typography
@@ -688,6 +824,7 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
               Rp. {fasPembayaran.toLocaleString('id-ID')}
             </Typography>
           </Box>
+
         </CardContent>
       </Card>
       <Global
@@ -716,7 +853,7 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
             left: 0,
             position: 'relative',
             right: 0,
-            top: -drawerBleeding
+            top: -200
           }}
         >
           <Puller />
@@ -736,13 +873,18 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
                   size="small"
                   sx={{
                     alignItems: 'center',
+                    backgroundColor: selectedDeliveryTypes.has(obj.text) ? 'rgba(0, 0, 0, 0.1)' : 'transparent',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.1)'
+                    },
                     display: 'flex',
                     gap: '0.5rem',
                     justifyContent: 'start',
                     marginBottom: '0.5rem'
                   }}
-                  variant="text"
-                  onClick={() => handleDelivery(obj.text)}
+                  variant={selectedDeliveryTypes.has(obj.text) ? 'contained' : 'text'}
+                  onClick={() => handleDeliveryType(obj.text)}
+
                 >
                   <img alt={obj.text} src={obj.icon} />
                   <Typography>{obj.text}</Typography>
@@ -764,12 +906,16 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
                   size="small"
                   sx={{
                     alignItems: 'center',
+                    backgroundColor: selectedDelivery.has(obj.text) ? 'rgba(0, 0, 0, 0.1)' : 'transparent',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.1)'
+                    },
                     display: 'flex',
                     gap: '0.5rem',
                     justifyContent: 'start',
                     marginBottom: '0.5rem'
                   }}
-                  variant="text"
+                  variant={selectedDelivery.has(obj.text) ? 'contained' : 'text'}
                   onClick={() => handleDelivery(obj.text)}
                 >
                   <img alt={obj.text} src={obj.icon} />
@@ -777,6 +923,14 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
                 </Button>
               );
             })}
+            <Button
+              color="primary"
+              fullWidth={true}
+              variant="contained"
+              onClick={() => handlePilihDelivery()}
+            >
+            Pilih
+            </Button>
           </Box>
         </StyledBox>
       </SwipeableDrawer>
@@ -813,7 +967,7 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
           <Puller />
           <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1rem 0rem 1rem' }}>
             <Typography sx={{ fontWeight: 'bold', marginTop: '1rem' }} variant="h5">Total Pembayaran</Typography>
-            <Typography sx={{ fontWeight: 'bold', marginTop: '1rem' }} variant="h5">Rp. {menuCost > 0 ? totalmenuCost.toLocaleString('id-ID') : '0'}</Typography>
+            <Typography sx={{ fontWeight: 'bold', marginTop: '1rem' }} variant="h5">Rp. {totalPembayaran.toLocaleString('id-ID')}</Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1rem 1rem 1rem' }}>
           <Button
@@ -822,7 +976,7 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
             variant="contained"
             onClick={!isCheckout ? toggleOpenModalCheckout : () => navigate('./order-in-progress')}
           >
-            {isCheckout ? 'Checkout' : 'Proses Pesanan'}
+            Checkout
           </Button>
           </Box>
         </StyledBox>
@@ -933,10 +1087,55 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
           </Box>
         </Box>
       </Modal>
+
+      <Modal
+        aria-describedby="modal-modal-description"
+        aria-labelledby="modal-modal-title"
+        open={openModalTambahResto}
+        onClose={toggleOpenModalTambahResto}
+      >
+        <Box sx={style}>
+          <Typography
+            component="h3"
+            id="modal-modal-title"
+            sx={{ color: `${theme?.palette?.error}`, fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'center' }}
+            variant="h3"
+          >
+            Mau beli di resto lain?
+          </Typography>
+          <Typography
+            id="modal-modal-description"
+            sx={{ marginBottom: '0.5rem', textAlign: 'center' }}
+            variant="body1"
+          >
+            Yuk, pesan makanan kesukaanmu dengan mudah! Dengan multi order, kamu dapat pesan makanan melalui resto yang searah, gak perlu muter-muter!
+          </Typography>
+          <Box gap={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <Button
+              color="primary"
+              size="medium"
+              sx={{ width: '100%' }}
+              variant="contained"
+              onClick={handleConfirmTambahResto}
+            >
+              Boleh
+            </Button>
+            <Button
+              color="primary"
+              size="medium"
+              sx={{ width: '100%' }}
+              variant="outlined"
+              onClick={toggleOpenModalTambahResto}
+            >
+              Gak Perlu
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </Container>
   );
 };
 
-CheckoutMultiOrder.displayName = 'CheckoutMultiOrder';
+CheckoutMultiPesanAntar.displayName = 'CheckoutMultiPesanAntar';
 
-export default CheckoutMultiOrder;
+export default CheckoutMultiPesanAntar;

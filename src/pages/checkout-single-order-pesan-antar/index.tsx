@@ -967,16 +967,7 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
           >
             Sebelum pesan, pastiin pesananmu udah bener-bener sesuai, ya!
           </Typography>
-          <Box gap={2} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Button
-              color="primary"
-              size="medium"
-              sx={{ width: '100%' }}
-              variant="outlined"
-              onClick={toggleOpenModalCheckout}
-            >
-              Cek Ulang
-            </Button>
+          <Box gap={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <Button
               color="primary"
               size="medium"
@@ -985,6 +976,15 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
               onClick={handleConfirmCheckout}
             >
               Sesuai
+            </Button>
+            <Button
+              color="primary"
+              size="medium"
+              sx={{ width: '100%' }}
+              variant="outlined"
+              onClick={toggleOpenModalCheckout}
+            >
+              Cek Ulang
             </Button>
           </Box>
         </Box>
@@ -1012,16 +1012,7 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
           >
             Yuk, pesan makanan kesukaanmu dengan mudah! Dengan multi order, kamu dapat pesan makanan melalui resto yang searah, gak perlu muter-muter!
           </Typography>
-          <Box gap={2} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Button
-              color="primary"
-              size="medium"
-              sx={{ width: '100%' }}
-              variant="outlined"
-              onClick={toggleOpenModalTambahResto}
-            >
-              Gak Perlu
-            </Button>
+          <Box gap={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <Button
               color="primary"
               size="medium"
@@ -1030,6 +1021,15 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
               onClick={handleConfirmTambahResto}
             >
               Boleh
+            </Button>
+            <Button
+              color="primary"
+              size="medium"
+              sx={{ width: '100%' }}
+              variant="outlined"
+              onClick={toggleOpenModalTambahResto}
+            >
+              Gak Perlu
             </Button>
           </Box>
         </Box>

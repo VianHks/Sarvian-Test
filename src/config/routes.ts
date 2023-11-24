@@ -225,5 +225,14 @@ export const routes: Route[] = [
     meta: { appBarId: 'keranjang', description: 'Keranjang' },
     path: '/keranjang',
     search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/checkout-multi-order-pesan-antar/index.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Halaman Checkout' },
+    path: '/checkout/multi-order/pesan-antar',
+    search: true
   }
 ];
