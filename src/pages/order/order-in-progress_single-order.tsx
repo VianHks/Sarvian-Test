@@ -145,11 +145,11 @@ const Orders: PageComponent = () => {
   const [timerIdDriver, setTimerIdDriver] = useState<NodeJS.Timeout | null>(null);
   const [restoCountdown, setRestoCountdown] = useState(120);
   const [driverCountdown, setDriverCountdown] = useState(120);
-  const [orderApproved, setOrderApproved] = useState(false);
+  const [orderApproved, setOrderApproved] = useState(true);
   const [openModalRestoCanceled, setOpenModalRestoCanceled] = useState(false);
   const [searchDriver, setSearchDriver] = useState(3);
-  const [isDriverFound, setIsDriverFound] = useState(false);
-  const [isDriverOnTheWay, setIsDriverOnTheWay] = useState(false);
+  const [isDriverFound, setIsDriverFound] = useState(true);
+  const [isDriverOnTheWay, setIsDriverOnTheWay] = useState(true);
 
   useEffect(() => {
     if (id) {
@@ -166,7 +166,7 @@ const Orders: PageComponent = () => {
   }, [id]);
 
   const startCountdownResto = () => {
-    setRestoCountdown(120);
+    setRestoCountdown(15);
     const id = setInterval(() => {
       setRestoCountdown((prevCountdown) => {
         if (prevCountdown === 0) {
@@ -197,7 +197,7 @@ const Orders: PageComponent = () => {
   };
 
   const startCountdownDriver = () => {
-    setDriverCountdown(120);
+    setDriverCountdown(20);
     const id = setInterval(() => {
       setDriverCountdown((prevCountdown) => {
         if (prevCountdown === 0) {
@@ -336,7 +336,7 @@ const Orders: PageComponent = () => {
             </Box>
           </Grid>
           <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', paddingTop: '0rem!important' }} xs={orderApproved ? 4 : 2}>
-            {orderApproved
+            {isDriverFound
               ? <Box gap={2} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'end' }}>
                 <Avatar sx={{ backgroundColor: theme.palette.primary.main, height: '32px', width: '32px' }}>
                   <IconButton aria-label="call">
@@ -733,7 +733,7 @@ const Orders: PageComponent = () => {
           </Box>
         </CardContent>
       </Card>
-      <Box marginTop="4.5rem">
+      <Box marginTop="4.5rem" >
         <Button color="error" fullWidth={true} sx={{ marginBottom: '1rem' }} variant="contained" onClick={toggleOpenModalBatal}>
           Batalkan Pesanan
         </Button>
@@ -764,16 +764,7 @@ const Orders: PageComponent = () => {
           >
             Inget, ya. Pesanan yang kamu batalin akan hilang dari daftar manapun. Masih yakin mau batalin pesanan?
           </Typography>
-          <Box gap={2} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Button
-              color="primary"
-              size="medium"
-              sx={{ width: '100%' }}
-              variant="outlined"
-              onClick={toggleOpenModalBatal}
-            >
-              Batal
-            </Button>
+          <Box gap={2} sx={{ display: 'flex', flexDirection: 'column' }}>
             <Button
               color="primary"
               size="medium"
@@ -782,6 +773,15 @@ const Orders: PageComponent = () => {
               onClick={handleConfirmBatal}
             >
               Lanjut
+            </Button>
+            <Button
+              color="primary"
+              size="medium"
+              sx={{ width: '100%' }}
+              variant="outlined"
+              onClick={toggleOpenModalBatal}
+            >
+              Batal
             </Button>
           </Box>
         </Box>
@@ -809,7 +809,7 @@ const Orders: PageComponent = () => {
             >
               Maaf, Resto Holliwings lagi gak bisa konfirmasi pesanan. Mau diulang lagi atau batal pesan dan pilih resto lain?
             </Typography>
-            <Box gap={2} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Box gap={2} sx={{ display: 'flex', flexDirection: 'column' }}>
               <Button
                 color="primary"
                 size="medium"
@@ -827,6 +827,52 @@ const Orders: PageComponent = () => {
                 onClick={() => { setRestoCountdown(120); setOrderApproved(false); }}
               >
                 Ulang
+              </Button>
+            </Box>
+          </Box>
+        </Modal>
+        : null}
+      {driverCountdown === 0 && detailOrder[0]?.DELIVERY_STATUS === 'Delivery Order'
+        ? <Modal
+          aria-describedby="modal-modal-description"
+          aria-labelledby="modal-modal-title"
+          open={true}
+          onClose={handleCloseModalRestoCanceled}
+        >
+          <Box sx={style}>
+            <Typography
+              component="h3"
+              id="modal-modal-title"
+              sx={{ color: `${theme?.palette?.error}`, fontWeight: 'bold', textAlign: 'center' }}
+              variant="h3"
+            >
+              Kami gagal menemukan driver untuk pesananmu
+            </Typography>
+            <Typography
+              id="modal-modal-description"
+              sx={{ marginBlock: '1rem', textAlign: 'center' }}
+              variant="body1"
+            >
+              Maaf, kita udah nyoba cari driver buat pesananmu, tapi kayaknya mereka lagi pada liburan. Jadi, pesanan ini harus kita batalin, maaf banget!
+            </Typography>
+            <Box gap={2} sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Button
+                color="primary"
+                size="medium"
+                sx={{ width: '100%' }}
+                variant="contained"
+                onClick={() => navigate('/beranda')}
+              >
+                Ganti Detail Pesanan
+              </Button>
+              <Button
+                color="primary"
+                size="medium"
+                sx={{ width: '100%' }}
+                variant="outlined"
+                onClick={() => navigate('/beranda')}
+              >
+                Kembali ke Beranda
               </Button>
             </Box>
           </Box>
