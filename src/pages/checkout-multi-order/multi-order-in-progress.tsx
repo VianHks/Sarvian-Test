@@ -36,15 +36,11 @@ import {
 } from '@components/material.js';
 
 import Bakar from '@assets/images/Bakar.png';
-import Bike from '@assets/images/Bike.svg';
 import Cake from '@assets/images/Cake.svg';
 import Vodka from '@assets/images/Dessert.png';
-import DineIn from '@assets/images/DineIn.svg';
 import QR from '@assets/images/Dummy_QR.svg';
 import TelponLogo from '@assets/images/FotoTelpon.svg';
 import MieBaso from '@assets/images/MieBaso.png';
-import PesanAntar from '@assets/images/PesanAntar.svg';
-import PickUp from '@assets/images/PickUp.svg';
 import Pisan from '@assets/images/Pisan.png';
 import Roti from '@assets/images/Roti.png';
 import TokoHw from '@assets/images/TokoHw.svg';
@@ -664,16 +660,7 @@ const MultiOrderInProgress: PageComponent = () => {
           >
             Inget, ya. Pesanan yang kamu batalin akan hilang dari daftar manapun. Masih yakin mau batalin pesanan?
           </Typography>
-          <Box gap={2} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Button
-              color="primary"
-              size="medium"
-              sx={{ width: '100%' }}
-              variant="outlined"
-              onClick={toggleOpenModalBatal}
-            >
-              Batal
-            </Button>
+          <Box gap={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <Button
               color="primary"
               size="medium"
@@ -682,6 +669,15 @@ const MultiOrderInProgress: PageComponent = () => {
               onClick={handleConfirmBatal}
             >
               Lanjut
+            </Button>
+            <Button
+              color="primary"
+              size="medium"
+              sx={{ width: '100%' }}
+              variant="outlined"
+              onClick={toggleOpenModalBatal}
+            >
+              Batal
             </Button>
           </Box>
         </Box>
@@ -708,16 +704,7 @@ const MultiOrderInProgress: PageComponent = () => {
           >
             Setelah konfirmasi, resto langsung siapin pesanan kamu.
           </Typography>
-          <Box gap={2} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Button
-              color="primary"
-              size="medium"
-              sx={{ width: '30%' }}
-              variant="outlined"
-              onClick={toggleOpenModalSiapkanPesanan}
-            >
-              Nanti
-            </Button>
+          <Box gap={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <Button
               color="primary"
               size="medium"
@@ -726,6 +713,15 @@ const MultiOrderInProgress: PageComponent = () => {
               onClick={toggleOpenModalSiapkanPesanan}
             >
               Siapkan Sekarang
+            </Button>
+            <Button
+              color="primary"
+              size="medium"
+              sx={{ width: '30%' }}
+              variant="outlined"
+              onClick={toggleOpenModalSiapkanPesanan}
+            >
+              Nanti
             </Button>
           </Box>
         </Box>
