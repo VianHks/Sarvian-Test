@@ -183,7 +183,7 @@ export const routes: Route[] = [
   },
   {
     auth: false,
-    element: lazy(() => import('@pages/checkout-multi-order/index.js')),
+    element: lazy(() => import('@pages/checkout-multi-order-pickup/index.js')),
     hash: true,
     layout: 'appbar',
     meta: { description: 'Halaman Checkout' },
@@ -192,11 +192,11 @@ export const routes: Route[] = [
   },
   {
     auth: false,
-    element: lazy(() => import('@pages/checkout-multi-order/multi-order-in-progress.js')),
+    element: lazy(() => import('@pages/checkout-multi-order-pickup/multi-order-in-progress.js')),
     hash: true,
     layout: 'appbar',
     meta: { description: 'Pesanan Berlangsung' },
-    path: '/multi-order/in-progress',
+    path: '/inprogress/multi-order/pickup',
     search: true
   },
   {
@@ -233,6 +233,15 @@ export const routes: Route[] = [
     layout: 'appbar',
     meta: { description: 'Halaman Checkout' },
     path: '/checkout/multi-order/pesan-antar',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/pesanan-berlangsung-multi-order-pesan-antar/index.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Pesanan Berlangsung' },
+    path: '/inprogress/multi-order/pesan-antar',
     search: true
   }
 ];
