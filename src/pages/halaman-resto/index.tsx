@@ -1,12 +1,17 @@
 /* eslint-disable linebreak-style */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import DiningRoundedIcon from '@mui/icons-material/DiningRounded';
-import { Alert, Avatar, Box, Button, Card, Divider, Grid, IconButton, InputAdornment, TextField, Typography } from '@mui/material';
+import { Alert, Avatar, Box, Button, Card, Divider, Grid, IconButton, TextField, Typography } from '@mui/material';
+
 
 import { AccessTimeFilled, AddBoxFilled, IndeterminateCheckBoxFilled, LocationOnFilled, StarFilled } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
+
+import { useAuth } from '@hooks/use-auth';
+import { halamanRestoCommand } from '@models/halaman-resto/commands';
+import { useStore } from '@models/store';
 
 import FloatingShoppingButton from './floatingshopping-button';
 import Rating from './rating';
@@ -14,8 +19,7 @@ import Rating from './rating';
 import Bakar from '@assets/images/Bakar.png';
 import ProfilFoto from '@assets/images/Orang.svg';
 import Pisan from '@assets/images/Pisan.png';
-import RestoFoto from '@assets/images/RestoFoto.svg';
-import restoImage from '@assets/images/pages/beranda/resto.svg';
+
 
 // eslint-disable-next-line import/exports-last
 export interface RestoItem {
@@ -180,7 +184,9 @@ const HalamanResto: PageComponent = () => {
     harga: number
 
   }
-  const [restoIsOpen, setRestoIsOpen] = useState(true);
+  const { auth } = useAuth();
+  const token = useMemo(() => auth?.token.accessToken, [auth]);
+  const [store, dispatch] = useStore((state) => state?.halamanResto);
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const navigate = useNavigate();
@@ -188,7 +194,6 @@ const HalamanResto: PageComponent = () => {
   const [ordersPaketHemat, setOrdersPaketHemat] = useState<PaketHematDataModel[]>([DEFAULT_PAKETHEMAT]);
   const [methode, setMethode] = useState('Pesan Antar');
   const [filteredResto, setFilteredResto] = useState(DUMMY_RESTO);
-
 
   const calculateTotal = (selectedItems: MenuItem[]) => {
     let amount = 0;
@@ -246,12 +251,33 @@ const HalamanResto: PageComponent = () => {
     navigate('./ulasan-rating');
   };
 
-  
-
   useEffect(() => {
-    const currentHour = new Date().getHours();
-    const [openHour, closeHour] = DUMMY_RESTO[0].open.split(' - ').map((time) => parseInt(time));
-    const isOpen = currentHour >= openHour && currentHour <= closeHour;
+    if (token) {
+      dispatch(halamanRestoCommand.ulasanRatingLoad(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+      dispatch(halamanRestoCommand.menuRekomendLoad(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+      dispatch(halamanRestoCommand.paketHematLoad(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+      dispatch(halamanRestoCommand.restoRatingLoad(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+
+      return () => {
+        dispatch(halamanRestoCommand.ulasanRatingClear());
+      };
+    }
 
     if (MENU_REKOMEND) {
       setOrders(MENU_REKOMEND);
@@ -260,21 +286,29 @@ const HalamanResto: PageComponent = () => {
     if (PAKET_HEMAT) {
       setOrdersPaketHemat(PAKET_HEMAT);
     }
-
-    setRestoIsOpen(isOpen);
   }, [orders, ordersPaketHemat]);
 
-  return (
-    <Box sx={{ margin: '1rem 1.5rem' }}>
+  console.log('cekstore', store);
 
+  return (
+    <Box sx={{ margin: '0.5rem 0.5rem' }}>
+{store?.restoRatingOutput?.map((resto) => {
+  const currentHour = new Date().getHours();
+  const [openHour, closeHour] = resto.open.split(' - ').map((time) => parseInt(time));
+  const isOpen = currentHour >= openHour && currentHour <= closeHour;
+
+  return (
+   <div key={resto.id}>
     <Grid item={true} xs={12}>
-      {!restoIsOpen && (
-        <Alert color="warning" severity="warning" sx={{ alignItems: 'center', display: 'flex' }}>
-          Resto ini tutup sekarang. Buka lagi besok jam {DUMMY_RESTO[0].open} ya!
+      {!isOpen && (
+        <Alert color="info" severity="info" sx={{ alignItems: 'center', display: 'flex' }}>
+          <Typography fontSize="1rem">
+          Resto ini lagi tutup, Buka lagi besok jam {resto.open.split(' - ')[0]} ya!
+          </Typography>
         </Alert>
       )}
     </Grid>
-      {filteredResto.map((resto) => (
+
         <Card key={resto.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem', marginTop: '2rem' }}>
           <Grid container={true} spacing={2}>
         <Grid
@@ -286,7 +320,7 @@ const HalamanResto: PageComponent = () => {
           }}
           xs={2}
         >
-          <Avatar src={RestoFoto} sx={{ height: '50px', width: '50px' }} />
+          <Avatar src={resto.foto} sx={{ height: '50px', width: '50px' }} />
         </Grid>
         <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'start', paddingTop: '0rem!important' }} xs={8}>
           <Box>
@@ -299,12 +333,11 @@ const HalamanResto: PageComponent = () => {
               sx={{ fontWeight: 'bold', textAlign: 'start' }}
               variant="h4"
             >
-              Resto Bunda Gila
+              {resto.restoName}
             </Typography>
           </Box>
         </Grid>
             <Grid item={true} sx={{ display: 'flex', justifyContent: 'center' }} xs={11}>
-
               <Box gap={1} sx={{ display: 'flex' }}>
                 <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
                   <StarFilled size={10} style={{ color: '#FBD600' }} />
@@ -330,7 +363,9 @@ const HalamanResto: PageComponent = () => {
             </Grid>
           </Grid>
         </Card>
-      ))}
+   </div>
+  );
+})}
       <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
         <Grid item={true} xs={6}>
             <Typography
@@ -356,7 +391,7 @@ const HalamanResto: PageComponent = () => {
          <Box sx={{ overflowX: 'auto' }}>
           <Grid container={true} sx={{ width: '100rem', overflowX: 'auto' }}>
             <Grid item={true} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              {DUMMY_MENU_RECOMDATION.map((obj) => {
+              {store?.ulasanRatingOutput?.map((obj) => {
                 return (
                 <Card key={obj.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem' }}>
                     <Grid container={true} spacing={2}>
@@ -375,18 +410,18 @@ const HalamanResto: PageComponent = () => {
                     <Box>
 
                       <Typography
-                        sx={{ fontWeight: 'bold', textAlign: 'start', marginLeft: '20px' }}
+                        sx={{ fontWeight: 'bold', textAlign: 'start', marginLeft: '0.5rem' }}
                         variant="h6"
                       >
                         {obj.userName}
                       </Typography>
-                        <Box sx={{ marginLeft: '20px' }}>
+                        <Box sx={{ marginLeft: '0.5rem' }}>
                           <Rating rating={obj.rating} />
                         </Box>
                     </Box>
                   </Grid>
                   <Box sx={{ marginTop: '10px', marginLeft: '10px', width: '100%    ' }}>
-                  <TextField fullWidth={true} placeholder={obj.comment} size="small" variant="outlined" />
+                  <TextField fullWidth={true} placeholder={obj.commentTag} size="small" variant="outlined" />
                   </Box>
 
                     </Grid>
@@ -410,9 +445,9 @@ const HalamanResto: PageComponent = () => {
                 >
                     Menu Rekomendasi
                 </Typography>
-                {MENU_REKOMEND.map((obj, index) => {
+                {store?.menuRekomendOutput?.map((obj, index) => {
                   return (
-              <div key={obj.title} style={{ marginBottom: '0.5rem' }}>
+              <div key={obj.id} style={{ marginBottom: '0.5rem' }}>
                 <Card sx={{ paddingInline: '0.5rem' }}>
                 <Grid
                   container={true}
@@ -568,9 +603,9 @@ const HalamanResto: PageComponent = () => {
             >
                 Paket Hemat
             </Typography>
-            {PAKET_HEMAT.map((obj, index) => {
+            {store?.paketHematOutput?.map((obj, index) => {
               return (
-              <div key={obj.title} style={{ marginBottom: '0.5rem' }}>
+              <div key={obj.id} style={{ marginBottom: '0.5rem' }}>
                 <Card sx={{ paddingInline: '0.5rem' }}>
                 <Grid
                   container={true}

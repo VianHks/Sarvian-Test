@@ -1,12 +1,16 @@
 import type { FetchInstance } from '@nxweb/core';
 import { applyMock } from '@nxweb/core';
 
-import { faq } from './mock/faq.js';
-import { nasiList } from './mock/nasi.js';
-import { products } from './mock/products.js';
 import { ayamList } from './mock/ayam.js';
-import { sambelList } from './mock/sambel.js';
+import { faq } from './mock/faq.js';
+import { rekomendMenuList } from './mock/menu-rekomend.js';
 import { menuList } from './mock/menu.js';
+import { nasiList } from './mock/nasi.js';
+import { paketHematList } from './mock/paket-hemat.js';
+import { products } from './mock/products.js';
+import { restoRatingList } from './mock/resto-rating.js';
+import { sambelList } from './mock/sambel.js';
+import { ulasanAndRating } from './mock/ulasan-rating.js';
 
 export const apiMock = (instance: FetchInstance) => {
   return process.env.NODE_ENV === 'production'
@@ -18,7 +22,11 @@ export const apiMock = (instance: FetchInstance) => {
       nasiList,
       ayamList,
       sambelList,
-      menuList
+      menuList,
+      ulasanAndRating,
+      rekomendMenuList,
+      paketHematList,
+      restoRatingList
     ], {
       // Add mock options here
       delayResponse: 1000
