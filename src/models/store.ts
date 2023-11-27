@@ -6,18 +6,21 @@ import {
 } from '@nxweb/react';
 
 import { FAQReducer } from './faq/reducers.js';
+import { HalamanRestoReducer } from './halaman-resto/reducers.js';
+import { productviewCommand } from './product-view/commands.js';
+import { ProductViewReducer } from './product-view/reducers.js';
 import { productsCommand } from './products/commands.js';
 import { productsReducer } from './products/reducers.js';
 
 import type { RootAction, RootModel } from './types.js';
-import { ProductViewReducer } from './product-view/reducers.js';
-import { productviewCommand } from './product-view/commands.js';
+import { halamanRestoCommand } from './halaman-resto/commands.js';
 
 // ** Init reducers
 const rootReducer = combineReducers({
   faq: FAQReducer,
   products: productsReducer,
-  productView: ProductViewReducer
+  productView: ProductViewReducer,
+  halamanResto: HalamanRestoReducer
 });
 
 // ** Init models
@@ -26,7 +29,8 @@ const rootModel: RootModel = {};
 // ** Init commands
 const rootCommand = {
   products: productsCommand,
-  productView: productviewCommand
+  productView: productviewCommand,
+  halamanResto: halamanRestoCommand
 };
 
 // ** Create store
