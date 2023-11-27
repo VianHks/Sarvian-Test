@@ -1,6 +1,6 @@
 /* eslint-disable linebreak-style */
 
-import React, { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   Box,
@@ -16,6 +16,10 @@ import {
 } from '@mui/material';
 
 import { AddBoxFilled, IndeterminateCheckBoxFilled } from '@nxweb/icons/material';
+
+import { useAuth } from '@hooks/use-auth';
+import { productviewCommand } from '@models/product-view/commands';
+import { useStore } from '@models/store';
 
 import SwipeableTextMobileStepper from './slidergambar';
 
@@ -40,6 +44,10 @@ const itemsSambel = [
 ];
 
 const ProductView = () => {
+  const [totalHargaMenu, setTotalHargaMenu] = useState(0);
+  const { auth } = useAuth();
+  const token = useMemo(() => auth?.token.accessToken, [auth]);
+  const [store, dispatch] = useStore((state) => state?.productView);
   const [count, setCount] = useState(0);
   const [checkedAyam, setCheckedAyam] = useState<SelectedItemsAyam>({
     ayamGorengMadu: false,
@@ -58,24 +66,38 @@ const ProductView = () => {
     sambelMatah: false
   });
 
-  const handleChangeCheckbox = (itemName: keyof SelectedItemsNasi) => {
-    setCheckedNasi((prevItems) => ({
-      ...prevItems,
-      [itemName]: !prevItems[itemName]
+  const handleChangeCheckbox = (id: number) => {
+    const updatedNasiOutput = [...store?.nasiOutput ?? []];
+    const selectedItem = updatedNasiOutput.find((item) => item.id === id);
+    if (selectedItem) {
+      selectedItem.checked = !selectedItem.checked;
+    }
+
+    setCheckedNasi((prevCheckedNasi) => ({
+      ...prevCheckedNasi,
+      [id]: selectedItem?.checked ?? false
     }));
   };
-  const handleChangeCheckboxAyam = (itemName: keyof SelectedItemsAyam) => {
-    setCheckedAyam((prevItems) => ({
-      ...prevItems,
-      [itemName]: !prevItems[itemName]
-    }));
-  };
-  const handleChangeCheckboxSambel = (itemName: keyof SelectedItemsSambel) => {
-    setCheckedSambel((prevItems) => ({
-      ...prevItems,
-      [itemName]: !prevItems[itemName]
-    }));
-  };
+  /*
+   * Const handleChangeCheckbox = (itemName: keyof SelectedItemsNasi) => {
+   *   setCheckedNasi((prevItems) => ({
+   *     ...prevItems,
+   *     [itemName]: !prevItems[itemName]
+   *   }));
+   * };
+   * const handleChangeCheckboxAyam = (itemName: keyof SelectedItemsAyam) => {
+   *   setCheckedAyam((prevItems) => ({
+   *     ...prevItems,
+   *     [itemName]: !prevItems[itemName]
+   *   }));
+   * };
+   * const handleChangeCheckboxSambel = (itemName: keyof SelectedItemsSambel) => {
+   *   setCheckedSambel((prevItems) => ({
+   *     ...prevItems,
+   *     [itemName]: !prevItems[itemName]
+   *   }));
+   * };
+   */
 
   const handleIncrement = () => {
     setCount(count + 1);
@@ -86,6 +108,49 @@ const ProductView = () => {
       setCount(count - 1);
     }
   };
+
+  useEffect(() => {
+    if (token) {
+      dispatch(productviewCommand.nasiLoad(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+      dispatch(productviewCommand.ayamLoad(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+      dispatch(productviewCommand.sambelLoad(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+
+      dispatch(productviewCommand.menuLoad(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+
+      return () => {
+        dispatch(productviewCommand.nasiClear());
+      };
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (store) {
+      const totalNasi = store?.nasiOutput?.reduce((total, item) => total + item.price, 0) ?? 0;
+      const totalAyam = store?.ayamOutput?.reduce((total, item) => total + item.price, 0) ?? 0;
+      const totalSambel = store?.sambelOutput?.reduce((total, item) => total + item.price, 0) ?? 0;
+      const totalPaket = store?.menuOutput?.reduce((total, item) => total + item.price, 0) ?? 0;
+
+      setTotalHargaMenu(totalNasi + totalAyam + totalSambel + totalPaket);
+    }
+  }, [store]);
+
+  console.log('cekstore', store);
 
   return (
     <>
@@ -113,24 +178,29 @@ const ProductView = () => {
           <Typography sx={{ marginBottom: '0.5rem' }} variant="h4">
             Paket Ayam Bakar
           </Typography>
-          <Grid container={true} justifyContent="space-between" spacing={2}>
+          {store?.menuOutput?.map((item) => (
+          <Grid container={true} justifyContent="space-between" key={item.id} spacing={2}>
             <Grid item={true} xs={6}>
+
               <Typography
+
                 sx={{ marginBottom: '0.25rem', color: '#1F66D0' }}
                 variant="body2"
               >
-                Rp. 50.000,00
+                Rp. {item.price.toLocaleString('id-ID')}
               </Typography>
+
             </Grid>
             <Grid item={true} xs="auto">
               <Typography
                 sx={{ marginBottom: '0.25rem', color: '#1F66D0' }}
                 variant="body2"
               >
-                Terjual 24
+                Terjual {item.terjual}
               </Typography>
             </Grid>
           </Grid>
+          ))}
           <Box>
             <Typography
               sx={{ marginBottom: '1rem', textAlign: 'left' }}
@@ -166,7 +236,7 @@ const ProductView = () => {
               Nasi
             </Typography>
 
-              {items.map((item) => (
+              {store?.nasiOutput?.map((item) => (
       <Grid container={true} key={item.id} sx={{ alignItem: 'center', display: 'flex', justifyContent: 'space-between' }}>
             <Grid item={true} xs={8}>
             <FormControlLabel
@@ -174,13 +244,13 @@ const ProductView = () => {
               <Checkbox
                 checked={checkedNasi[item.id]}
                 style={{ borderRadius: '50%' }}
-                onClick={() => handleChangeCheckbox(item.id as keyof SelectedItemsNasi)} />
+                onClick={() => handleChangeCheckbox(item.id)} />
             }
-              label={<>{item.label}</>} />
+              label={<>{item.itemName}</>} />
             </Grid>
             <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'end' }} xs={4}>
                 <Typography>
-                  {item.price}
+                {item.price === 0 ? 'Gratis' : `Rp. ${item.price.toLocaleString('id-ID')}`}
                 </Typography>
             </Grid>
 
@@ -196,21 +266,20 @@ const ProductView = () => {
             >
               Ayam
             </Typography>
-            {itemsAyam.map((item) => (
+            {store?.ayamOutput?.map((item) => (
       <Grid container={true} key={item.id} sx={{ alignItem: 'center', display: 'flex', justifyContent: 'space-between' }}>
             <Grid item={true} xs={8}>
             <FormControlLabel
               control={
               <Checkbox
                 checked={checkedAyam[item.id]}
-                style={{ borderRadius: '50%' }}
-                onClick={() => handleChangeCheckboxAyam(item.id as keyof SelectedItemsAyam)} />
+                style={{ borderRadius: '50%' }} />
             }
-              label={<>{item.label}</>} />
+              label={<>{item.itemName}</>} />
             </Grid>
             <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'end' }} xs={4}>
                 <Typography>
-                  {item.price}
+                {item.price === 0 ? 'Gratis' : `Rp. ${item.price.toLocaleString('id-ID')}`}
                 </Typography>
             </Grid>
 
@@ -237,21 +306,20 @@ const ProductView = () => {
             >
               Sambel
             </Typography>
-            {itemsSambel.map((item) => (
+            {store?.sambelOutput?.map((item) => (
       <Grid container={true} key={item.id} sx={{ alignItem: 'center', display: 'flex', justifyContent: 'space-between' }}>
             <Grid item={true} xs={8}>
             <FormControlLabel
               control={
               <Checkbox
                 checked={checkedSambel[item.id]}
-                style={{ borderRadius: '50%' }}
-                onClick={() => handleChangeCheckboxSambel(item.id as keyof SelectedItemsSambel)} />
+                style={{ borderRadius: '50%' }} />
             }
-              label={<>{item.label}</>} />
+              label={<>{item.itemName}</>} />
             </Grid>
             <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'end' }} xs={4}>
                 <Typography>
-                  {item.price}
+                {item.price === 0 ? 'Gratis' : `Rp. ${item.price.toLocaleString('id-ID')}`}
                 </Typography>
             </Grid>
 
@@ -345,7 +413,7 @@ const ProductView = () => {
                       }}
                       variant="h6"
                     >
-                    Rp. 100.000
+                    Rp. {totalHargaMenu.toLocaleString('id-ID')}
                     </Typography>
                   </Grid>
                </Grid>

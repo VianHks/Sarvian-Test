@@ -228,8 +228,8 @@ const QontoStepIcon = (props: StepIconProps) => {
 QontoStepIcon.displayName = 'Orders';
 
 const MultiOrderInProgressPesanAntar: PageComponent = () => {
-  const [cekStatusPesanan, setCekStatusPesanan] = useState(false);
-  const [cekDriver, setCekDriver] = useState(false);
+  const [cekStatusPesanan, setCekStatusPesanan] = useState(true);
+  const [cekDriver, setCekDriver] = useState(true);
   const [biayaParkir, setBiayaParkir] = useState(2000);
   const [biayaOngkir, setBiayaOngkir] = useState(2000);
   const [biayaLayanan, setBiayaLayanan] = useState(2000);
