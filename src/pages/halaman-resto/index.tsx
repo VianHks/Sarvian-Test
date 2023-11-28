@@ -89,6 +89,7 @@ export const DUMMY_RESTO = [
   }
 
 ];
+
 interface MenuRekomendDataModel {
   count: number
   foto: string
@@ -190,6 +191,7 @@ const HalamanResto: PageComponent = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const navigate = useNavigate();
+  const [count, setCount] = useState(item.count);
   const [orders, setOrders] = useState<MenuRekomendDataModel[]>([DEFAULT_MENUREKOMEND]);
   const [ordersPaketHemat, setOrdersPaketHemat] = useState<PaketHematDataModel[]>([DEFAULT_PAKETHEMAT]);
   const [methode, setMethode] = useState('Pesan Antar');
@@ -286,7 +288,7 @@ const HalamanResto: PageComponent = () => {
     if (PAKET_HEMAT) {
       setOrdersPaketHemat(PAKET_HEMAT);
     }
-  }, [orders, ordersPaketHemat]);
+  }, []);
 
   console.log('cekstore', store);
 

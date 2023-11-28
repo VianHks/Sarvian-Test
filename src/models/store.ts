@@ -16,6 +16,8 @@ import type { RootAction, RootModel } from './types.js';
 import { halamanRestoCommand } from './halaman-resto/commands.js';
 import { checkoutCommand } from './checkout/commands.js';
 import { CheckoutReducer } from './checkout/reducers.js';
+import { PersonalizedRecReducer } from './personalized-recomendation/reducers.js';
+import { personalizedRecCommand } from './personalized-recomendation/commands.js';
 
 // ** Init reducers
 const rootReducer = combineReducers({
@@ -23,7 +25,8 @@ const rootReducer = combineReducers({
   products: productsReducer,
   productView: ProductViewReducer,
   halamanResto: HalamanRestoReducer,
-  checkout: CheckoutReducer
+  checkout: CheckoutReducer,
+  personalizedRec: PersonalizedRecReducer
 });
 
 // ** Init models
@@ -34,7 +37,8 @@ const rootCommand = {
   products: productsCommand,
   productView: productviewCommand,
   halamanResto: halamanRestoCommand,
-  checkout: checkoutCommand
+  checkout: checkoutCommand,
+  personalizedRec: personalizedRecCommand
 };
 
 // ** Create store
