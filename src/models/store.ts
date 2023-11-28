@@ -14,13 +14,16 @@ import { productsReducer } from './products/reducers.js';
 
 import type { RootAction, RootModel } from './types.js';
 import { halamanRestoCommand } from './halaman-resto/commands.js';
+import { checkoutCommand } from './checkout/commands.js';
+import { CheckoutReducer } from './checkout/reducers.js';
 
 // ** Init reducers
 const rootReducer = combineReducers({
   faq: FAQReducer,
   products: productsReducer,
   productView: ProductViewReducer,
-  halamanResto: HalamanRestoReducer
+  halamanResto: HalamanRestoReducer,
+  checkout: CheckoutReducer
 });
 
 // ** Init models
@@ -30,7 +33,8 @@ const rootModel: RootModel = {};
 const rootCommand = {
   products: productsCommand,
   productView: productviewCommand,
-  halamanResto: halamanRestoCommand
+  halamanResto: halamanRestoCommand,
+  checkout: checkoutCommand
 };
 
 // ** Create store

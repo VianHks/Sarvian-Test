@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable jsx-a11y/prefer-tag-over-role */
 /* eslint-disable linebreak-style */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Global } from '@emotion/react';
@@ -42,6 +42,10 @@ import {
   Grid,
   Typography
 } from '@components/material.js';
+import { useAuth } from '@hooks/use-auth';
+import { checkoutCommand } from '@models/checkout/commands';
+import { halamanRestoCommand } from '@models/halaman-resto/commands';
+import { useStore } from '@models/store';
 
 import Bakar from '@assets/images/Bakar.png';
 import Bike from '@assets/images/Bike.svg';
@@ -131,8 +135,15 @@ const Delivery = [
 
 const Checkout: PageComponent = (props: Props) => {
   const navigate = useNavigate();
+  const { auth } = useAuth();
+  const token = useMemo(() => auth?.token.accessToken, [auth]);
+  const [store, dispatch] = useStore((state) => state?.checkout);
   const theme = useTheme();
   const { window } = props;
+  const [totalMenu, setTotalMenu] = useState(0);
+  const [totalPembayaran, setTotalPembayaran] = useState(0);
+  const [biayaLayanan, setBiayaLayanan] = useState(2000);
+  const [biayaFasilitas, setBiayaFasilitas] = useState(600);
   const [orders, setOrders] = useState<PesananDataModel[]>([DEFAULT_PESANAN]);
   const [delivery, setDelivery] = useState('Dine In');
   const [selectedTime, setSelectedTime] = useState(dayjs());
@@ -197,10 +208,52 @@ const Checkout: PageComponent = (props: Props) => {
   };
 
   useEffect(() => {
+    if (token) {
+      dispatch(checkoutCommand.loadCheckoutMenu(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+
+      return () => {
+        dispatch(checkoutCommand.clearCheckoutMenu());
+      };
+    }
+
+    if (store && store?.checkoutMenuOutput) {
+      const calculatedTotalMenu = store.checkoutMenuOutput.reduce(
+        (total, menu) => total + menu.harga * menu.count,
+        0
+      );
+
+      setTotalMenu(calculatedTotalMenu);
+
+      const calculatedTotalPembayaran = calculatedTotalMenu + biayaLayanan + biayaFasilitas;
+
+      setTotalPembayaran(calculatedTotalPembayaran);
+    }
+
     if (DUMMY_PESANAN) {
       setOrders(DUMMY_PESANAN);
     }
-  }, [orders]);
+  }, [orders, biayaFasilitas, biayaLayanan]);
+
+  useEffect(() => {
+    if (store?.checkoutMenuOutput) {
+      const calculatedTotalMenu = store.checkoutMenuOutput.reduce(
+        (total, menu) => total + menu.harga * menu.count,
+        0
+      );
+     
+      setTotalMenu(calculatedTotalMenu);
+
+      const calculatedTotalPembayaran = calculatedTotalMenu + biayaLayanan + biayaFasilitas;
+
+      setTotalPembayaran(calculatedTotalPembayaran);
+    }
+  }, [store, biayaFasilitas, biayaLayanan]);
+
+  console.log('cekstore', store);
 
   return (
     <Container>
@@ -369,7 +422,7 @@ const Checkout: PageComponent = (props: Props) => {
               </Button>
             </Grid>
           </Grid>
-          {DUMMY_PESANAN.map((obj, index) => {
+          {store?.checkoutMenuOutput?.map((obj, index) => {
             return (
               <div key={obj.title} style={{ marginBottom: '1rem' }}>
                 <Grid
@@ -559,7 +612,8 @@ const Checkout: PageComponent = (props: Props) => {
               }}
               variant="body2"
             >
-              Rp. 50.000
+
+              Rp. {totalMenu.toLocaleString('id-ID')}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -577,7 +631,8 @@ const Checkout: PageComponent = (props: Props) => {
               }}
               variant="body2"
             >
-              Rp. 2.000
+
+              Rp. {biayaLayanan.toLocaleString('id-ID')}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -595,7 +650,8 @@ const Checkout: PageComponent = (props: Props) => {
               }}
               variant="body2"
             >
-              Rp. 200
+
+              Rp. {biayaFasilitas.toLocaleString('id-ID')}
             </Typography>
           </Box>
         </CardContent>
@@ -723,7 +779,9 @@ const Checkout: PageComponent = (props: Props) => {
           <Puller />
           <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1rem 0rem 1rem' }}>
             <Typography sx={{ fontWeight: 'bold', marginTop: '1rem' }} variant="h5">Total Pembayaran</Typography>
-            <Typography sx={{ fontWeight: 'bold', marginTop: '1rem' }} variant="h5">Rp. 150.000</Typography>
+            <Typography sx={{ fontWeight: 'bold', marginTop: '1rem' }} variant="h5">
+                        Rp. {totalPembayaran.toLocaleString('id-ID')}
+            </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1rem 1rem 1rem' }}>
           <Button
