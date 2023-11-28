@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable jsx-a11y/prefer-tag-over-role */
 /* eslint-disable linebreak-style */
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -34,6 +34,9 @@ import {
   Grid,
   Typography
 } from '@components/material.js';
+import { useAuth } from '@hooks/use-auth';
+import { checkoutCommand } from '@models/checkout/commands';
+import { useStore } from '@models/store';
 
 import Bakar from '@assets/images/Bakar.png';
 import QR from '@assets/images/Dummy_QR.svg';
@@ -138,6 +141,13 @@ QontoStepIcon.displayName = 'Orders';
 
 const Orders: PageComponent = () => {
   const navigate = useNavigate();
+
+  const [totalPembayaran, setTotalPembayaran] = useState(0);
+  const [biayaLayanan, setBiayaLayanan] = useState(2000);
+  const [biayaFasilitas, setBiayaFasilitas] = useState(600);
+  const { auth } = useAuth();
+  const token = useMemo(() => auth?.token.accessToken, [auth]);
+  const [store, dispatch] = useStore((state) => state?.checkout);
   const theme = useTheme();
   const [orders, setOrders] = useState<PesananDataModel[]>([DEFAULT_PESANAN]);
   const [openModal, setOpenModal] = useState(false);
@@ -157,13 +167,51 @@ const Orders: PageComponent = () => {
   };
 
   useEffect(() => {
+    if (token) {
+      dispatch(checkoutCommand.loadCheckoutMenu(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+
+      dispatch(checkoutCommand.loadRestoList(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+      dispatch(checkoutCommand.loadDana(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+
+      return () => {
+        dispatch(checkoutCommand.clearCheckoutMenu());
+      };
+    }
+
     if (DUMMY_PESANAN) {
       setOrders(DUMMY_PESANAN);
     }
   }, [orders]);
 
+  useEffect(() => {
+    if (store?.checkoutMenuOutput) {
+      const calculatedTotalMenu = store.checkoutMenuOutput.reduce(
+        (total, menu) => total + biayaLayanan + biayaFasilitas + menu.harga * menu.count,
+        0
+      );
+
+      setTotalPembayaran(calculatedTotalMenu);
+    }
+  }, [store, biayaFasilitas, biayaLayanan]);
+
+  console.log('cekinprogress', store);
+
   return (
     <Container>
+      {store?.restoListOutput?.map((resto) => (
+   <div key={resto.id}>
       <Grid container={true} spacing={2}>
         <Grid
           item={true}
@@ -176,21 +224,23 @@ const Orders: PageComponent = () => {
         >
           <Avatar src={MieBaso} sx={{ height: '50px', width: '50px' }} />
         </Grid>
-        <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'start', paddingTop: '0rem!important' }} xs={8}>
-          <Box>
-            <Typography
-              sx={{ fontWeight: 'bold', textAlign: 'start' }}
-              variant="h6"
-            >
-              Resto Bunda Gila
-            </Typography>
-            <Typography variant="body2">
-                Menunggu konfirmasi resto
-            </Typography>
-          </Box>
-        </Grid>
+
+    <Grid item={true} key={resto.id} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'start', paddingTop: '0rem!important' }} xs={8}>
+      <Box>
+        <Typography
+          sx={{ fontWeight: 'bold', textAlign: 'start' }}
+          variant="h6"
+        >
+          {resto.restoName}
+        </Typography>
+        <Typography variant="body2">
+          {resto.detail}
+        </Typography>
+      </Box>
+    </Grid>
+
         <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', paddingTop: '0rem!important' }} xs={2}>
-            {orderApproved
+            {resto.status
               ? <Box gap={2} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'end' }}>
                 <Avatar sx={{ backgroundColor: theme.palette.primary.main, height: '32px', width: '32px' }}>
                     <IconButton aria-label="call">
@@ -210,8 +260,9 @@ const Orders: PageComponent = () => {
                 </Box>}
         </Grid>
       </Grid>
+
       <hr />
-      {orderApproved
+      {resto.status
         ? <>
             <Box>
                 <Alert severity="info" sx={{ alignItems: 'center', backgroundColor: theme.palette.grey[100], borderColor: theme.palette.grey[100], display: 'flex' }} variant="outlined">
@@ -250,6 +301,8 @@ const Orders: PageComponent = () => {
             </Card>
           </>
         : null}
+   </div>
+      ))}
       <Typography sx={{ fontWeight: 'bold' }} variant="h5">
         Pesanan Kamu
       </Typography>
@@ -275,7 +328,7 @@ const Orders: PageComponent = () => {
           </Box>
         </AccordionSummary>
         <AccordionDetails>
-          {DUMMY_PESANAN.map((obj) => {
+          {store?.checkoutMenuOutput?.map((obj) => {
             return (
               <div key={obj.title} style={{ marginBottom: '1rem' }}>
                 <Grid
@@ -433,7 +486,7 @@ const Orders: PageComponent = () => {
             sx={{ fontWeight: 'bold' }}
             variant="h5"
           >
-            Rp. 200.000
+            Rp. {store?.danaOutput?.[0].jumlah.toLocaleString('id-ID')}
           </Typography>
         </Box>
       </Box>
@@ -460,7 +513,7 @@ const Orders: PageComponent = () => {
               }}
               variant="body2"
             >
-              Rp. 50.000
+              Rp. {totalPembayaran.toLocaleString('id-ID')}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -502,7 +555,20 @@ const Orders: PageComponent = () => {
         </CardContent>
       </Card>
       <Box sx={{ bottom: 0, left: 0, padding: '1rem', position: 'fixed', right: 0 }}>
-        <Button color="error" fullWidth={true} sx={{ marginBottom: '1rem' }} variant="contained" onClick={toggleOpenModalBatal}>
+        <Button
+          color="error"
+          disabled={
+            ((store?.restoListOutput &&
+              store.restoListOutput[0].status) || false) ||
+            ((store?.restoListOutput &&
+              store.restoListOutput[0].detail === 'Pesanan dikonfirmasi resto') ||
+              false)
+          }
+          fullWidth={true}
+          sx={{ marginBottom: '1rem' }}
+          variant="contained"
+          onClick={toggleOpenModalBatal}
+        >
             Batalkan Pesanan
         </Button>
         <Button color="primary" fullWidth={true} variant="outlined">

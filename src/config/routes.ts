@@ -45,7 +45,7 @@ export const routes: Route[] = [
     hash: true,
     layout: 'appbar',
     meta: { description: 'Halaman Checkout' },
-    path: '/checkout',
+    path: '/checkout-dinein',
     search: true
   },
   {
@@ -54,7 +54,7 @@ export const routes: Route[] = [
     hash: true,
     layout: 'appbar',
     meta: { description: 'Pesanan Berlangsung' },
-    path: '/checkout/order-in-progress',
+    path: '/checkout-dinein/order-in-progress',
     search: true
   },
   {
