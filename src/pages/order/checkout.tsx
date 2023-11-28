@@ -44,7 +44,6 @@ import {
 } from '@components/material.js';
 import { useAuth } from '@hooks/use-auth';
 import { checkoutCommand } from '@models/checkout/commands';
-import { halamanRestoCommand } from '@models/halaman-resto/commands';
 import { useStore } from '@models/store';
 
 import Bakar from '@assets/images/Bakar.png';
@@ -220,23 +219,10 @@ const Checkout: PageComponent = (props: Props) => {
       };
     }
 
-    if (store && store?.checkoutMenuOutput) {
-      const calculatedTotalMenu = store.checkoutMenuOutput.reduce(
-        (total, menu) => total + menu.harga * menu.count,
-        0
-      );
-
-      setTotalMenu(calculatedTotalMenu);
-
-      const calculatedTotalPembayaran = calculatedTotalMenu + biayaLayanan + biayaFasilitas;
-
-      setTotalPembayaran(calculatedTotalPembayaran);
-    }
-
     if (DUMMY_PESANAN) {
       setOrders(DUMMY_PESANAN);
     }
-  }, [orders, biayaFasilitas, biayaLayanan]);
+  }, [orders]);
 
   useEffect(() => {
     if (store?.checkoutMenuOutput) {
@@ -244,7 +230,7 @@ const Checkout: PageComponent = (props: Props) => {
         (total, menu) => total + menu.harga * menu.count,
         0
       );
-     
+
       setTotalMenu(calculatedTotalMenu);
 
       const calculatedTotalPembayaran = calculatedTotalMenu + biayaLayanan + biayaFasilitas;

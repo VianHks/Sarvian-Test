@@ -3,9 +3,9 @@ import type { FetchURLOptions } from '@nxweb/core';
 
 import { API, apiURL } from '../base.js';
 
-export const endpoint = 'GetCheckoutMenu';
+export const endpoint = 'GetDana';
 
-export const getCheckoutMenu = async (token: string, options?: Readonly<FetchURLOptions>) => {
+export const getDana = async (token: string, options?: Readonly<FetchURLOptions>) => {
   const url = apiURL(endpoint, options);
   const { data } = await API(
     token,

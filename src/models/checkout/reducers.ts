@@ -12,6 +12,14 @@ const CheckoutReducer = (
       return { ...state, ...action.value };
     case CheckoutActionType.CheckoutMenuClear:
       return {};
+    case CheckoutActionType.RestoListLoad:
+      return { ...state, ...action.value };
+    case CheckoutActionType.RestoListClear:
+      return {};
+    case CheckoutActionType.DanaLoad:
+      return { ...state, ...action.value };
+    case CheckoutActionType.DanaClear:
+      return {};
 
     default:
       return state;
