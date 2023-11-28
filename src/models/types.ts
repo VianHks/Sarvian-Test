@@ -1,3 +1,4 @@
+import type { CheckoutAction, CheckoutModel } from './checkout/types.js';
 import type { FAQAction, FAQModel } from './faq/types.js';
 import type { HalamanRestoAction, HalamanRestoModel } from './halaman-resto/types.js';
 import type { ProductViewsAction, ProductViewsModel } from './product-view/types.js';
@@ -9,9 +10,10 @@ export interface RootModel {
   products?: ProductsModel
   productView?: ProductViewsModel
   halamanResto?: HalamanRestoModel
+  checkout?: CheckoutModel
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type RootAction = FAQAction | HalamanRestoAction | ProductsAction | ProductViewsAction | {
+export type RootAction = CheckoutAction | FAQAction | HalamanRestoAction | ProductsAction | ProductViewsAction | {
   type: ''
 };

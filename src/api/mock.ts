@@ -11,6 +11,7 @@ import { products } from './mock/products.js';
 import { restoRatingList } from './mock/resto-rating.js';
 import { sambelList } from './mock/sambel.js';
 import { ulasanAndRating } from './mock/ulasan-rating.js';
+import { listCheckoutMenu } from './mock/menu-checkout.js';
 
 export const apiMock = (instance: FetchInstance) => {
   return process.env.NODE_ENV === 'production'
@@ -26,7 +27,8 @@ export const apiMock = (instance: FetchInstance) => {
       ulasanAndRating,
       rekomendMenuList,
       paketHematList,
-      restoRatingList
+      restoRatingList,
+      listCheckoutMenu
     ], {
       // Add mock options here
       delayResponse: 1000
