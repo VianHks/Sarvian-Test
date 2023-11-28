@@ -1,7 +1,7 @@
 /* eslint-disable import/exports-last */
 /* eslint-disable complexity */
 /* eslint-disable linebreak-style */
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -19,6 +19,9 @@ import {
 import type { PageComponent } from '@nxweb/react';
 
 import { Card, Grid, Typography } from '@components/material.js';
+import { useAuth } from '@hooks/use-auth';
+import { personalizedRecCommand } from '@models/personalized-recomendation/commands';
+import { useStore } from '@models/store';
 
 import Bubur from '@assets/images/Bubur.png';
 import Chinese from '@assets/images/Chinese.png';
@@ -118,7 +121,9 @@ export const DEFAULT_FOODS_LIST: FoodsListDataModel = {
 };
 
 const PersonalizedRecomendation: PageComponent = () => {
-  // Const theme = useTheme();
+  const { auth } = useAuth();
+  const token = useMemo(() => auth?.token.accessToken, [auth]);
+  const [store, dispatch] = useStore((state) => state?.personalizedRec);
   const navigate = useNavigate();
   const [foodsList, setFoodsList] =
     useState<FoodsListDataModel>(DEFAULT_FOODS_LIST);
@@ -160,29 +165,54 @@ const PersonalizedRecomendation: PageComponent = () => {
   const handleFoodItemClick = (clickedItem: FoodsDataModel, mealType: string) => {
     setFoodsList((prevFoodsList) => {
       const updatedFoodsList = { ...prevFoodsList };
+      const selectedItems = updatedFoodsList[mealType];
 
-      console.log('updatedFoodsList', updatedFoodsList);
-
-      const isItemAlreadySelected = updatedFoodsList[mealType].some((item) => {
-        console.log('item:', item);  // Log the entire item
-        console.log('clickedItem.id:', clickedItem.id);
-
-        return item.id === clickedItem.id;
-      });
+      const isItemAlreadySelected = selectedItems.some((item) => item.id === clickedItem.id);
 
       if (isItemAlreadySelected) {
-        updatedFoodsList[mealType] = updatedFoodsList[mealType].filter(
-          (item) => item.id !== clickedItem.id
-        );
+        // If item is already selected, remove it from the list
+        updatedFoodsList[mealType] = selectedItems.filter((item) => item.id !== clickedItem.id);
       } else {
-        updatedFoodsList[mealType] = [...updatedFoodsList[mealType], clickedItem];
+        const selectedItem = store?.personalizedRecOutput?.find(
+          (item) => item.id === clickedItem.id
+        );
+
+        if (selectedItem) {
+          // If item is not selected, add it to the list
+          updatedFoodsList[mealType] = [...selectedItems, selectedItem];
+        }
       }
+
+      console.log('Updated foods list:', updatedFoodsList);
 
       return updatedFoodsList;
     });
   };
 
-  console.log('foodList', foodsList);
+  useEffect(() => {
+    if (token) {
+      dispatch(personalizedRecCommand.personalizedRecLoad(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+
+      return () => {
+        dispatch(personalizedRecCommand.personalizedRecClear());
+      };
+    }
+  }, []);
+
+  /*
+   * UseEffect(() => {
+   *   if (token) {
+   *     setFoodsList(store?.personalizedRecOutput || );
+   *   }
+   */
+
+  // }, []);
+
+  console.log('cekstore', store);
 
   const handleNext = () => {
     if (activeStep === 0) {
@@ -237,12 +267,12 @@ const PersonalizedRecomendation: PageComponent = () => {
         ? (
         <Box>
           <Grid container={true} spacing={2}>
-            {DUMMY_FOODS.map((obj: FoodsDataModel) => {
-              const isItemSelected = foodsList.breakfast.some(
-                (item) => Number(item.id) === Number(obj.id)
-              );
+          {store?.personalizedRecOutput?.map((obj) => {
+            const isItemSelected = foodsList.breakfast.some(
+              (item) => Number(item.id) === Number(obj.id)
+            );
 
-              return (
+            return (
                 <Grid
                   item={true}
                   key={obj.id}
@@ -266,7 +296,7 @@ const PersonalizedRecomendation: PageComponent = () => {
                         ? '2px solid #3f51b5'
                         : '2px solid transparent'
                     }}
-                    onClick={() => !isItemSelected && handleFoodItemClick(obj, 'breakfast')}
+                    onClick={() => handleFoodItemClick(obj, 'breakfast')}
                   >
                     <Avatar
                       src={obj.photo}
@@ -287,8 +317,8 @@ const PersonalizedRecomendation: PageComponent = () => {
                     </Typography>
                   </Card>
                 </Grid>
-              );
-            })}
+            );
+          })}
           </Grid>
         </Box>
         )
@@ -296,7 +326,7 @@ const PersonalizedRecomendation: PageComponent = () => {
           ? (
         <Box>
           <Grid container={true}>
-            {DUMMY_FOODS.map((obj) => {
+            {store?.personalizedRecOutput?.map((obj) => {
               const isItemSelected = foodsList.lunch.some(
                 (item) => Number(item.id) === Number(obj.id)
               );
@@ -325,7 +355,7 @@ const PersonalizedRecomendation: PageComponent = () => {
                         ? '2px solid #3f51b5'
                         : '2px solid transparent'
                     }}
-                    onClick={() => !isItemSelected && handleFoodItemClick(obj, 'lunch')}
+                    onClick={() => handleFoodItemClick(obj, 'lunch')}
                   >
                     <Avatar
                       src={obj.photo}
@@ -354,7 +384,7 @@ const PersonalizedRecomendation: PageComponent = () => {
           : (
         <Box>
           <Grid container={true}>
-            {DUMMY_FOODS.map((obj) => {
+            {store?.personalizedRecOutput?.map((obj) => {
               const isItemSelected = foodsList.dinner.some(
                 (item) => Number(item.id) === Number(obj.id)
               );
@@ -383,7 +413,7 @@ const PersonalizedRecomendation: PageComponent = () => {
                         ? '2px solid #3f51b5'
                         : '2px solid transparent'
                     }}
-                    onClick={() => !isItemSelected && handleFoodItemClick(obj, 'dinner')}
+                    onClick={() => handleFoodItemClick(obj, 'dinner')}
                   >
                     <Avatar
                       src={obj.photo}
@@ -448,5 +478,5 @@ const PersonalizedRecomendation: PageComponent = () => {
 };
 
 PersonalizedRecomendation.displayName = 'PersonalizedRecomendation';
-
+PersonalizedRecomendation.layout = 'blank';
 export default PersonalizedRecomendation;
