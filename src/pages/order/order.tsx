@@ -1,5 +1,5 @@
 /* eslint-disable linebreak-style */
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -19,6 +19,10 @@ import {
 
 import { CircleFilled, StarBorderOutlined, StarFilled } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
+
+import { useAuth } from '@hooks/use-auth';
+import { orderCommand } from '@models/order/commands';
+import { useStore } from '@models/store';
 
 import Bakar from '@assets/images/Bakar.png';
 import MieBaso from '@assets/images/MieBaso.png';
@@ -148,6 +152,9 @@ const CustomTab = styled((props: StyledTabProps) => <Tab disableRipple={true} {.
 );
 
 const Order: PageComponent = () => {
+  const { auth } = useAuth();
+  const token = useMemo(() => auth?.token.accessToken, [auth]);
+  const [store, dispatch] = useStore((state) => state?.order);
   const navigate = useNavigate();
   const theme = useTheme();
   const [tabValue, setTabValue] = useState('Diproses');
@@ -162,6 +169,22 @@ const Order: PageComponent = () => {
   const handleLihatPesanana = (orderNumber: string) => {
     navigate(`/order-in-progress/single-order?id=${orderNumber}`);
   };
+
+  useEffect(() => {
+    if (token) {
+      dispatch(orderCommand.orderLoad(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+
+      return () => {
+        dispatch(orderCommand.orderClear());
+      };
+    }
+  }, []);
+
+  console.log('cekstore', store);
 
   return (
     <>
@@ -188,7 +211,8 @@ const Order: PageComponent = () => {
       </Box>
       <Container sx={{ paddingInline: '0.5rem' }}>
         <div>
-          {tabValue === 'Diproses' && DUMMY_ORDER.map((order) => (
+          {tabValue === 'Diproses' && store?.orderOutput?.map((order) => (
+
             <Card key={order.NO_ORDER} sx={{ marginBottom: '1rem', padding: '1rem' }}>
               <Grid container={true} sx={{ alignItems: 'center', display: 'flex', marginBottom: '0.75rem' }}>
                 <Grid item={true} sx={{ textAlign: 'start' }} xs={4}>
@@ -351,7 +375,7 @@ const Order: PageComponent = () => {
                     <Typography color="black" variant="caption">2 Aug 2023</Typography>
                   </Box>
                 </Box>
-                {DUMMY_ORDER[0].ORDER_ITEM.map((obj) => {
+                {store?.orderOutput?.[0].ORDER_ITEM.map((obj) => {
                   return (
                     <div key={obj.TITLE}>
                       <Grid
@@ -438,7 +462,7 @@ const Order: PageComponent = () => {
                       <Typography color="black" variant="caption">2 Aug 2023</Typography>
                     </Box>
                   </Box>
-                  {DUMMY_ORDER[0].ORDER_ITEM.map((obj) => {
+                  {store?.orderOutput?.[0].ORDER_ITEM.map((obj) => {
                     return (
                       <div key={obj.TITLE}>
                         <Grid
@@ -646,7 +670,7 @@ const Order: PageComponent = () => {
                     <Typography color="black" variant="caption">2 Aug 2023</Typography>
                   </Box>
                 </Box>
-                {DUMMY_ORDER[0].ORDER_ITEM.map((obj) => {
+                {store?.orderOutput?.[0].ORDER_ITEM.map((obj) => {
                   return (
                     <div key={obj.TITLE}>
 
@@ -843,7 +867,7 @@ const Order: PageComponent = () => {
                   <Typography color="black" variant="caption">2 Aug 2023</Typography>
                 </Box>
               </Box>
-              {DUMMY_ORDER[0].ORDER_ITEM.map((obj) => {
+              {store?.orderOutput?.[0].ORDER_ITEM.map((obj) => {
                 return (
                   <div key={obj.TITLE}>
                     <Grid

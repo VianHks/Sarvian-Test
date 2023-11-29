@@ -54,7 +54,7 @@ export const routes: Route[] = [
     hash: true,
     layout: 'appbar',
     meta: { description: 'Pesanan Berlangsung' },
-    path: '/checkout-dinein/order-in-progress',
+    path: '/order-in-progress/single-order',
     search: true
   },
   {
