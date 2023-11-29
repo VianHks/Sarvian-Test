@@ -45,7 +45,7 @@ export const routes: Route[] = [
     hash: true,
     layout: 'appbar',
     meta: { description: 'Halaman Checkout' },
-    path: '/checkout',
+    path: '/checkout-dinein',
     search: true
   },
   {
@@ -54,7 +54,7 @@ export const routes: Route[] = [
     hash: true,
     layout: 'appbar',
     meta: { description: 'Pesanan Berlangsung' },
-    path: '/order-in-progress/single-order',
+    path: '/checkout-dinein/order-in-progress',
     search: true
   },
   {
@@ -103,7 +103,8 @@ export const routes: Route[] = [
     auth: false,
     element: lazy(() => import('@pages/halaman-resto/view-rating.js')),
     hash: true,
-    layout: 'blank',
+    meta: { description: 'Ulasan & Rating' },
+    layout: 'appbar',
     path: '/page-resto/ulasan-rating',
     search: true
   },
@@ -112,7 +113,7 @@ export const routes: Route[] = [
     element: lazy(() => import('@pages/chat-and-call/index.js')),
     hash: true,
     meta: { description: 'Chat' },
-    layout: 'blank',
+    layout: 'appbar',
     path: '/chat-list',
     search: true
   },
@@ -183,6 +184,33 @@ export const routes: Route[] = [
   },
   {
     auth: false,
+    element: lazy(() => import('@pages/checkout-multi-order-pickup/index.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Halaman Checkout' },
+    path: '/multi-order',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/checkout-multi-order-pickup/multi-order-in-progress.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Pesanan Berlangsung' },
+    path: '/inprogress/multi-order/pickup',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/checkout-single-order-pesan-antar/index.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Halaman Checkout' },
+    path: '/single-order-pesan-antar',
+    search: true
+  },
+  {
+    auth: false,
     element: lazy(() => import('@pages/pusat-bantuan/index.js')),
     hash: true,
     layout: 'appbar',
@@ -197,6 +225,24 @@ export const routes: Route[] = [
     layout: 'appbar',
     meta: { appBarId: 'keranjang', description: 'Keranjang' },
     path: '/keranjang',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/checkout-multi-order-pesan-antar/index.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Halaman Checkout' },
+    path: '/checkout/multi-order/pesan-antar',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/pesanan-berlangsung-multi-order-pesan-antar/index.js')),
+    hash: true,
+    layout: 'appbar',
+    meta: { description: 'Pesanan Berlangsung' },
+    path: '/inprogress/multi-order/pesan-antar',
     search: true
   }
 ];
