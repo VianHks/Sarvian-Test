@@ -68,7 +68,7 @@ export const Accordion = () => {
           },
 
           '& .MuiTypography-root': {
-            fontWeight: 500
+            // fontWeight: 500
           }
         }),
 

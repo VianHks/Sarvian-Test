@@ -50,7 +50,7 @@ export const routes: Route[] = [
   },
   {
     auth: false,
-    element: lazy(() => import('@pages/order/order-in-progress.js')),
+    element: lazy(() => import('@pages/order/order-in-progress_single-order.js')),
     hash: true,
     layout: 'appbar',
     meta: { description: 'Pesanan Berlangsung' },
