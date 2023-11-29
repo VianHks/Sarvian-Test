@@ -1,13 +1,8 @@
 /* eslint-disable linebreak-style */
-import { useEffect, useMemo, useState } from 'react';
-
 import type { FetchMockAdapter, FetchMockInitializer } from '@nxweb/core';
 import { createMockURL } from '@nxweb/core';
 
-import { endpoint } from '../clients/personalized-recomendation.js';
-
-import { useAuth } from '@hooks/use-auth';
-import { useStore } from '@models/store';
+import { endpoint } from '../clients/makanan.js';
 
 import Bubur from '@assets/images/Bubur.png';
 import Chinese from '@assets/images/Chinese.png';
@@ -22,11 +17,11 @@ import Roti from '@assets/images/Roti.png';
 import Sate from '@assets/images/Sate.png';
 import Sunda from '@assets/images/Sunda.png';
 
-export const personalizedRecList: FetchMockInitializer = (adapter: Readonly<FetchMockAdapter>) => {
+export const makanan: FetchMockInitializer = (adapter: Readonly<FetchMockAdapter>) => {
   const url = createMockURL(endpoint, window.NX.env.API_URL);
 
   adapter.onPost(url).reply(200, {
-    personalizedRecOutput: [
+    makananOutput: [
       {
         id: '0',
         photo: `${Minuman}`,
@@ -80,7 +75,7 @@ export const personalizedRecList: FetchMockInitializer = (adapter: Readonly<Fetc
       {
         id: '10',
         photo: `${Sate}`,
-        title: 'SAAAAT'
+        title: 'Sate'
       },
       {
         id: '11',

@@ -1,3 +1,4 @@
+import { BerandaAction, BerandaModel } from './beranda/types.js';
 import type { CheckoutAction, CheckoutModel } from './checkout/types.js';
 import type { FAQAction, FAQModel } from './faq/types.js';
 import type { HalamanRestoAction, HalamanRestoModel } from './halaman-resto/types.js';
@@ -13,9 +14,10 @@ export interface RootModel {
   halamanResto?: HalamanRestoModel
   checkout?: CheckoutModel
   personalizedRec?: PersonalizedRecModel
+  beranda?: BerandaModel
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type RootAction = CheckoutAction | FAQAction | HalamanRestoAction | PersonalizedRecAction | ProductsAction | ProductViewsAction | {
+export type RootAction = BerandaAction | CheckoutAction | FAQAction | HalamanRestoAction | PersonalizedRecAction | ProductsAction | ProductViewsAction | {
   type: ''
 };

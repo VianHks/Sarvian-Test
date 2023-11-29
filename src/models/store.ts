@@ -18,6 +18,8 @@ import { checkoutCommand } from './checkout/commands.js';
 import { CheckoutReducer } from './checkout/reducers.js';
 import { PersonalizedRecReducer } from './personalized-recomendation/reducers.js';
 import { personalizedRecCommand } from './personalized-recomendation/commands.js';
+import { berandaCommand } from './beranda/commands.js';
+import { BerandaReducer } from './beranda/reducers.js';
 
 // ** Init reducers
 const rootReducer = combineReducers({
@@ -26,7 +28,8 @@ const rootReducer = combineReducers({
   productView: ProductViewReducer,
   halamanResto: HalamanRestoReducer,
   checkout: CheckoutReducer,
-  personalizedRec: PersonalizedRecReducer
+  personalizedRec: PersonalizedRecReducer,
+  beranda: BerandaReducer
 });
 
 // ** Init models
@@ -38,7 +41,8 @@ const rootCommand = {
   productView: productviewCommand,
   halamanResto: halamanRestoCommand,
   checkout: checkoutCommand,
-  personalizedRec: personalizedRecCommand
+  personalizedRec: personalizedRecCommand,
+  beranda: berandaCommand
 };
 
 // ** Create store
