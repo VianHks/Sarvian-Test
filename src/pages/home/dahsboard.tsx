@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Avatar, Box, Card, CardContent, CardMedia, Chip, Divider, Grid, InputAdornment, TextField, Typography, useTheme } from '@mui/material';
@@ -6,6 +6,10 @@ import { Avatar, Box, Card, CardContent, CardMedia, Chip, Divider, Grid, InputAd
 import { AccessTimeFilled, ExpandMoreFilled, FilterAltFilled, LocationOnFilled, SearchFilled, StarFilled } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
 
+import { useAuth } from '@hooks/use-auth';
+import { berandaCommand } from '@models/beranda/commands';
+import { useStore } from '@models/store';
+import FloatingShoppingButton from '@pages/halaman-resto/floatingshopping-button';
 import type { FoodsDataModel, FoodsListDataModel } from '@pages/personalized-recomendation';
 import { DEFAULT_FOODS_LIST } from '@pages/personalized-recomendation';
 
@@ -33,7 +37,6 @@ import terhemat from '@assets/images/pages/beranda/terhemat.svg';
 import terlaris from '@assets/images/pages/beranda/terlaris.svg';
 import topRated from '@assets/images/pages/beranda/topRated.svg';
 import verifyIcon from '@assets/images/pages/beranda/verify.svg';
-import FloatingShoppingButton from '@pages/halaman-resto/floatingshopping-button';
 
 // eslint-disable-next-line import/exports-last
 export interface RestoItem {
@@ -269,14 +272,16 @@ const DUMMY_FOODS = [
 const Home: PageComponent = () => {
   const navigate = useNavigate();
   const theme = useTheme();
-
+  const { auth } = useAuth();
+  const token = useMemo(() => auth?.token.accessToken, [auth]);
+  const [store, dispatch] = useStore((state) => state?.beranda);
   const [methode, setMethode] = useState('Pesan Antar');
-  const [filteredResto, setFilteredResto] = useState(DUMMY_RESTO);
+  const [filteredResto, setFilteredResto] = useState(store?.berandaRestoListOutput);
   const [searchValue, setSearchValue] = useState('');
   const [foodsList, setFoodsList] = useState<FoodsListDataModel>(DEFAULT_FOODS_LIST);
 
   const filterResto = (method: string) => {
-    const filtered = DUMMY_RESTO.filter((resto) => {
+    const filtered = store?.berandaRestoListOutput?.filter((resto) => {
       return resto.orderMethode.toLowerCase().includes(method.toLowerCase());
     });
 
@@ -304,8 +309,32 @@ const Home: PageComponent = () => {
   };
 
   useEffect(() => {
+    if (token) {
+      dispatch(berandaCommand.menuBerandaLoad(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+      dispatch(berandaCommand.makananLoad(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+      dispatch(berandaCommand.restoListLoad(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+
+      return () => {
+        dispatch(berandaCommand.menuBerandaClear());
+      };
+    }
+
     filterResto(methode);
   }, [methode]);
+
+  console.log('cekstore', store);
 
   const handleMethode = (newValue: string) => {
     setMethode(newValue);
@@ -389,7 +418,7 @@ const Home: PageComponent = () => {
         <Box sx={{ overflowX: 'auto' }}>
           <Grid container={true} sx={{ width: '28.75rem' }}>
             <Grid item={true} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              {DUMMY_MENU_RECOMDATION.map((obj) => {
+              {store?.menuBerandaOutput?.map((obj) => {
                 return (
                   <Card key={obj.id} sx={{ borderColor: 'transparent', marginRight: '0.5rem', padding: '0.5rem', width: '9.25rem' }}>
                     <CardMedia
@@ -462,7 +491,7 @@ const Home: PageComponent = () => {
         ? <Box sx={{ overflowX: 'auto' }}>
             <Grid container={true} sx={{ width: '28.75rem' }}>
               <Grid item={true} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                {DUMMY_MENU_RECOMDATION.map((obj) => {
+                {store?.menuBerandaOutput?.map((obj) => {
                   return (
                     <Card key={obj.id} sx={{ borderColor: 'transparent', marginRight: '0.5rem', padding: '0.5rem', width: '9.25rem' }}>
                       <CardMedia
@@ -525,7 +554,7 @@ const Home: PageComponent = () => {
             </Grid>
           </Box>
         : null}
-        {methode !== 'Pesan Antar' && filteredResto.map((resto) => (
+        {methode !== 'Pesan Antar' && filteredResto?.map((resto) => (
           <Card key={resto.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem' }}>
             <Grid container={true} spacing={2}>
               <Grid item={true} xs={4}>
@@ -582,7 +611,7 @@ const Home: PageComponent = () => {
         {methode === 'Pesan Antar' &&
         <Box>
           <Grid container={true} spacing={2} sx={{ marginTop: '1.5rem' }}>
-            {DUMMY_FOODS.map((obj: FoodsDataModel) => {
+            {store?.makananOutput?.map((obj: FoodsDataModel) => {
               const isItemSelected = foodsList.breakfast.some(
                 (item) => Number(item.id) === Number(obj.id)
               );
