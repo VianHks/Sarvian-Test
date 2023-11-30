@@ -408,7 +408,7 @@ const Home: PageComponent = () => {
           })}
           </Grid>
         : null}
-      <Card sx={{ backgroundColor: theme.palette.info.light, borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '1rem', marginInline: '-1.5rem', padding: '1rem 1.5rem' }}>
+      <Card sx={{ backgroundColor: '#D5ECFE', borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '1rem', marginInline: '-1.5rem', padding: '1rem 1.5rem' }}>
         <Box gap={1} sx={{ display: 'flex', marginBottom: '0.875rem' }}>
           <img alt="test" src={recomendationIcon} />
           <Typography color="neutral-90" fontWeight="bold" variant="h5">
@@ -481,6 +481,7 @@ const Home: PageComponent = () => {
           </Grid>
         </Box>
       </Card>
+      <Card sx={{ backgroundColor: '#D5ECFE', borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '1rem', marginInline: '-1.5rem', padding: '1rem 1.5rem' }}>
       <Box gap={1} sx={{ display: 'flex', marginBottom: '1.125rem' }}>
         <img alt="test" src={methode === 'Pick Up' ? pickUpIcon : methode === 'Dine In' ? dineInIcon : jajananLokalIcon} />
         <Typography color="neutral-90" fontWeight="bold" variant="h5">
@@ -554,6 +555,7 @@ const Home: PageComponent = () => {
             </Grid>
           </Box>
         : null}
+        </Card>
         {methode !== 'Pesan Antar' && filteredResto?.map((resto) => (
           <Card key={resto.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem' }}>
             <Grid container={true} spacing={2}>

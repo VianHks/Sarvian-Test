@@ -25,9 +25,10 @@ import { AddBoxFilled, IndeterminateCheckBoxFilled } from '@nxweb/icons/material
 import { Grid } from '@components/material.js';
 
 import SwipeableTextMobileStepper from './slidergambar';
+import { layouts } from '@config/layout';
 
-import Pict1 from '@assets/images/Video.svg';
-import Pict2 from '@assets/images/Video2.svg';
+// import Pict1 from '@assets/images/Video.svg';
+// import Pict2 from '@assets/images/Video2.svg';
 
 // Const AutoPlaySwipeableViews = autoPlay(SwipeableViews);
 
@@ -38,7 +39,7 @@ const settings = {
   slidesToShow: 1,
   slidesToScroll: 1
 };
-const images = [Pict1, Pict2];
+// const images = [Pict1, Pict2];
 const ProductView = () => {
   const [count, setCount] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -60,12 +61,12 @@ const ProductView = () => {
     <>
       <Container
         sx={{
-        //   BackgroundColor: '#E4F3FF',
-          height: '16rem',
+          height: '20rem',
           // padding: '1rem',
           position: 'relative',
           display: 'flex',
-          alignItems: 'center'
+          alignItems: 'center',
+          marginTop: '-1rem'
         }}
       >
      <SwipeableTextMobileStepper />
@@ -74,7 +75,6 @@ const ProductView = () => {
 
       <Container
         sx={{
-          marginTop: '10px',
           position: 'relative',
           zIndex: '1',
           marginBottom: '-1.5rem'
@@ -211,4 +211,5 @@ const ProductView = () => {
 };
 
 ProductView.displayName = 'ProductView';
+ProductView.layout = 'blank';
 export default ProductView;

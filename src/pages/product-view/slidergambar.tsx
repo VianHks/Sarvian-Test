@@ -29,11 +29,11 @@ const SwipeableTextMobileStepper = () => {
   const maxSteps = images.length;
 
   const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    setActiveStep((prevActiveStep) => (prevActiveStep + 1) % maxSteps);
   };
 
   const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    setActiveStep((prevActiveStep) => (prevActiveStep - 1 + maxSteps) % maxSteps);
   };
 
   const handleStepChange = (step: number) => {
@@ -53,7 +53,7 @@ const SwipeableTextMobileStepper = () => {
           bgcolor: 'background.default'
         }}
       >
-        <Typography>{images[activeStep]}</Typography>
+        <Typography>&nbsp;</Typography>
       </Paper>
       <SwipeableViews
         axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
@@ -80,33 +80,10 @@ const SwipeableTextMobileStepper = () => {
           </div>
         ))}
       </SwipeableViews>
-      <MobileStepper
-        activeStep={activeStep}
-        backButton={
-          <Button disabled={activeStep === 0} size="small" onClick={handleBack}>
-            {theme.direction === 'rtl'
-              ? <KeyboardArrowRight />
-              : <KeyboardArrowLeft />}
-            Back
-          </Button>
-        }
-        nextButton={
-          <Button
-            disabled={activeStep === maxSteps - 1}
-            size="small"
-            onClick={handleNext}
-          >
-            Next
-            {theme.direction === 'rtl'
-              ? <KeyboardArrowLeft />
-              : <KeyboardArrowRight />}
-          </Button>
-        }
-        position="static"
-        steps={maxSteps} />
     </Box>
   );
 };
+
 
 SwipeableTextMobileStepper.displayName = 'SwipeableTextMobileStepper';
 export default SwipeableTextMobileStepper;
