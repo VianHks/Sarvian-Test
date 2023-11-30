@@ -12,7 +12,6 @@ import {
   Avatar,
   Box,
   Button,
-  Container,
   IconButton,
   Modal,
   Step,

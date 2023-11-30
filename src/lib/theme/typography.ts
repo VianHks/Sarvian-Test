@@ -1,5 +1,7 @@
 export const typography = {
   fontFamily: [
+    'Quicksand',
+    'Poppins',
     'Public Sans',
     'sans-serif',
     '-apple-system',
@@ -60,6 +62,10 @@ export const typography = {
   body2: {
     fontSize: '0.8125rem',
     lineHeight: 1.53846154
+  },
+  body3: {
+    fontSize: '0.625rem',
+    lineHeight: 0.7
   },
   button: {
     fontSize: '0.9375rem',

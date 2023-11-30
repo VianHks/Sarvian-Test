@@ -43,7 +43,7 @@ const itemsSambel = [
   { id: 'sambelMatah', label: 'Sambel Matah', price: '+ RP. 2500' }
 ];
 
-const ProductView = () => {
+const GantiItem = () => {
   const [totalHargaMenu, setTotalHargaMenu] = useState(0);
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
@@ -156,8 +156,8 @@ const ProductView = () => {
     <>
       <Container
         sx={{
-          marginTop: '1rem',
-          height: '16rem',
+          marginTop: '-1rem',
+          height: '20rem',
           position: 'relative',
           display: 'flex',
           alignItems: 'center'
@@ -168,7 +168,6 @@ const ProductView = () => {
 
       <Container
         sx={{
-          marginTop: '10px',
           position: 'relative',
           zIndex: '1',
           marginBottom: '-1.5rem'
@@ -431,5 +430,5 @@ const ProductView = () => {
   );
 };
 
-ProductView.displayName = 'ProductView';
-export default ProductView;
+GantiItem.displayName = 'GantiItem';
+export default GantiItem;
