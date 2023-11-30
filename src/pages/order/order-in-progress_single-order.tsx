@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable jsx-a11y/prefer-tag-over-role */
 /* eslint-disable linebreak-style */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import {
@@ -34,8 +34,10 @@ import {
   Grid,
   Typography
 } from '@components/material.js';
-
-import { DUMMY_ORDER } from './order';
+import { useAuth } from '@hooks/use-auth';
+import { checkoutCommand } from '@models/checkout/commands';
+import { orderCommand } from '@models/order/commands';
+import { useStore } from '@models/store';
 
 import Bakar from '@assets/images/Bakar.png';
 import QR from '@assets/images/Dummy_QR.svg';
@@ -137,7 +139,14 @@ const Orders: PageComponent = () => {
   const theme = useTheme();
   const [searchParams] = useSearchParams();
   const id = searchParams.get('id');
-
+  const { auth } = useAuth();
+  const token = useMemo(() => auth?.token.accessToken, [auth]);
+  const [store, dispatch] = useStore((state) => state);
+  const [totalPembayaran, setTotalPembayaran] = useState(0);
+  const [biayaLayanan, setBiayaLayanan] = useState(2000);
+  const [biayaFasilitas, setBiayaFasilitas] = useState(600);
+  const [biayaParkir, setBiayaParkir] = useState(2000);
+  const [biayaOngkir, setBiayaOngkir] = useState(2000);
   const [detailOrder, setDetailOrder] = useState<OrderDataModel[]>([]);
   const [openModal, setOpenModal] = useState(false);
   const [openQR, setOpenQR] = useState(false);
@@ -152,8 +161,30 @@ const Orders: PageComponent = () => {
   const [isDriverOnTheWay, setIsDriverOnTheWay] = useState(true);
 
   useEffect(() => {
+    if (token) {
+      dispatch(orderCommand.orderLoad(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+      dispatch(checkoutCommand.loadCheckoutMenu(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+      dispatch(checkoutCommand.loadDana(token))
+
+        .catch((err: unknown) => {
+          console.error(err);
+        });
+
+      return () => {
+        dispatch(orderCommand.orderClear());
+      };
+    }
+
     if (id) {
-      const selectedOrder = DUMMY_ORDER.find((order) => order.NO_ORDER === parseInt(id, 10));
+      const selectedOrder = store?.order?.orderOutput?.find((order) => order.NO_ORDER === parseInt(id, 10));
 
       if (selectedOrder) {
         setDetailOrder([selectedOrder]);
@@ -164,6 +195,24 @@ const Orders: PageComponent = () => {
       setDetailOrder([]);
     }
   }, [id]);
+
+  useEffect(() => {
+    if (store?.checkout?.checkoutMenuOutput) {
+      const calculatedTotalMenu = store.checkout.checkoutMenuOutput.reduce(
+        (total, menu) => total + menu.harga * menu.count,
+        0
+      );
+
+      let calculatedTotalPembayaran = calculatedTotalMenu + biayaLayanan + biayaFasilitas;
+
+      if (detailOrder[0]?.DELIVERY_STATUS === 'Delivery Order') {
+        // Add biayaParkir and biayaOngkir for Delivery Order
+        calculatedTotalPembayaran += biayaParkir + biayaOngkir;
+      }
+
+      setTotalPembayaran(calculatedTotalPembayaran);
+    }
+  }, [store, biayaFasilitas, biayaLayanan, biayaParkir, biayaOngkir]);
 
   const startCountdownResto = () => {
     setRestoCountdown(15);
@@ -226,7 +275,7 @@ const Orders: PageComponent = () => {
     }
   };
 
-  console.log('searchDriver', searchDriver);
+  console.log('cekstore', store);
 
   useEffect(() => {
     startCountdownResto();
@@ -306,12 +355,12 @@ const Orders: PageComponent = () => {
                   <MessageFilled color={theme.palette.grey[100]} size={16} />
                 </IconButton>
               </Avatar>
-            </Box>
+              </Box>
             : <Box>
               <Typography variant="caption">
                 {formatTime(restoCountdown)}
               </Typography>
-            </Box>}
+              </Box>}
         </Grid>
       </Grid>
       <hr />
@@ -348,14 +397,14 @@ const Orders: PageComponent = () => {
                     <MessageFilled color={theme.palette.grey[100]} size={16} />
                   </IconButton>
                 </Avatar>
-              </Box>
+                </Box>
               : <Box>
                 <Typography variant="caption">
                   {formatTime(driverCountdown)}
                 </Typography>
-              </Box>}
+                </Box>}
           </Grid>
-        </Grid>
+          </Grid>
         : null}
       {detailOrder[0]?.DELIVERY_STATUS === 'Pickup' && orderApproved
         ? <>
@@ -396,7 +445,7 @@ const Orders: PageComponent = () => {
               </Box>
             </CardContent>
           </Card>
-        </>
+          </>
         : detailOrder[0]?.DELIVERY_STATUS === 'Delivery Order' && orderApproved && isDriverOnTheWay
           ? <>
             <Box marginBlock="1rem">
@@ -436,7 +485,7 @@ const Orders: PageComponent = () => {
                 </Box>
               </CardContent>
             </Card>
-          </>
+            </>
           : null}
       <Typography fontWeight="bold" marginBlock="1rem" variant="h5">
         Pesananmu
@@ -463,7 +512,7 @@ const Orders: PageComponent = () => {
           </Box>
         </AccordionSummary>
         <AccordionDetails>
-          {DUMMY_PESANAN.map((obj) => {
+          {store?.checkout?.checkoutMenuOutput?.map((obj) => {
             return (
               <div key={obj.title} style={{ marginBottom: '1rem' }}>
                 <Grid
@@ -624,7 +673,7 @@ const Orders: PageComponent = () => {
             sx={{ fontWeight: 'bold' }}
             variant="h5"
           >
-            Rp. 200.000
+            Rp. {store?.checkout?.danaOutput?.[0]?.jumlah.toLocaleString('id-ID')}
           </Typography>
         </Box>
       </Box>
@@ -652,7 +701,7 @@ const Orders: PageComponent = () => {
               }}
               variant="body2"
             >
-              Rp. 50.000
+              Rp. {totalPembayaran.toLocaleString('id-ID')}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -670,7 +719,7 @@ const Orders: PageComponent = () => {
               }}
               variant="body2"
             >
-              Rp. 2.000
+              Rp. {biayaLayanan.toLocaleString('id-ID')}
             </Typography>
           </Box>
           {detailOrder[0]?.DELIVERY_STATUS === 'Delivery Order'
@@ -690,7 +739,7 @@ const Orders: PageComponent = () => {
                   }}
                   variant="body2"
                 >
-                  Rp. 2.000
+                  Rp. {biayaParkir.toLocaleString('id-ID')}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -711,7 +760,7 @@ const Orders: PageComponent = () => {
                   Rp. 2.000
                 </Typography>
               </Box>
-            </>
+              </>
             : null}
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography
@@ -728,12 +777,12 @@ const Orders: PageComponent = () => {
               }}
               variant="body2"
             >
-              Rp. 200
+              Rp. {biayaFasilitas.toLocaleString('id-ID')}
             </Typography>
           </Box>
         </CardContent>
       </Card>
-      <Box marginTop="4.5rem" >
+      <Box marginTop="4.5rem">
         <Button color="error" fullWidth={true} sx={{ marginBottom: '1rem' }} variant="contained" onClick={toggleOpenModalBatal}>
           Batalkan Pesanan
         </Button>
@@ -788,11 +837,11 @@ const Orders: PageComponent = () => {
       </Modal>
       {restoCountdown === 0 && detailOrder[0]?.DELIVERY_STATUS === 'Delivery Order'
         ? <Modal
-          aria-describedby="modal-modal-description"
-          aria-labelledby="modal-modal-title"
-          open={true}
-          onClose={handleCloseModalRestoCanceled}
-        >
+            aria-describedby="modal-modal-description"
+            aria-labelledby="modal-modal-title"
+            open={true}
+            onClose={handleCloseModalRestoCanceled}
+          >
           <Box sx={style}>
             <Typography
               component="h3"
@@ -830,15 +879,15 @@ const Orders: PageComponent = () => {
               </Button>
             </Box>
           </Box>
-        </Modal>
+          </Modal>
         : null}
       {driverCountdown === 0 && detailOrder[0]?.DELIVERY_STATUS === 'Delivery Order'
         ? <Modal
-          aria-describedby="modal-modal-description"
-          aria-labelledby="modal-modal-title"
-          open={true}
-          onClose={handleCloseModalRestoCanceled}
-        >
+            aria-describedby="modal-modal-description"
+            aria-labelledby="modal-modal-title"
+            open={true}
+            onClose={handleCloseModalRestoCanceled}
+          >
           <Box sx={style}>
             <Typography
               component="h3"
@@ -876,7 +925,7 @@ const Orders: PageComponent = () => {
               </Button>
             </Box>
           </Box>
-        </Modal>
+          </Modal>
         : null}
       <Modal
         aria-describedby="modal-modal-description"

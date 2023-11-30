@@ -20,6 +20,7 @@ export const listCheckoutMenu: FetchMockInitializer = (adapter: Readonly<FetchMo
         harga: 100000,
         title: 'Ayam Goreng Pisan'
       },
+
       {
         id: 2,
         count: 1,
