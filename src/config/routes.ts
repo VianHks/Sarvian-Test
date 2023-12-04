@@ -95,7 +95,7 @@ export const routes: Route[] = [
     auth: false,
     element: lazy(() => import('@pages/halaman-resto/index.js')),
     hash: true,
-    layout: 'blank',
+    layout: 'appbar',
     path: '/page-resto',
     search: true
   },

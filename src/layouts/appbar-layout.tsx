@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
-import { Avatar, Button, Dialog, DialogContent, Grid, IconButton, styled } from '@mui/material';
+import { Avatar, Button, Dialog, DialogContent, Grid, IconButton, InputLabel, Menu, MenuItem, Select, styled } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -12,6 +12,7 @@ import { ArrowBackFilled, ContentCopyOutlined, EmailOutlined, FileDownloadOutlin
 import { Facebook, Instagram, LINE, Telegram, Twitter, WhatsApp } from '@nxweb/icons/simple';
 
 import { routes } from '@config/routes';
+import { SearchOutlined } from '@mui/icons-material';
 
 type ActionType = 'detailpesanan' | undefined;
 
@@ -27,9 +28,17 @@ const ContentWrapper = styled('main')(({ theme }) => ({
   }
 }));
 
+const DUMMY_MENU = [
+  { id: 0, category_name: 'Menu', active: true, category_description: 'Menu' },
+  { id: 1, category_name: 'Paket Kombo', active: true, category_description: 'Paket Kombo' },
+  { id: 2, category_name: 'Paket Hemat', active: true, category_description: 'Paket Hemat' },
+  { id: 3, category_name: 'Paket Komplit', active: true, category_description: 'Paket Komplit' }
+];
 // NOTE: SUBDESCRIPTION OR GET DATA FROM PAGE
 
 const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, readonly action?: ActionType }) => {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [selectedValue, setSelectedValue] = useState<string | null>('Menu');
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -41,11 +50,21 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
   const pageDescription = currentRoute?.meta?.description || '';
   const pageId = currentRoute?.meta?.appBarId || '';
 
+  useEffect(() => {
+    setAnchorEl(document.body);
+  }, []);
+
   const handleBack = () => {
     console.log('cek');
     navigate(-1);
   };
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
 
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const closeDialog = () => {
@@ -105,9 +124,23 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
           >
             <ArrowBackFilled onClick={handleBack} />
           </IconButton>
+
+          <div>
+  <Select label="Filter" labelId="filter-label" displayEmpty value={selectedValue} onChange={(event) => setSelectedValue(event.target.value as string)} sx={{ width: 200 }}>
+
+  {DUMMY_MENU.filter((category) => category.category_name !== 'Menu').map((category) => (
+    <MenuItem key={category.id} value={category.category_name}>
+      {category.category_description}
+    </MenuItem>
+  ))}
+  </Select>
+
+</div>
+
           <Typography component="div" fontWeight="bold" sx={{ flexGrow: 1 }} variant="h5">
             {String(pageDescription)}
           </Typography>
+
           {dynamicHandler}
           <Dialog open={isDialogOpen} onClose={closeDialog}>
             <DialogContent sx={{ width: '30rem' }}>
