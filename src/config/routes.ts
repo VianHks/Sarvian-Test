@@ -19,7 +19,7 @@ export const routes: Route[] = [
     auth: false,
     element: lazy(() => import('@pages/home/dahsboard.js')),
     hash: true,
-    layout: 'blank',
+    layout: 'bottomnav',
     path: '/beranda',
     search: true
   },
@@ -27,7 +27,7 @@ export const routes: Route[] = [
     auth: false,
     element: lazy(() => import('@pages/home/search-result.js')),
     hash: true,
-    layout: 'blank',
+    layout: 'appbar',
     path: '/beranda/search-result',
     search: true
   },

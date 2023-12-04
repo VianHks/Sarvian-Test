@@ -42,6 +42,7 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
   const pageId = currentRoute?.meta?.appBarId || '';
 
   const handleBack = () => {
+    console.log('cek');
     navigate(-1);
   };
 

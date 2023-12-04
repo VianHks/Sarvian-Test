@@ -18,7 +18,7 @@ export const navigation: readonly NavItemsType[] = [
   {
     icon: <TextsmsOutlined />,
     id: 'chat-page',
-    link: '/chat',
+    link: '/chat-list',
     text: 'Chat'
   }
 ];

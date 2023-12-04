@@ -1,4 +1,3 @@
-/* eslint-disable linebreak-style */
 import { useEffect, useState } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -39,9 +38,32 @@ const FixedBottomNavigation: FC<Props> = (props) => {
 
     return navItem !== null &&
       <BottomNavigationAction
-        icon={navItem.icon}
+        icon={
+        <span
+          style={{
+            fontSize: '1.5rem'
+          }}
+        >
+          {navItem.icon}
+        </span>
+      }
         key={index}
         label={navItem.text}
+        sx={{
+          position: 'relative',
+          '::before': {
+            content: '""',
+            position: 'absolute',
+            top: 3,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '6px',
+            height: '6px',
+            borderRadius: '50%',
+            background: '#2671df',
+            display: value === navItem.link ? 'block' : 'none'
+          }
+        }}
         value={navItem.link} />;
   });
 
@@ -53,6 +75,7 @@ const FixedBottomNavigation: FC<Props> = (props) => {
         onChange={(_, newValue) => {
           setValue(newValue);
         }}
+
       >
         {RenderMenuItems}
       </BottomNavigation>
