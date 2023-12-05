@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
-import { Avatar, Button, Dialog, DialogContent, Grid, IconButton, InputBase, Paper, styled } from '@mui/material';
+import { Avatar, Button, Dialog, DialogContent, FormControl, Grid, IconButton, InputBase, Paper, InputLabel, Menu, MenuItem, Select, styled } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -12,6 +12,8 @@ import { ArrowBackFilled, ContentCopyOutlined, EmailOutlined, FileDownloadOutlin
 import { Facebook, Instagram, LINE, Telegram, Twitter, WhatsApp } from '@nxweb/icons/simple';
 
 import { routes } from '@config/routes';
+import { SearchOutlined } from '@mui/icons-material';
+import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 
 type ActionType = 'detailpesanan' | undefined;
 
@@ -27,9 +29,17 @@ const ContentWrapper = styled('main')(({ theme }) => ({
   }
 }));
 
-// NOTE: SUBDESCRIPTION OR GET DATA FROM PAGE
+const DUMMY_MENU = [
+
+  { id: 1, category_name: 'Paket Kombo', active: true, category_description: 'Paket Kombo' },
+  { id: 2, category_name: 'Paket Hemat', active: true, category_description: 'Paket Hemat' },
+  { id: 3, category_name: 'Paket Komplit', active: true, category_description: 'Paket Komplit' }
+];
+
 
 const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, readonly action?: ActionType }) => {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [selectedValue, setSelectedValue] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -41,10 +51,21 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
   const pageDescription = currentRoute?.meta?.description || '';
   const pageId = currentRoute?.meta?.appBarId || '';
 
+  useEffect(() => {
+    setAnchorEl(document.body);
+  }, []);
+
   const handleBack = () => {
+    console.log('cek');
     navigate(-1);
   };
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
 
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const closeDialog = () => {
@@ -91,6 +112,8 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
       break;
   }
 
+  console.log('cekpage', pageId);
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static" sx={{ background: pageId === 'searchresult' ? '#D5ECFE' : 'white', elevation: 0 }}>
@@ -128,9 +151,37 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
             </IconButton>
           </Paper>
           ) }
+          {pageId === 'pageresto' && (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <FormControl>
+            <InputLabel id="filter-label" sx={{ color: 'black' }}>Menu</InputLabel>
+              <Select
+                id="filter"
+                label="Menu"
+                labelId="filter-label"
+                value={selectedValue}
+                onChange={(event) => setSelectedValue(event.target.value as string)}
+                sx={{ width: 200, marginRight: 1, color: 'black' }}
+              >
+                {DUMMY_MENU.filter((category) => category.category_name !== 'Menu').map((category) => (
+                  <MenuItem key={category.id} value={category.category_name}>
+                    {category.category_description}
+                  </MenuItem>
+                ))}
+              </Select>
+              </FormControl>
+              <IconButton color="inherit" aria-label="search">
+                <SearchOutlined fontSize="medium" style={{ color: 'black' }} />
+              </IconButton>
+              <IconButton color="inherit" aria-label="share">
+              <ShareOutlinedIcon fontSize="medium" style={{ color: 'black' }} />
+              </IconButton>
+            </Box>
+          )}
           <Typography component="div" fontWeight="bold" sx={{ flexGrow: 1 }} variant="h5">
             {String(pageDescription)}
           </Typography>
+
           {dynamicHandler}
           <Dialog open={isDialogOpen} onClose={closeDialog}>
             <DialogContent sx={{ width: '30rem' }}>

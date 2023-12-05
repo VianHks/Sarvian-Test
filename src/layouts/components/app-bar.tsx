@@ -1,8 +1,9 @@
 import type { FC } from 'react';
+import { useState } from 'react';
 
 import { hexToRGBA } from '@nxweb/core';
 
-import { AppBar as MuiAppBar, Toolbar as MuiToolbar, styled } from '@components/material.js';
+import { Button, Menu, MenuItem, AppBar as MuiAppBar, Toolbar as MuiToolbar, styled } from '@components/material.js';
 import type { AppBarProps, Theme, ToolbarProps } from '@components/material.js';
 import type { LayoutProps } from '@layouts/types.js';
 
@@ -43,7 +44,7 @@ const Toolbar = styled(MuiToolbar)<ToolbarProps>(({ theme }) => ({
 const VerticalAppBar: FC<Props> = (props) => {
   const { settings, appBarProps, appBarContent: userAppBarContent } = props;
   const { appBar, appBarBlur } = settings;
-
+  
   const appBarBlurEffect = appBarBlur && {
     '&:after': {
       backdropFilter: 'blur(10px)',
@@ -75,6 +76,8 @@ const VerticalAppBar: FC<Props> = (props) => {
 
   delete userAppBarProps.sx;
 
+  
+
   return (
     <AppBar
       className="layout-navbar"
@@ -94,6 +97,7 @@ const VerticalAppBar: FC<Props> = (props) => {
         }}
       >
         {(userAppBarContent && userAppBarContent(props)) || null}
+        
       </Toolbar>
     </AppBar>
   );

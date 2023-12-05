@@ -610,7 +610,7 @@ const Home: PageComponent = () => {
             </Grid>
           </Card>
         ))}
-        {methode === 'Pesan Antar' &&
+        {/* {methode === 'Pesan Antar' &&
         <Box>
           <Grid container={true} spacing={2} sx={{ marginTop: '1.5rem' }}>
             {store?.makananOutput?.map((obj: FoodsDataModel) => {
@@ -666,8 +666,8 @@ const Home: PageComponent = () => {
               );
             })}
           </Grid>
-        </Box>}
-        <FloatingShoppingButton onClick={() => navigate('/order')} />
+        </Box>} */}
+        {/* <FloatingShoppingButton onClick={() => navigate('/order')} /> */}
     </Box>
   );
 };
