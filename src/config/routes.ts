@@ -28,6 +28,7 @@ export const routes: Route[] = [
     element: lazy(() => import('@pages/home/search-result.js')),
     hash: true,
     layout: 'appbar',
+    meta: { appBarId: 'searchresult' },
     path: '/beranda/search-result',
     search: true
   },

@@ -87,47 +87,7 @@ const DashboardSearchResult: PageComponent = () => {
   }, [query]);
 
   return (
-    <>
-      <Box
-        sx={{
-          backgroundColor: theme.palette.info.main,
-          marginBottom: '1.5rem',
-          padding: '1rem 1.5rem 1rem',
-          position: 'relative'
-        }}
-      >
-        <Box
-          gap={5}
-          sx={{
-            alignItems: 'center',
-            display: 'flex',
-            justifyContent: 'space-between'
-          }}
-        >
-          <ArrowBackFilled size={32} />
-          <Paper
-            component="form"
-            sx={{
-              p: '2px 4px',
-              display: 'flex',
-              alignItems: 'center',
-              width: 400
-            }}
-          >
-            <IconButton aria-label="menu" sx={{ p: '10px' }}>
-              <SearchIcon />
-            </IconButton>
-            <InputBase
-              inputProps={{ 'aria-label': 'search google maps' }}
-              placeholder="Mau makan apa hari ini?"
-              sx={{ ml: 1, flex: 1 }} />
-            <IconButton aria-label="search" sx={{ p: '10px' }} type="button">
-              <FilterAltFilled style={{ color: '#317FF2' }} />
-            </IconButton>
-          </Paper>
-        </Box>
-      </Box>
-      <Box sx={{ marginBottom: '1.5rem', padding: '0.5rem 1.5rem 1rem' }}>
+    <Box sx={{ marginBottom: '1.5rem', padding: '0.5rem 1.5rem 1rem' }}>
         <Box
           gap={1}
           sx={{ alignItems: 'center', display: 'flex', marginBottom: '1rem' }}
@@ -376,8 +336,7 @@ const DashboardSearchResult: PageComponent = () => {
               </Card>
           ))
           : null}
-      </Box>
-    </>
+    </Box>
   );
 };
 

@@ -251,6 +251,10 @@ const HalamanResto: PageComponent = () => {
     navigate('./ulasan-rating');
   };
 
+  const handleLanjutPembayaranClick = () => {
+    navigate('/keranjang');
+  };
+
   useEffect(() => {
     if (token) {
       dispatch(halamanRestoCommand.ulasanRatingLoad(token))
@@ -785,6 +789,7 @@ const HalamanResto: PageComponent = () => {
               size="medium"
               sx={{ textTransform: 'none', width: '100%' }}
               variant="contained"
+              onClick={handleLanjutPembayaranClick}
             >
                 Lanjut Pembayaran
             </Button>
