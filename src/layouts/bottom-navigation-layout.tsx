@@ -1,4 +1,3 @@
-/* eslint-disable linebreak-style */
 import type { FC } from 'react';
 
 import { ArrowUP } from '@nxweb/icons/tabler';
