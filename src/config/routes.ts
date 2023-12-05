@@ -95,6 +95,7 @@ export const routes: Route[] = [
     auth: false,
     element: lazy(() => import('@pages/halaman-resto/index.js')),
     hash: true,
+    meta: { appBarId: 'pageresto' },
     layout: 'appbar',
     path: '/page-resto',
     search: true
@@ -113,7 +114,7 @@ export const routes: Route[] = [
     element: lazy(() => import('@pages/chat-and-call/index.js')),
     hash: true,
     meta: { description: 'Chat' },
-    layout: 'appbar',
+    layout: 'bottomnav',
     path: '/chat-list',
     search: true
   },

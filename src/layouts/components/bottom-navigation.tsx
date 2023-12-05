@@ -41,7 +41,10 @@ const FixedBottomNavigation: FC<Props> = (props) => {
         icon={
         <span
           style={{
-            fontSize: '1.5rem'
+            fontSize: '1.5rem',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
           }}
         >
           {navItem.icon}
