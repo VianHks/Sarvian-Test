@@ -611,7 +611,7 @@ const Order: PageComponent = () => {
                   sx={{
                     alignItems: 'center',
                     display: 'flex',
-                    gap: '0.25rem',
+                    gap: '0.7rem',
                     width: '100%'
                   }}
                 >
@@ -620,7 +620,7 @@ const Order: PageComponent = () => {
                     endIcon={false}
                     size="medium"
                     startIcon={false}
-                    sx={{ flex: 1, padding: '0.5rem 1.375rem' }}
+                    sx={{ flex: 1, padding: '0.5rem' }}
                     variant="outlined"
                   >
                     Lihat Penilaian
@@ -630,7 +630,7 @@ const Order: PageComponent = () => {
                     endIcon={false}
                     size="medium"
                     startIcon={false}
-                    sx={{ flex: 1 }}
+                    sx={{ flex: 1, padding: '0.5rem 1.375rem' }}
                     variant="contained"
                   >
                     Beli Lagi
@@ -790,7 +790,7 @@ const Order: PageComponent = () => {
                   sx={{
                     alignItems: 'center',
                     display: 'flex',
-                    gap: '0.25rem',
+                    gap: '0.7rem',
                     width: '100%'
                   }}
                 >
@@ -799,7 +799,7 @@ const Order: PageComponent = () => {
                     endIcon={false}
                     size="medium"
                     startIcon={false}
-                    sx={{ flex: 1 }}
+                    sx={{ flex: 1, padding: '0.5rem' }}
                     variant="outlined"
                   >
                     Lihat Penilaian
@@ -809,7 +809,7 @@ const Order: PageComponent = () => {
                     endIcon={false}
                     size="medium"
                     startIcon={false}
-                    sx={{ flex: 1 }}
+                    sx={{ flex: 1, padding: '0.5rem 1.375rem' }}
                     variant="contained"
                   >
                     Beli Lagi
