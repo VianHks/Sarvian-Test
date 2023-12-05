@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
-import { Avatar, Button, Dialog, DialogContent, Grid, IconButton, styled } from '@mui/material';
+import { Avatar, Button, Dialog, DialogContent, Grid, IconButton, InputBase, Paper, styled } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 
 import { LinkOutline } from '@nxweb/icons/ionicons';
-import { ArrowBackFilled, ContentCopyOutlined, EmailOutlined, FileDownloadOutlined, ShareFilled, SmsOutlined } from '@nxweb/icons/material';
+import { ArrowBackFilled, ContentCopyOutlined, EmailOutlined, FileDownloadOutlined, FilterAltFilled, SearchFilled, ShareFilled, SmsOutlined } from '@nxweb/icons/material';
 import { Facebook, Instagram, LINE, Telegram, Twitter, WhatsApp } from '@nxweb/icons/simple';
 
 import { routes } from '@config/routes';
@@ -93,7 +93,7 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static" sx={{ background: 'white', elevation: 0 }}>
+      <AppBar position="static" sx={{ background: pageId === 'searchresult' ? '#D5ECFE' : 'white', elevation: 0 }}>
         <Toolbar>
           <IconButton
             aria-label="back"
@@ -104,6 +104,30 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
           >
             <ArrowBackFilled onClick={handleBack} />
           </IconButton>
+          { pageId === 'searchresult' && (
+          <Paper
+            component="form"
+            sx={{
+              alignItems: 'center',
+              borderRadius: '0.5rem',
+              boxShadow: 'none',
+              display: 'flex',
+              p: '0.5 rem 1rem',
+              width: 280
+            }}
+          >
+            <IconButton aria-label="menu" sx={{ p: '10px' }}>
+              <SearchFilled />
+            </IconButton>
+            <InputBase
+              inputProps={{ 'aria-label': 'search google maps' }}
+              placeholder="Mau makan apa hari ini?"
+              sx={{ ml: 1, flex: 1 }} />
+            <IconButton aria-label="search" sx={{ p: '10px' }} type="button">
+              <FilterAltFilled style={{ color: '#317FF2' }} />
+            </IconButton>
+          </Paper>
+          ) }
           <Typography component="div" fontWeight="bold" sx={{ flexGrow: 1 }} variant="h5">
             {String(pageDescription)}
           </Typography>

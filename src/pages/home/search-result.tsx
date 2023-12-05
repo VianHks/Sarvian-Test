@@ -88,15 +88,15 @@ const DashboardSearchResult: PageComponent = () => {
 
   return (
     <>
-      <Box
+      {/* <Box
         sx={{
           backgroundColor: theme.palette.info.main,
           marginBottom: '1.5rem',
           padding: '1rem 1.5rem 1rem',
           position: 'relative'
         }}
-      >
-        <Box
+      > */}
+        {/* <Box
           gap={5}
           sx={{
             alignItems: 'center',
@@ -104,8 +104,8 @@ const DashboardSearchResult: PageComponent = () => {
             justifyContent: 'space-between'
           }}
         >
-          <ArrowBackFilled size={32} />
-          <Paper
+          <ArrowBackFilled size={32} /> */}
+          {/* <Paper
             component="form"
             sx={{
               p: '2px 4px',
@@ -124,9 +124,9 @@ const DashboardSearchResult: PageComponent = () => {
             <IconButton aria-label="search" sx={{ p: '10px' }} type="button">
               <FilterAltFilled style={{ color: '#317FF2' }} />
             </IconButton>
-          </Paper>
-        </Box>
-      </Box>
+          </Paper> */}
+        {/* </Box> */}
+      {/* </Box> */}
       <Box sx={{ marginBottom: '1.5rem', padding: '0.5rem 1.5rem 1rem' }}>
         <Box
           gap={1}

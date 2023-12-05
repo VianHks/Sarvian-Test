@@ -784,7 +784,6 @@ const HalamanResto: PageComponent = () => {
                     </Typography>
                 </Grid>
         </Grid>
-          {/* {totalAmount !== 0 && ( */}
             <Button
               color="primary"
               size="medium"
@@ -794,7 +793,6 @@ const HalamanResto: PageComponent = () => {
             >
                 Lanjut Pembayaran
             </Button>
-          {/* )} */}
             <FloatingShoppingButton onClick={handleShoppingButtonClick} />
     </Box>
   );
