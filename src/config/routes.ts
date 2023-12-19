@@ -37,6 +37,7 @@ export const routes: Route[] = [
     element: lazy(() => import('@pages/personalized-recomendation/index.js')),
     hash: true,
     layout: 'blank',
+    meta: { appBarId: 'recommendation' },
     path: '/recomendation',
     search: true
   },

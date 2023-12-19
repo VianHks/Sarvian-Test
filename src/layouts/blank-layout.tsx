@@ -3,11 +3,15 @@ import type { FC, PropsWithChildren } from 'react';
 import { Box, styled } from '@components/material.js';
 import type { BoxProps } from '@components/material.js';
 
+import { routes } from '@config/routes';
+
 interface BlankLayoutProps extends PropsWithChildren {
   readonly className?: string
 }
 
 // Styled component for Blank Layout component
+const currentRoute = routes.find((route) => route.path === location.pathname);
+const pageId = currentRoute?.meta?.appBarId || '';
 const BlankLayoutWrapper = styled(Box)<BoxProps>(({ theme }) => ({
   height: '100vh',
 
@@ -38,7 +42,7 @@ const BlankLayout: FC<BlankLayoutProps> = ({
       <Box
         className="app-content"
         sx={{
-          minHeight: '200vh',
+          minHeight: pageId === 'recommendation' ? '100vh' : '200vh',
           overflow: 'hidden',
           position: 'relative'
         }}
