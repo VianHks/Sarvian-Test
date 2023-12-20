@@ -236,8 +236,8 @@ const PersonalizedRecomendation: PageComponent = () => {
   return (
     <Container style={{ padding: '3rem 1.5rem' }}>
       <Typography
-        sx={{ fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'center' }}
-        variant="h5"
+        sx={{ fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'center', fontFamily: theme?.typography?.fontFamily?.split(',')[0].trim() }}
+        variant="h4"
       >
         {activeStep === 0
           ? 'Mau sarapan apa TokruMates?'
@@ -246,7 +246,7 @@ const PersonalizedRecomendation: PageComponent = () => {
             : 'Jangan lupa makan malam ya!'}
       </Typography>
       <Typography
-        sx={{ marginBottom: '1rem', textAlign: 'center' }}
+        sx={{ fontFamily: theme.typography.fontFamily?.split(',')[1].trim(), marginBottom: '1rem', textAlign: 'center' }}
         variant="body2"
       >
         Pilih makanan kesukaanmu! (minimal 3 kategori)
@@ -260,8 +260,10 @@ const PersonalizedRecomendation: PageComponent = () => {
           {STEPS.map((label, index) => (
             <Step key={label}>
               <StepButton onClick={() => setActiveStep(index)}>
-                <StepLabel style={{ color: 'blue' }}>
-                  {label}
+                <StepLabel>
+                  <Typography sx={{ color: activeStep === index ? theme.palette.primary.main : theme.palette.grey[600], fontFamily: theme.typography.fontFamily?.split(',')[1].trim() }} variant="body1">
+                    {label}
+                  </Typography>
                 </StepLabel>
               </StepButton>
             </Step>

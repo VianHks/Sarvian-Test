@@ -84,8 +84,8 @@ const BottomNavLayout: FC<BottomNavLayoutProps> = (props) => {
 
         : (
         <ScrollToTop className="mui-fixed">
-          <Fab aria-label="scroll back to top" color="primary" size="small" sx={{ marginBottom: '4.5rem' }}>
-            <ArrowUP />
+          <Fab aria-label="scroll back to top" color="secondary" size="small" sx={{ marginBottom: '4.5rem' }}>
+            <ArrowUP style={{ color: 'black' }} />
           </Fab>
         </ScrollToTop>
         )}
