@@ -54,7 +54,7 @@ export const routes: Route[] = [
     element: lazy(() => import('@pages/order/order-in-progress_single-order.js')),
     hash: true,
     layout: 'appbar',
-    meta: { description: 'Pesanan Berlangsung' },
+    meta: { appBarId: 'pesananberlangsung', description: 'Pesanan Berlangsung' },
     path: '/order-in-progress/single-order',
     search: true
   },

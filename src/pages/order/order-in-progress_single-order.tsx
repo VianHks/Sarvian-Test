@@ -12,6 +12,8 @@ import {
   Avatar,
   Box,
   Button,
+  Container,
+  Divider,
   IconButton,
   Modal,
   Step,
@@ -77,7 +79,7 @@ const DUMMY_PESANAN: PesananDataModel[] = [
   },
   {
     count: 1,
-    detail: 'Jangan terlalu gosong',
+    detail: 'Catatan menu',
     foto: `${Bakar}`,
     harga: 50000,
     title: 'Ayam Bakar'
@@ -88,12 +90,12 @@ const Steps = [
   {
     active: 1,
     description: `Gg. Bahagia Selalu`,
-    label: 'Lokasi Kamu'
+    label: 'Alamat Resto'
   },
   {
     active: 2,
     description: `Gg. Bahagia Selalu`,
-    label: 'Alamat Resto'
+    label: 'Lokasi Kamu'
   }
 ];
 
@@ -153,11 +155,11 @@ const Orders: PageComponent = () => {
   const [timerIdDriver, setTimerIdDriver] = useState<NodeJS.Timeout | null>(null);
   const [restoCountdown, setRestoCountdown] = useState(120);
   const [driverCountdown, setDriverCountdown] = useState(120);
-  const [orderApproved, setOrderApproved] = useState(true);
+  const [orderApproved, setOrderApproved] = useState(false);
   const [openModalRestoCanceled, setOpenModalRestoCanceled] = useState(false);
   const [searchDriver, setSearchDriver] = useState(3);
-  const [isDriverFound, setIsDriverFound] = useState(true);
-  const [isDriverOnTheWay, setIsDriverOnTheWay] = useState(true);
+  const [isDriverFound, setIsDriverFound] = useState(false);
+  const [isDriverOnTheWay, setIsDriverOnTheWay] = useState(false);
 
   useEffect(() => {
     if (token) {
@@ -274,7 +276,7 @@ const Orders: PageComponent = () => {
     }
   };
 
-  console.log('cekstore', store);
+  console.log('cekstore', detailOrder);
 
   useEffect(() => {
     startCountdownResto();
@@ -311,9 +313,11 @@ const Orders: PageComponent = () => {
     setOpenModalRestoCanceled(!openModalRestoCanceled);
   };
 
+  console.log('cekordr', store?.order?.orderOutput?.[0].DELIVERY_STATUS);
+
   return (
-    <>
-      {detailOrder[0]?.DELIVERY_STATUS === 'Delivery Order' && isDriverOnTheWay === true
+    <Container sx={{ marginTop: '-0.25rem' }}>
+      {store?.order?.orderOutput?.[0]?.DELIVERY_STATUS === 'Delivery Order' && isDriverOnTheWay === true
         ? <img alt="map" src={map} style={{ height: '400px', marginInline: '-1rem', marginTop: '-1.2rem', width: '360px' }} />
         : null}
       <Grid container={true} spacing={2}>
@@ -363,7 +367,7 @@ const Orders: PageComponent = () => {
         </Grid>
       </Grid>
       <hr />
-      {detailOrder[0]?.DELIVERY_STATUS === 'Delivery Order'
+      {store?.order?.orderOutput?.[0]?.DELIVERY_STATUS === 'Delivery Order'
         ? <Grid container={true} spacing={2}>
           <Grid
             item={true}
@@ -489,7 +493,7 @@ const Orders: PageComponent = () => {
       <Typography fontWeight="bold" marginBlock="1rem" variant="h5">
         Pesananmu
       </Typography>
-      <Accordion sx={{ marginBottom: '1rem' }}>
+      <Accordion sx={{ borderRadius: '0.5rem', marginBottom: '1rem' }}>
         <AccordionSummary
           aria-controls="panel1a-content"
           expandIcon={<KeyboardArrowDownFilled />}
@@ -510,6 +514,7 @@ const Orders: PageComponent = () => {
             </Typography>
           </Box>
         </AccordionSummary>
+        <Divider />
         <AccordionDetails>
           {store?.checkout?.checkoutMenuOutput?.map((obj) => {
             return (
@@ -782,10 +787,10 @@ const Orders: PageComponent = () => {
         </CardContent>
       </Card>
       <Box marginTop="4.5rem">
-        <Button color="error" fullWidth={true} sx={{ marginBottom: '1rem' }} variant="contained" onClick={toggleOpenModalBatal}>
+        <Button color="error" fullWidth={true} sx={{ borderRadius: '0.5rem', marginBottom: '1rem', padding: '8px 22px' }} variant="contained" onClick={toggleOpenModalBatal}>
           Batalkan Pesanan
         </Button>
-        <Button color="primary" fullWidth={true} variant="outlined" onClick={() => navigate('/pusat-bantuan')}>
+        <Button color="primary" fullWidth={true} sx={{ borderRadius: '0.5rem', padding: '8px 22px' }} variant="outlined" onClick={() => navigate('/pusat-bantuan')}>
           Pusat Bantuan
         </Button>
       </Box>
@@ -1045,7 +1050,7 @@ const Orders: PageComponent = () => {
           </Modal> */}
 
       {/* </Container> */}
-    </>
+    </Container>
   );
 };
 

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
-import { Avatar, Button, Dialog, DialogContent, FormControl, Grid, IconButton, InputBase, Paper, InputLabel, Menu, MenuItem, Select, styled } from '@mui/material';
+import { SearchOutlined } from '@mui/icons-material';
+import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+import { Avatar, Button, Dialog, DialogContent, FormControl, Grid, IconButton, InputBase, InputLabel, Menu, MenuItem, Paper, Select, styled, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -12,8 +14,6 @@ import { ArrowBackFilled, ContentCopyOutlined, EmailOutlined, FileDownloadOutlin
 import { Facebook, Instagram, LINE, Telegram, Twitter, WhatsApp } from '@nxweb/icons/simple';
 
 import { routes } from '@config/routes';
-import { SearchOutlined } from '@mui/icons-material';
-import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 
 type ActionType = 'detailpesanan' | undefined;
 
@@ -36,8 +36,8 @@ const DUMMY_MENU = [
   { id: 3, category_name: 'Paket Komplit', active: true, category_description: 'Paket Komplit' }
 ];
 
-
 const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, readonly action?: ActionType }) => {
+  const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedValue, setSelectedValue] = useState('');
   const navigate = useNavigate();
@@ -159,9 +159,9 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
                 id="filter"
                 label="Menu"
                 labelId="filter-label"
+                sx={{ width: 200, marginRight: 1, color: 'black' }}
                 value={selectedValue}
                 onChange={(event) => setSelectedValue(event.target.value as string)}
-                sx={{ width: 200, marginRight: 1, color: 'black' }}
               >
                 {DUMMY_MENU.filter((category) => category.category_name !== 'Menu').map((category) => (
                   <MenuItem key={category.id} value={category.category_name}>
@@ -169,14 +169,14 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
                   </MenuItem>
                 ))}
               </Select>
-              </FormControl>
-              <IconButton color="inherit" aria-label="search">
+            </FormControl>
+              <IconButton aria-label="search" color="inherit">
                 <SearchOutlined fontSize="medium" style={{ color: 'black' }} />
               </IconButton>
-              <IconButton color="inherit" aria-label="share">
+              <IconButton aria-label="share" color="inherit">
               <ShareOutlinedIcon fontSize="medium" style={{ color: 'black' }} />
               </IconButton>
-            </Box>
+          </Box>
           )}
           <Typography component="div" fontWeight="bold" sx={{ flexGrow: 1 }} variant="h5">
             {String(pageDescription)}
@@ -294,7 +294,7 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
           position: 'relative'
         }}
       >
-        <ContentWrapper>{children}</ContentWrapper>
+        <ContentWrapper sx={{ backgroundColor: pageId === 'pesananberlangsung' ? theme.palette.grey[100] : theme.palette.grey[200] }}>{children}</ContentWrapper>
       </Box>
     </Box>
   );
