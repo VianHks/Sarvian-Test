@@ -41,7 +41,7 @@ import verifyIcon from '@assets/images/pages/beranda/verify.svg';
 // eslint-disable-next-line import/exports-last
 export interface RestoItem {
   id: number
-  location: number
+  location: string
   open: string
   orderMethode: string
   rating: string
@@ -54,7 +54,7 @@ export interface MenuItem {
   id: number
   itemName: string
   itemPrice: number
-  location: number
+  location: string
   orderMethode: string
   restoName: string
   sold: number
@@ -90,7 +90,7 @@ export const DUMMY_MENU_RECOMDATION = [
     id: 1,
     itemName: 'Ayam Goreng Pisan',
     itemPrice: 100000,
-    location: 1.5,
+    location: '1.5km',
     orderMethode: 'Pesan Antar, Pick Up',
     restoName: 'Resto Sunda Gila 1',
     sold: 24,
@@ -100,7 +100,7 @@ export const DUMMY_MENU_RECOMDATION = [
     id: 2,
     itemName: 'Bubur Sumsum',
     itemPrice: 120000,
-    location: 1.5,
+    location: '1.5km',
     orderMethode: 'Pesan Antar, Pick Up, Dine In',
     restoName: 'Dapur Pak Raden',
     sold: 24,
@@ -110,7 +110,7 @@ export const DUMMY_MENU_RECOMDATION = [
     id: 3,
     itemName: 'Ayam Goreng Kemarin',
     itemPrice: 130000,
-    location: 1.5,
+    location: '1.5km',
     orderMethode: 'Dine In',
     restoName: 'Kedai Nyonyah',
     sold: 24,
@@ -120,7 +120,7 @@ export const DUMMY_MENU_RECOMDATION = [
     id: 4,
     itemName: 'Bebek Bubuk',
     itemPrice: 130000,
-    location: 1.5,
+    location: '1.5km',
     orderMethode: 'Dine In',
     restoName: 'Warung Gusti',
     sold: 24,
@@ -130,7 +130,7 @@ export const DUMMY_MENU_RECOMDATION = [
     id: 5,
     itemName: 'Gorengan Rebus',
     itemPrice: 130000,
-    location: 1.5,
+    location: '1.5km',
     orderMethode: 'Dine In',
     restoName: 'Warung Cak Waluh',
     sold: 24,
@@ -140,7 +140,7 @@ export const DUMMY_MENU_RECOMDATION = [
     id: 4,
     itemName: 'Kopi Paste',
     itemPrice: 130000,
-    location: 1.5,
+    location: '1.5km',
     orderMethode: 'Dine In',
     restoName: 'Warung Kopas',
     sold: 24,
@@ -152,7 +152,7 @@ export const DUMMY_MENU_RECOMDATION = [
 export const DUMMY_RESTO = [
   {
     id: 1,
-    location: 1.5,
+    location: '1.5km',
     open: '9.00 - 12.00 WIB',
     orderMethode: 'Pesan Antar, Pick Up',
     rating: '4.9',
@@ -161,7 +161,7 @@ export const DUMMY_RESTO = [
   },
   {
     id: 2,
-    location: 1.5,
+    location: '1.5km',
     open: '9.00 - 12.00 WIB',
     orderMethode: 'Pesan Antar, Pick Up, Dine In',
     rating: '4.8',
@@ -170,7 +170,7 @@ export const DUMMY_RESTO = [
   },
   {
     id: 3,
-    location: 1.5,
+    location: '1.5km',
     open: '9.00 - 12.00 WIB',
     orderMethode: 'Dine In',
     rating: '5.0',
@@ -179,7 +179,7 @@ export const DUMMY_RESTO = [
   },
   {
     id: 4,
-    location: 1.5,
+    location: '1.5km',
     open: '9.00 - 12.00 WIB',
     orderMethode: 'Pick Up',
     rating: '3.1',
@@ -188,7 +188,7 @@ export const DUMMY_RESTO = [
   },
   {
     id: 5,
-    location: 1.5,
+    location: '1.5km',
     open: '9.00 - 12.00 WIB',
     orderMethode: 'Dine In',
     rating: '1.4',
@@ -197,7 +197,7 @@ export const DUMMY_RESTO = [
   },
   {
     id: 6,
-    location: 1.5,
+    location: '1.5km',
     open: '9.00 - 12.00 WIB',
     orderMethode: 'Pesan Antar, Dine In',
     rating: '2.6',
@@ -379,31 +379,34 @@ const Home: PageComponent = () => {
         fullWidth={true}
         placeholder="Mau makan apa hari ini?"
         size="small"
-        sx={{ marginBottom: '1rem' }}
+        sx={{
+          '& input::placeholder': { color: 'blue' },
+          marginBottom: '1rem'
+        }}
         value={searchValue}
         variant="outlined"
         onChange={(e) => setSearchValue(e.target.value)} />
-      <Grid container={true} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: methode === 'Pesan Antar' ? '1rem' : '2rem' }}>
+      <Grid container={true} spacing={1} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: methode === 'Pesan Antar' ? '1rem' : '2rem' }}>
         <Grid item={true}>
-          <Chip color={methode === 'Pesan Antar' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={pesanAntarIcon} />} label="Pesan Antar" onClick={() => handleMethode('Pesan Antar')} />
+          <Chip color={methode === 'Pesan Antar' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={pesanAntarIcon} />} sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} label="Pesan Antar" onClick={() => handleMethode('Pesan Antar')} />
         </Grid>
         <Grid item={true}>
-          <Chip color={methode === 'Pick Up' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={pickUpIcon} />} label="Pick Up" onClick={() => handleMethode('Pick Up')} />
+          <Chip color={methode === 'Pick Up' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={pickUpIcon} />} sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} label="Pick Up" onClick={() => handleMethode('Pick Up')} />
         </Grid>
         <Grid item={true}>
-          <Chip color={methode === 'Dine In' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={dineInIcon} />} label="Dine In" onClick={() => handleMethode('Dine In')} />
+          <Chip color={methode === 'Dine In' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={dineInIcon} />} sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} label="Dine In" onClick={() => handleMethode('Dine In')} />
         </Grid>
       </Grid>
       {methode === 'Pesan Antar'
         ? <Grid container={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
           {CARD_PESAN_ANTAR.map((obj) => {
             return (
-            <Grid item={true} key={obj.title} xs="auto">
-              <Card sx={{ padding: '0.8rem' }} onClick={() => navigate(`./search-result?query=${obj.path}`)}>
-                <img alt={obj.title} src={obj.icon} />
-              </Card>
-              <Typography sx={{ fontWeight: 'bold', textAlign: 'center' }} variant="body2">{obj.title}</Typography>
-            </Grid>
+              <Grid item={true} key={obj.title} xs="auto">
+                <Card sx={{ padding: '0.8rem' }} onClick={() => navigate(`./search-result?query=${obj.path}`)}>
+                  <img alt={obj.title} src={obj.icon} />
+                </Card>
+                <Typography sx={{ fontWeight: 'bold', textAlign: 'center' }} variant="body2">{obj.title}</Typography>
+              </Grid>
             );
           })}
           </Grid>
@@ -481,15 +484,15 @@ const Home: PageComponent = () => {
           </Grid>
         </Box>
       </Card>
-      <Card sx={{ backgroundColor: '#D5ECFE', borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '1rem', marginInline: '-1.5rem', padding: '1rem 1.5rem' }}>
-      <Box gap={1} sx={{ display: 'flex', marginBottom: '1.125rem' }}>
-        <img alt="test" src={methode === 'Pick Up' ? pickUpIcon : methode === 'Dine In' ? dineInIcon : jajananLokalIcon} />
-        <Typography color="neutral-90" fontWeight="bold" variant="h5">
-          {methode === 'Pesan Antar' ? 'Eksplor Jajanan Lokal' : methode === 'Dine In' ? 'Dine-In di Resto' : 'Resto yang bisa Pickup'}
-        </Typography>
-      </Box>
-      { methode === 'Pesan Antar'
-        ? <Box sx={{ overflowX: 'auto' }}>
+      <Card sx={{ backgroundColor: 'transparent', borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '1rem', marginInline: '-1.5rem', padding: '1rem 1.5rem' }}>
+        <Box gap={1} sx={{ display: 'flex', marginBottom: '1rem' }}>
+          <img alt="test" src={methode === 'Pick Up' ? pickUpIcon : methode === 'Dine In' ? dineInIcon : jajananLokalIcon} />
+          <Typography color="neutral-90" fontWeight="bold" variant="h5">
+            {methode === 'Pesan Antar' ? 'Eksplor Jajanan Lokal' : methode === 'Dine In' ? 'Dine-In di Resto' : 'Resto yang bisa Pickup'}
+          </Typography>
+        </Box>
+        {methode === 'Pesan Antar'
+          ? <Box sx={{ overflowX: 'auto' }}>
             <Grid container={true} sx={{ width: '28.75rem' }}>
               <Grid item={true} sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 {store?.menuBerandaOutput?.map((obj) => {
@@ -553,17 +556,17 @@ const Home: PageComponent = () => {
                 })}
               </Grid>
             </Grid>
-          </Box>
-        : null}
-        </Card>
-        {methode !== 'Pesan Antar' && filteredResto?.map((resto) => (
-          <Card key={resto.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem' }}>
-            <Grid container={true} spacing={2}>
-              <Grid item={true} xs={4}>
-                <div style={{ alignItems: 'center', display: 'flex', height: '100%', justifyContent: 'center', width: '100%' }}>
-                  <img alt="test" src={restoImage} style={{ maxHeight: '100%', maxWidth: '100%' }} />
-                  {/* Uncomment the following lines if you have a verified image */}
-                  {/* <img
+            </Box>
+          : null}
+      </Card>
+      {methode !== 'Pesan Antar' && filteredResto?.map((resto) => (
+        <Card key={resto.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', marginTop: '-2rem', padding: '0.5rem' }}>
+          <Grid container={true} spacing={2}>
+            <Grid item={true} xs={4}>
+              <div style={{ alignItems: 'center', display: 'flex', height: '100%', justifyContent: 'center', width: '100%' }}>
+                <img alt="test" src={restoImage} style={{ maxHeight: '100%', maxWidth: '100%' }} />
+                {/* Uncomment the following lines if you have a verified image */}
+                {/* <img
                     alt="Verified"
                     src={Verify}
                     style={{
@@ -573,44 +576,44 @@ const Home: PageComponent = () => {
                       maxWidth: '20px'
                     }}
                   /> */}
-                </div>
-              </Grid>
-              <Grid item={true} xs={8}>
-                {resto.verified
-                  ? <Typography color="neutral-70" sx={{ marginBottom: '0.125' }} variant="body2">
-                    Verified by TokoRumahan
-                    </Typography>
-                  : null}
-                <Typography color="neutral-90" fontWeight="bold" sx={{ marginBottom: '0.125' }} variant="h6">
-                  {resto.restoName}
-                </Typography>
-                <Box gap={1} sx={{ display: 'flex' }}>
-                  <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
-                    <StarFilled size={10} style={{ color: 'yellow' }} />
-                    <Typography color="neutral-90" variant="caption">
-                      {resto.rating}
-                    </Typography>
-                  </Box>
-                  <Divider flexItem={true} orientation="vertical" />
-                  <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
-                    <LocationOnFilled size={10} style={{ color: 'red' }} />
-                    <Typography color="neutral-90" variant="caption">
-                      {resto.location}
-                    </Typography>
-                  </Box>
-                  <Divider flexItem={true} orientation="vertical" />
-                  <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
-                    <AccessTimeFilled size={10} />
-                    <Typography color="neutral-90" variant="caption">
-                      {resto.open}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Grid>
+              </div>
             </Grid>
-          </Card>
-        ))}
-        {/* {methode === 'Pesan Antar' &&
+            <Grid item={true} xs={8}>
+              {resto.verified
+                ? <Typography color="neutral-70" sx={{ marginBottom: '0.125' }} variant="body2">
+                  Verified by TokoRumahan
+                  </Typography>
+                : null}
+              <Typography color="neutral-90" fontWeight="bold" sx={{ marginBottom: '0.125' }} variant="h6">
+                {resto.restoName}
+              </Typography>
+              <Box gap={1} sx={{ display: 'flex' }}>
+                <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
+                  <StarFilled size={10} style={{ color: 'yellow' }} />
+                  <Typography color="neutral-90" variant="caption">
+                    {resto.rating}
+                  </Typography>
+                </Box>
+                <Divider flexItem={true} orientation="vertical" />
+                <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
+                  <LocationOnFilled size={10} style={{ color: 'red' }} />
+                  <Typography color="neutral-90" variant="caption">
+                    {resto.location}
+                  </Typography>
+                </Box>
+                <Divider flexItem={true} orientation="vertical" />
+                <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
+                  <AccessTimeFilled size={10} />
+                  <Typography color="neutral-90" variant="caption">
+                    {resto.open}
+                  </Typography>
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
+        </Card>
+      ))}
+      {/* {methode === 'Pesan Antar' &&
         <Box>
           <Grid container={true} spacing={2} sx={{ marginTop: '1.5rem' }}>
             {store?.makananOutput?.map((obj: FoodsDataModel) => {
@@ -667,7 +670,7 @@ const Home: PageComponent = () => {
             })}
           </Grid>
         </Box>} */}
-        {/* <FloatingShoppingButton onClick={() => navigate('/order')} /> */}
+      {/* <FloatingShoppingButton onClick={() => navigate('/order')} /> */}
     </Box>
   );
 };
