@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { SearchOutlined } from '@mui/icons-material';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
-import { Avatar, Button, Dialog, DialogContent, FormControl, Grid, IconButton, InputBase, InputLabel, Menu, MenuItem, Paper, Select, styled } from '@mui/material';
+import { Avatar, Button, Dialog, DialogContent, FormControl, Grid, IconButton, InputBase, InputLabel, Menu, MenuItem, Paper, Select, styled, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -37,6 +37,7 @@ const DUMMY_MENU = [
 ];
 
 const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, readonly action?: ActionType }) => {
+  const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedValue, setSelectedValue] = useState('');
   const navigate = useNavigate();
@@ -177,7 +178,7 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
               </IconButton>
           </Box>
           )}
-          <Typography component="div" fontWeight="bold" sx={{ color: pageDescription === 'Pusat Bantuan' ? 'blue' : '', flexGrow: 1 }} variant="h4">
+          <Typography color={pageDescription === 'Pusat Bantuan' ? theme.palette.primary.main : theme.palette.grey[900]} component="div" fontWeight="bold" sx={{ flexGrow: 1 }} variant="h4">
             {String(pageDescription)}
           </Typography>
 
@@ -288,6 +289,7 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
       <Box
         className="app-content"
         sx={{
+          backgroundColor: pageId === 'pusat bantuan' ? theme.palette.grey[100] : '',
           minHeight: (theme) => `calc(100vh - ${theme.spacing((theme.mixins.toolbar.minHeight as number) / 4)})`,
           overflowX: 'hidden',
           position: 'relative'

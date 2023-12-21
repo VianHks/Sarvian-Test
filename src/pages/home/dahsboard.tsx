@@ -388,13 +388,13 @@ const Home: PageComponent = () => {
         onChange={(e) => setSearchValue(e.target.value)} />
       <Grid container={true} spacing={1} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: methode === 'Pesan Antar' ? '1rem' : '2rem' }}>
         <Grid item={true}>
-          <Chip color={methode === 'Pesan Antar' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={pesanAntarIcon} />} sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} label="Pesan Antar" onClick={() => handleMethode('Pesan Antar')} />
+          <Chip color={methode === 'Pesan Antar' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={pesanAntarIcon} />} label="Pesan Antar" sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} onClick={() => handleMethode('Pesan Antar')} />
         </Grid>
         <Grid item={true}>
-          <Chip color={methode === 'Pick Up' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={pickUpIcon} />} sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} label="Pick Up" onClick={() => handleMethode('Pick Up')} />
+          <Chip color={methode === 'Pick Up' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={pickUpIcon} />} label="Pick Up" sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} onClick={() => handleMethode('Pick Up')} />
         </Grid>
         <Grid item={true}>
-          <Chip color={methode === 'Dine In' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={dineInIcon} />} sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} label="Dine In" onClick={() => handleMethode('Dine In')} />
+          <Chip color={methode === 'Dine In' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={dineInIcon} />} label="Dine In" sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} onClick={() => handleMethode('Dine In')} />
         </Grid>
       </Grid>
       {methode === 'Pesan Antar'
@@ -484,7 +484,7 @@ const Home: PageComponent = () => {
           </Grid>
         </Box>
       </Card>
-      <Card sx={{ backgroundColor: 'transparent', borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '1rem', marginInline: '-1.5rem', padding: '1rem 1.5rem' }}>
+      <Card sx={{ backgroundColor: 'transparent', borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '-1rem', marginInline: '-1.5rem', padding: '1rem 1.5rem' }}>
         <Box gap={1} sx={{ display: 'flex', marginBottom: '1rem' }}>
           <img alt="test" src={methode === 'Pick Up' ? pickUpIcon : methode === 'Dine In' ? dineInIcon : jajananLokalIcon} />
           <Typography color="neutral-90" fontWeight="bold" variant="h5">
@@ -560,22 +560,21 @@ const Home: PageComponent = () => {
           : null}
       </Card>
       {methode !== 'Pesan Antar' && filteredResto?.map((resto) => (
-        <Card key={resto.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', marginTop: '-2rem', padding: '0.5rem' }}>
+        <Card key={resto.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem' }}>
           <Grid container={true} spacing={2}>
             <Grid item={true} xs={4}>
               <div style={{ alignItems: 'center', display: 'flex', height: '100%', justifyContent: 'center', width: '100%' }}>
                 <img alt="test" src={restoImage} style={{ maxHeight: '100%', maxWidth: '100%' }} />
                 {/* Uncomment the following lines if you have a verified image */}
-                {/* <img
-                    alt="Verified"
-                    src={Verify}
-                    style={{
-                      top: 0,
-                      right: 0,
-                      maxHeight: '20px',
-                      maxWidth: '20px'
-                    }}
-                  /> */}
+                <img
+                  alt="Verified"
+                  src={verifyIcon}
+                  style={{
+                    maxHeight: '20px',
+                    maxWidth: '20px',
+                    right: 0,
+                    top: 0
+                  }} />
               </div>
             </Grid>
             <Grid item={true} xs={8}>
