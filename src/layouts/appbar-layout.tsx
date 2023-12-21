@@ -133,19 +133,23 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
             sx={{
               alignItems: 'center',
               borderRadius: '0.5rem',
-              boxShadow: 'none',
+              boxShadow: '0px 4px 8px 0px rgba(49, 127, 242, 0.08)',
               display: 'flex',
               p: '0.5 rem 1rem',
               width: 280
             }}
           >
             <IconButton aria-label="menu" sx={{ p: '10px' }}>
-              <SearchFilled />
+              <SearchFilled color={theme.palette.grey[900]} />
             </IconButton>
             <InputBase
               inputProps={{ 'aria-label': 'search google maps' }}
               placeholder="Mau makan apa hari ini?"
-              sx={{ ml: 1, flex: 1 }} />
+              sx={{
+                '& input::placeholder': { color: 'darkblue' },
+                ml: 1,
+                flex: 1
+              }} />
             <IconButton aria-label="search" sx={{ p: '10px' }} type="button">
               <FilterAltFilled style={{ color: '#317FF2' }} />
             </IconButton>
