@@ -1,3 +1,4 @@
+/* eslint-disable import/max-dependencies */
 import { lazy } from 'react';
 
 import type { Route } from '@nxweb/react';
@@ -97,8 +98,8 @@ export const routes: Route[] = [
     auth: false,
     element: lazy(() => import('@pages/halaman-resto/index.js')),
     hash: true,
-    meta: { appBarId: 'pageresto' },
     layout: 'appbar',
+    meta: { appBarId: 'pageresto' },
     path: '/page-resto',
     search: true
   },
@@ -106,8 +107,8 @@ export const routes: Route[] = [
     auth: false,
     element: lazy(() => import('@pages/halaman-resto/view-rating.js')),
     hash: true,
-    meta: { description: 'Ulasan & Rating' },
     layout: 'appbar',
+    meta: { description: 'Ulasan & Rating' },
     path: '/page-resto/ulasan-rating',
     search: true
   },
@@ -115,8 +116,8 @@ export const routes: Route[] = [
     auth: false,
     element: lazy(() => import('@pages/chat-and-call/index.js')),
     hash: true,
-    meta: { description: 'Chat' },
     layout: 'bottomnav',
+    meta: { description: 'Chat' },
     path: '/chat-list',
     search: true
   },

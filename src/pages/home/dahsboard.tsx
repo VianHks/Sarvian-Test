@@ -381,6 +381,7 @@ const Home: PageComponent = () => {
         size="small"
         sx={{
           '& input::placeholder': { color: 'blue' },
+          boxShadow: '0px 4px 8px 0px rgba(49, 127, 242, 0.08)',
           marginBottom: '1rem'
         }}
         value={searchValue}
@@ -563,18 +564,32 @@ const Home: PageComponent = () => {
         <Card key={resto.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem' }}>
           <Grid container={true} spacing={2}>
             <Grid item={true} xs={4}>
-              <div style={{ alignItems: 'center', display: 'flex', height: '100%', justifyContent: 'center', width: '100%' }}>
-                <img alt="test" src={restoImage} style={{ maxHeight: '100%', maxWidth: '100%' }} />
-                {/* Uncomment the following lines if you have a verified image */}
+              <div
+                style={{
+                  alignItems: 'center',
+                  display: 'flex',
+                  height: '100%',
+                  justifyContent: 'center',
+                  position: 'relative',
+                  width: '100%'
+                }}
+              >
                 <img
-                  alt="Verified"
-                  src={verifyIcon}
-                  style={{
-                    maxHeight: '20px',
-                    maxWidth: '20px',
-                    right: 0,
-                    top: 0
-                  }} />
+                  alt="test"
+                  src={restoImage}
+                  style={{ maxHeight: '100%', maxWidth: '100%' }} />
+                {resto.verified
+                  ? <img
+                      alt="Verified"
+                      src={verifyIcon}
+                      style={{
+                        maxHeight: '1.5rem',
+                        maxWidth: '1.5rem',
+                        position: 'absolute',
+                        right: '5px',
+                        top: '5px'
+                      }} />
+                  : null}
               </div>
             </Grid>
             <Grid item={true} xs={8}>

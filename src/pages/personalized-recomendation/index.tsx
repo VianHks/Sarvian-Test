@@ -11,6 +11,7 @@ import {
   Container,
   Step,
   StepButton,
+  StepConnector,
   StepLabel,
   Stepper,
   useTheme
@@ -221,7 +222,12 @@ const PersonalizedRecomendation: PageComponent = () => {
     } else if (activeStep === 1) {
       setActiveStep(2);
     } else {
-      navigate('/beranda');
+      setTimeout(() => {
+        navigate('/location-by-gps');
+      });
+      setTimeout(() => {
+        navigate('/beranda');
+      }, 4000);
     }
   };
 
@@ -255,196 +261,201 @@ const PersonalizedRecomendation: PageComponent = () => {
         <Stepper
           activeStep={activeStep}
           alternativeLabel={true}
+          // Connector={<StepConnector style={{ backgroundColor: theme.palette.secondary.main }} />} // Ganti warna garis antara langkah-langkah
           nonLinear={true}
         >
           {STEPS.map((label, index) => (
-            <Step key={label}>
-              <StepButton onClick={() => setActiveStep(index)}>
-                <StepLabel>
-                  <Typography sx={{ color: activeStep === index ? theme.palette.primary.main : theme.palette.grey[600], fontFamily: theme.typography.fontFamily?.split(',')[1].trim() }} variant="body1">
-                    {label}
-                  </Typography>
-                </StepLabel>
-              </StepButton>
+            <Step active={index === activeStep} completed={index < activeStep} key={label}>
+              <StepLabel>
+                <Typography
+                  sx={{
+                    color: index === activeStep ? theme.palette.primary.main : index < activeStep ? theme.palette.primary.main : theme.palette.grey[600],
+                    fontFamily: theme.typography.fontFamily?.split(',')[1].trim()
+                  }}
+                  variant="body1"
+                >
+                  {label}
+                </Typography>
+              </StepLabel>
             </Step>
           ))}
         </Stepper>
       </Box>
       {activeStep === 0
         ? (
-        <Box>
-          <Grid container={true} spacing={2}>
-          {store?.personalizedRecOutput?.map((obj) => {
-            const isItemSelected = foodsList.breakfast.some(
-              (item) => Number(item.id) === Number(obj.id)
-            );
+          <Box>
+            <Grid container={true} spacing={2}>
+              {store?.personalizedRecOutput?.map((obj) => {
+                const isItemSelected = foodsList.breakfast.some(
+                  (item) => Number(item.id) === Number(obj.id)
+                );
 
-            return (
-                <Grid
-                  item={true}
-                  key={obj.id}
-                  sx={{ display: 'flex', justifyContent: 'center' }}
-                  xs={4}
-                >
-                  <Card
-                    sx={{
-                      alignItems: 'center',
-                      border: isItemSelected
-                        ? '2px solid #3f51b5'
-                        : '2px solid transparent',
-                      borderRadius: '8px',
-                      boxShadow: isItemSelected
-                        ? '0px 0px 10px rgba(0, 0, 0, 0.3)'
-                        : 'none',
-                      cursor: isItemSelected ? 'not-allowed' : 'pointer',
-                      display: 'block',
-                      justifyContent: 'center',
-                      marginBottom: '0.625rem',
-                      opacity: isItemSelected ? 0.7 : 1,
-                      padding: '0.5rem 1rem'
-                    }}
-                    onClick={() => handleFoodItemClick(obj, 'breakfast')}
+                return (
+                  <Grid
+                    item={true}
+                    key={obj.id}
+                    sx={{ display: 'flex', justifyContent: 'center' }}
+                    xs={4}
                   >
-                    <Avatar
-                      src={obj.photo}
+                    <Card
                       sx={{
-                        height: '66px',
-                        marginBottom: '0.5rem',
-                        width: '66px'
-                      }} />
-                    <Typography
-                      sx={{
-                        fontSize: '10px',
-                        fontWeight: 'bold',
-                        lineHeight: '15px',
-                        textAlign: 'center'
+                        alignItems: 'center',
+                        border: isItemSelected
+                          ? '2px solid #3f51b5'
+                          : '2px solid transparent',
+                        borderRadius: '8px',
+                        boxShadow: isItemSelected
+                          ? '0px 0px 15px rgba(0, 0, 0, 0.3)'
+                          : '0px 0px 5px rgba(0, 0, 0, 0.3)',
+                        cursor: isItemSelected ? 'not-allowed' : 'pointer',
+                        display: 'block',
+                        justifyContent: 'center',
+                        marginBottom: '0.625rem',
+                        opacity: isItemSelected ? 0.7 : 1,
+                        padding: '0.5rem 1rem'
                       }}
+                      onClick={() => handleFoodItemClick(obj, 'breakfast')}
                     >
-                      {obj.title}
-                    </Typography>
-                  </Card>
-                </Grid>
-            );
-          })}
-          </Grid>
-        </Box>
+                      <Avatar
+                        src={obj.photo}
+                        sx={{
+                          height: '66px',
+                          marginBottom: '0.5rem',
+                          width: '66px'
+                        }} />
+                      <Typography
+                        sx={{
+                          fontSize: '10px',
+                          fontWeight: 'bold',
+                          lineHeight: '15px',
+                          textAlign: 'center'
+                        }}
+                      >
+                        {obj.title}
+                      </Typography>
+                    </Card>
+                  </Grid>
+                );
+              })}
+            </Grid>
+          </Box>
         )
         : activeStep === 1
           ? (
-        <Box>
-          <Grid container={true} spacing={2}>
-            {store?.personalizedRecOutput?.map((obj) => {
-              const isItemSelected = foodsList.lunch.some(
-                (item) => Number(item.id) === Number(obj.id)
-              );
+            <Box>
+              <Grid container={true} spacing={2}>
+                {store?.personalizedRecOutput?.map((obj) => {
+                  const isItemSelected = foodsList.lunch.some(
+                    (item) => Number(item.id) === Number(obj.id)
+                  );
 
-              return (
-                <Grid
-                  item={true}
-                  key={obj.id}
-                  sx={{ display: 'flex', justifyContent: 'center' }}
-                  xs={4}
-                >
-                  <Card
-                    sx={{
-                      alignItems: 'center',
-                      border: isItemSelected
-                        ? '2px solid #3f51b5'
-                        : '2px solid transparent',
-                      borderRadius: '8px',
-                      boxShadow: isItemSelected
-                        ? '0px 0px 10px rgba(0, 0, 0, 0.3)'
-                        : 'none',
-                      cursor: isItemSelected ? 'not-allowed' : 'pointer',
-                      display: 'block',
-                      justifyContent: 'center',
-                      marginBottom: '0.625rem',
-                      opacity: isItemSelected ? 0.7 : 1,
-                      padding: '0.5rem 1rem'
-                    }}
-                    onClick={() => handleFoodItemClick(obj, 'lunch')}
-                  >
-                    <Avatar
-                      src={obj.photo}
-                      sx={{
-                        height: '66px',
-                        marginBottom: '0.5rem',
-                        width: '66px'
-                      }} />
-                    <Typography
-                      sx={{
-                        fontSize: '10px',
-                        fontWeight: 'bold',
-                        lineHeight: '15px',
-                        textAlign: 'center'
-                      }}
+                  return (
+                    <Grid
+                      item={true}
+                      key={obj.id}
+                      sx={{ display: 'flex', justifyContent: 'center' }}
+                      xs={4}
                     >
-                      {obj.title}
-                    </Typography>
-                  </Card>
-                </Grid>
-              );
-            })}
-          </Grid>
-        </Box>
+                      <Card
+                        sx={{
+                          alignItems: 'center',
+                          border: isItemSelected
+                            ? '2px solid #3f51b5'
+                            : '2px solid transparent',
+                          borderRadius: '8px',
+                          boxShadow: isItemSelected
+                            ? '0px 0px 15px rgba(0, 0, 0, 0.3)'
+                            : '0px 0px 5px rgba(0, 0, 0, 0.3)',
+                          cursor: isItemSelected ? 'not-allowed' : 'pointer',
+                          display: 'block',
+                          justifyContent: 'center',
+                          marginBottom: '0.625rem',
+                          opacity: isItemSelected ? 0.7 : 1,
+                          padding: '0.5rem 1rem'
+                        }}
+                        onClick={() => handleFoodItemClick(obj, 'lunch')}
+                      >
+                        <Avatar
+                          src={obj.photo}
+                          sx={{
+                            height: '66px',
+                            marginBottom: '0.5rem',
+                            width: '66px'
+                          }} />
+                        <Typography
+                          sx={{
+                            fontSize: '10px',
+                            fontWeight: 'bold',
+                            lineHeight: '15px',
+                            textAlign: 'center'
+                          }}
+                        >
+                          {obj.title}
+                        </Typography>
+                      </Card>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </Box>
           )
           : (
-        <Box>
-          <Grid container={true} spacing={2}>
-            {store?.personalizedRecOutput?.map((obj) => {
-              const isItemSelected = foodsList.dinner.some(
-                (item) => Number(item.id) === Number(obj.id)
-              );
+            <Box>
+              <Grid container={true} spacing={2}>
+                {store?.personalizedRecOutput?.map((obj) => {
+                  const isItemSelected = foodsList.dinner.some(
+                    (item) => Number(item.id) === Number(obj.id)
+                  );
 
-              return (
-                <Grid
-                  item={true}
-                  key={obj.id}
-                  sx={{ display: 'flex', justifyContent: 'center' }}
-                  xs={4}
-                >
-                  <Card
-                    sx={{
-                      alignItems: 'center',
-                      border: isItemSelected
-                        ? '2px solid #3f51b5'
-                        : '2px solid transparent',
-                      borderRadius: '8px',
-                      boxShadow: isItemSelected
-                        ? '0px 0px 10px rgba(0, 0, 0, 0.3)'
-                        : 'none',
-                      cursor: isItemSelected ? 'not-allowed' : 'pointer',
-                      display: 'block',
-                      justifyContent: 'center',
-                      marginBottom: '0.625rem',
-                      opacity: isItemSelected ? 0.7 : 1,
-                      padding: '0.5rem 1rem'
-                    }}
-                    onClick={() => handleFoodItemClick(obj, 'dinner')}
-                  >
-                    <Avatar
-                      src={obj.photo}
-                      sx={{
-                        height: '66px',
-                        marginBottom: '0.5rem',
-                        width: '66px'
-                      }} />
-                    <Typography
-                      sx={{
-                        fontSize: '10px',
-                        fontWeight: 'bold',
-                        lineHeight: '15px',
-                        textAlign: 'center'
-                      }}
+                  return (
+                    <Grid
+                      item={true}
+                      key={obj.id}
+                      sx={{ display: 'flex', justifyContent: 'center' }}
+                      xs={4}
                     >
-                      {obj.title}
-                    </Typography>
-                  </Card>
-                </Grid>
-              );
-            })}
-          </Grid>
-        </Box>
+                      <Card
+                        sx={{
+                          alignItems: 'center',
+                          border: isItemSelected
+                            ? '2px solid #3f51b5'
+                            : '2px solid transparent',
+                          borderRadius: '8px',
+                          boxShadow: isItemSelected
+                            ? '0px 0px 15px rgba(0, 0, 0, 0.3)'
+                            : '0px 0px 5px rgba(0, 0, 0, 0.3)',
+                          cursor: isItemSelected ? 'not-allowed' : 'pointer',
+                          display: 'block',
+                          justifyContent: 'center',
+                          marginBottom: '0.625rem',
+                          opacity: isItemSelected ? 0.7 : 1,
+                          padding: '0.5rem 1rem'
+                        }}
+                        onClick={() => handleFoodItemClick(obj, 'dinner')}
+                      >
+                        <Avatar
+                          src={obj.photo}
+                          sx={{
+                            height: '66px',
+                            marginBottom: '0.5rem',
+                            width: '66px'
+                          }} />
+                        <Typography
+                          sx={{
+                            fontSize: '10px',
+                            fontWeight: 'bold',
+                            lineHeight: '15px',
+                            textAlign: 'center'
+                          }}
+                        >
+                          {obj.title}
+                        </Typography>
+                      </Card>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </Box>
           )}
       <Box
         sx={{
