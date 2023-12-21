@@ -316,7 +316,7 @@ const Orders: PageComponent = () => {
   console.log('cekordr', store?.order?.orderOutput?.[0].DELIVERY_STATUS);
 
   return (
-    <Container sx={{ marginTop: '-0.25rem' }}>
+    <Container sx={{ marginBottom: '-5.5rem', marginTop: '-0.25rem' }}>
       {store?.order?.orderOutput?.[0]?.DELIVERY_STATUS === 'Delivery Order' && isDriverOnTheWay === true
         ? <img alt="map" src={map} style={{ height: '400px', marginInline: '-1rem', marginTop: '-1.2rem', width: '360px' }} />
         : null}
@@ -335,12 +335,13 @@ const Orders: PageComponent = () => {
         <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'start', paddingTop: '0rem!important' }} xs={orderApproved ? 6 : 8}>
           <Box>
             <Typography
+              color={theme.palette.grey[900]}
               sx={{ fontWeight: 'bold', textAlign: 'start' }}
               variant="h6"
             >
               Resto Bunda Gila
             </Typography>
-            <Typography variant="body2">
+            <Typography color={theme.palette.grey[900]} variant="body2">
               Menunggu konfirmasi resto
             </Typography>
           </Box>
@@ -360,7 +361,7 @@ const Orders: PageComponent = () => {
               </Avatar>
               </Box>
             : <Box>
-              <Typography variant="caption">
+              <Typography color={theme.palette.grey[900]} variant="caption">
                 {formatTime(restoCountdown)}
               </Typography>
               </Box>}
@@ -490,8 +491,8 @@ const Orders: PageComponent = () => {
             </Card>
             </>
           : null}
-      <Typography fontWeight="bold" marginBlock="1rem" variant="h5">
-        Pesananmu
+      <Typography color={theme.palette.grey[900]} fontWeight="bold" marginBlock="1rem" variant="h5">
+        Pesanan Kamu
       </Typography>
       <Accordion sx={{ borderRadius: '0.5rem', marginBottom: '1rem' }}>
         <AccordionSummary
@@ -509,7 +510,7 @@ const Orders: PageComponent = () => {
             }}
           >
             <Avatar src={MieBaso} sx={{ height: '24px', width: '24px' }} />
-            <Typography fontWeight="bold" variant="body1">
+            <Typography color={theme.palette.grey[900]} fontWeight="bold" variant="body1">
               Resto Bunda Gila
             </Typography>
           </Box>
@@ -563,6 +564,7 @@ const Orders: PageComponent = () => {
                       }}
                     >
                       <Typography
+                        color={theme.palette.grey[900]}
                         sx={{ fontWeight: 'bold', textAlign: 'start' }}
                         variant="body2"
                       >
@@ -577,6 +579,7 @@ const Orders: PageComponent = () => {
                       }}
                     >
                       <Typography
+                        color={theme.palette.grey[700]}
                         sx={{ fontWeight: 'bold', textAlign: 'start' }}
                         variant="body2"
                       >
@@ -584,6 +587,7 @@ const Orders: PageComponent = () => {
                       </Typography>
                       <Box sx={{ textAlign: 'center' }}>
                         <Typography
+                          color={theme.palette.grey[900]}
                           style={{
                             display: 'inline-block',
                             margin: '0 0.5rem'
@@ -609,6 +613,7 @@ const Orders: PageComponent = () => {
             );
           })}
           <Typography
+            color={theme.palette.grey[900]}
             sx={{ fontWeight: 'bold', marginBottom: '0.5rem' }}
             variant="body1"
           >
@@ -626,6 +631,7 @@ const Orders: PageComponent = () => {
         </AccordionDetails>
       </Accordion>
       <Typography
+        color={theme.palette.grey[900]}
         sx={{ fontWeight: 'bold', marginBottom: '0.5rem', marginTop: '1rem' }}
         variant="h5"
       >
@@ -637,17 +643,17 @@ const Orders: PageComponent = () => {
             {Steps.map((step) => (
               <Step active={true} key={step.label}>
                 <StepLabel StepIconComponent={QontoStepIcon} sx={{ marginLeft: '0.5rem' }}>
-                  <Typography fontWeight="bold">{step.label}</Typography>
+                  <Typography color={theme.palette.grey[900]} fontWeight="bold">{step.label}</Typography>
                 </StepLabel>
                 <StepContent>
-                  <Typography>{step.description}</Typography>
+                  <Typography color={theme.palette.grey[900]}>{step.description}</Typography>
                 </StepContent>
               </Step>
             ))}
           </Stepper>
         </CardContent>
       </Card>
-      <Typography color="neutral-90" fontWeight="Bold" marginBottom="1rem" variant="h5">
+      <Typography color={theme.palette.grey[900]} fontWeight="Bold" marginBottom="1rem" variant="h5">
         Metode Pembayaran
       </Typography>
       <Box
@@ -659,7 +665,7 @@ const Orders: PageComponent = () => {
         }}
       >
         <Typography
-          color="primary"
+          color={theme.palette.primary.main}
           sx={{ fontWeight: 'bold', textAlign: 'start' }}
           variant="body1"
         >
@@ -674,6 +680,7 @@ const Orders: PageComponent = () => {
           }}
         >
           <Typography
+            color={theme.palette.grey[900]}
             sx={{ fontWeight: 'bold' }}
             variant="h5"
           >
@@ -684,6 +691,7 @@ const Orders: PageComponent = () => {
       <Card>
         <CardContent sx={{ padding: '1rem 1rem 1rem 1rem!important' }}>
           <Typography
+            color={theme.palette.grey[900]}
             fontWeight="bold"
             sx={{ marginBottom: '0.5rem', textAlign: 'start' }}
             variant="h5"
@@ -692,14 +700,16 @@ const Orders: PageComponent = () => {
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography
+              color={theme.palette.grey[900]}
               sx={{ marginBottom: '0.5rem', textAlign: 'start' }}
               variant="body2"
             >
               Total Pembayaran
             </Typography>
             <Typography
+              color={theme.palette.grey[900]}
               sx={{
-                fontWeight: 'bold',
+                fontWeight: 'medium',
                 marginBottom: '0.5rem',
                 textAlign: 'end'
               }}
@@ -710,14 +720,16 @@ const Orders: PageComponent = () => {
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography
+              color={theme.palette.grey[900]}
               sx={{ marginBottom: '0.5rem', textAlign: 'start' }}
               variant="body2"
             >
               Biaya Layanan
             </Typography>
             <Typography
+              color={theme.palette.grey[900]}
               sx={{
-                fontWeight: 'bold',
+                fontWeight: 'medium',
                 marginBottom: '0.5rem',
                 textAlign: 'end'
               }}
@@ -730,14 +742,16 @@ const Orders: PageComponent = () => {
             ? <>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography
+                  color={theme.palette.grey[900]}
                   sx={{ marginBottom: '0.5rem', textAlign: 'start' }}
                   variant="body2"
                 >
                   Biaya Parkir
                 </Typography>
                 <Typography
+                  color={theme.palette.grey[900]}
                   sx={{
-                    fontWeight: 'bold',
+                    fontWeight: 'medium',
                     marginBottom: '0.5rem',
                     textAlign: 'end'
                   }}
@@ -748,14 +762,16 @@ const Orders: PageComponent = () => {
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography
+                  color={theme.palette.grey[900]}
                   sx={{ marginBottom: '0.5rem', textAlign: 'start' }}
                   variant="body2"
                 >
                   Biaya Ongkir
                 </Typography>
                 <Typography
+                  color={theme.palette.grey[900]}
                   sx={{
-                    fontWeight: 'bold',
+                    fontWeight: 'medium',
                     marginBottom: '0.5rem',
                     textAlign: 'end'
                   }}
@@ -768,14 +784,16 @@ const Orders: PageComponent = () => {
             : null}
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography
+              color={theme.palette.grey[900]}
               sx={{ marginBottom: '0.5rem', textAlign: 'start' }}
               variant="body2"
             >
               Biaya Fasilitas Pembayaran
             </Typography>
             <Typography
+              color={theme.palette.grey[900]}
               sx={{
-                fontWeight: 'bold',
+                fontWeight: 'medium',
                 marginBottom: '0.5rem',
                 textAlign: 'end'
               }}
@@ -786,7 +804,7 @@ const Orders: PageComponent = () => {
           </Box>
         </CardContent>
       </Card>
-      <Box marginTop="4.5rem">
+      <Box marginTop="2rem">
         <Button color="error" fullWidth={true} sx={{ borderRadius: '0.5rem', marginBottom: '1rem', padding: '8px 22px' }} variant="contained" onClick={toggleOpenModalBatal}>
           Batalkan Pesanan
         </Button>

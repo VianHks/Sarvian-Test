@@ -117,7 +117,7 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static" sx={{ background: pageId === 'searchresult' ? '#D5ECFE' : 'white', elevation: 0 }}>
-        <Toolbar>
+        <Toolbar sx={{ paddingInline: pageId === 'pesananberlangsung' ? '1.5rem' : 'auto' }}>
           <IconButton
             aria-label="back"
             color="default"
@@ -125,7 +125,7 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
             size="large"
             sx={{ mr: 2 }}
           >
-            <ArrowBackFilled onClick={handleBack} />
+            <ArrowBackFilled color={pageId === 'pesananberlangsung' ? theme.palette.grey[900] : 'auto'} onClick={handleBack} />
           </IconButton>
           { pageId === 'searchresult' && (
           <Paper
