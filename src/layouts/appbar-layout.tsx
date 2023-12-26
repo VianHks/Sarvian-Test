@@ -182,7 +182,7 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
               </IconButton>
           </Box>
           )}
-          <Typography component="div" fontWeight="bold" sx={{ flexGrow: 1 }} variant="h5">
+          <Typography color={pageDescription === 'Pusat Bantuan' ? theme.palette.primary.main : theme.palette.grey[900]} component="div" fontWeight="bold" sx={{ flexGrow: 1 }} variant="h4">
             {String(pageDescription)}
           </Typography>
 
@@ -293,6 +293,7 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
       <Box
         className="app-content"
         sx={{
+          backgroundColor: pageId === 'pusat bantuan' ? theme.palette.grey[100] : '',
           minHeight: (theme) => `calc(100vh - ${theme.spacing((theme.mixins.toolbar.minHeight as number) / 4)})`,
           overflowX: 'hidden',
           position: 'relative'

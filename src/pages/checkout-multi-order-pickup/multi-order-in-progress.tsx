@@ -646,38 +646,37 @@ const MultiOrderInProgress: PageComponent = () => {
       >
         <Box sx={style}>
           <Typography
-            component="h3"
             id="modal-modal-title"
-            sx={{ color: `${theme?.palette?.error}`, fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'center' }}
+            sx={{ color: `${theme?.palette?.error}`, fontFamily: theme.typography.fontFamily?.split(',')[0].trim(), fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'center' }}
             variant="h3"
           >
             Yakin mau batalin pesanan kamu?
           </Typography>
           <Typography
             id="modal-modal-description"
-            sx={{ marginBottom: '0.5rem', textAlign: 'center' }}
+            sx={{ fontFamily: theme.typography.fontFamily?.split(',')[1].trim(), marginBottom: '0.8rem', textAlign: 'center' }}
             variant="body1"
           >
             Inget, ya. Pesanan yang kamu batalin akan hilang dari daftar manapun. Masih yakin mau batalin pesanan?
           </Typography>
-          <Box gap={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <Box gap={3} sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
             <Button
               color="primary"
               size="medium"
-              sx={{ width: '100%' }}
-              variant="contained"
-              onClick={handleConfirmBatal}
-            >
-              Lanjut
-            </Button>
-            <Button
-              color="primary"
-              size="medium"
-              sx={{ width: '100%' }}
+              sx={{ padding: '0.7rem', width: '30%' }}
               variant="outlined"
               onClick={toggleOpenModalBatal}
             >
               Batal
+            </Button>
+            <Button
+              color="primary"
+              size="medium"
+              sx={{ padding: '0.7rem', width: '30%' }}
+              variant="contained"
+              onClick={handleConfirmBatal}
+            >
+              Lanjut
             </Button>
           </Box>
         </Box>

@@ -4,19 +4,19 @@ import type { NavItemsType } from '@layouts/types.js';
 
 export const navigation: readonly NavItemsType[] = [
   {
-    icon: <HomeSharp />,
+    icon: <HomeSharp size={32} />,
     id: 'beranda',
     link: '/beranda',
     text: 'Beranda'
   },
   {
-    icon: <ListAltFilled />,
+    icon: <ListAltFilled size={32} />,
     id: 'order-page',
     link: '/order',
     text: 'Pesanan'
   },
   {
-    icon: <TextsmsOutlined />,
+    icon: <TextsmsOutlined size={32} />,
     id: 'chat-page',
     link: '/chat-list',
     text: 'Chat'
