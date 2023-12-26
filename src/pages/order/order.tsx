@@ -54,7 +54,7 @@ export interface OrderDataModel {
 // eslint-disable-next-line import/exports-last
 export const DUMMY_ORDER = [
   {
-    DELIVERY_STATUS: 'Pickup',
+    DELIVERY_STATUS: 'Delivery Order',
     NO_ORDER: 1,
     ORDER_DATE: '2 Aug 2023',
     ORDER_ITEM: [

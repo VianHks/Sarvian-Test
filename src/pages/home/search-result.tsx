@@ -1,6 +1,6 @@
 /* eslint-disable multiline-ternary */
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import SearchIcon from '@mui/icons-material/Search';
 import {
@@ -34,11 +34,12 @@ import terdekat from '@assets/images/pages/beranda/terdekat.svg';
 import terhemat from '@assets/images/pages/beranda/terhemat.svg';
 import terlaris from '@assets/images/pages/beranda/terlaris.svg';
 import topRated from '@assets/images/pages/beranda/topRated.svg';
-import verifyIcon from '@assets/images/pages/beranda/verify.svg';
+import verifyIcon from '@assets/images/verified-rounded.svg';
 
 import type { MenuItem, RestoItem } from './dahsboard';
 
 const DashboardSearchResult: PageComponent = () => {
+  const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
   const query = new URLSearchParams(location.search).get('query') || '';
@@ -86,8 +87,12 @@ const DashboardSearchResult: PageComponent = () => {
     setRestaurantsSellingMenu(restaurantsSellingMenu);
   }, [query]);
 
+  const handleCardToRestoClick = () => {
+    navigate('/page-resto');
+  };
+
   return (
-    <Box sx={{ marginBottom: '1.5rem', padding: '0.5rem 1.5rem 1rem' }}>
+    <Box sx={{ marginBottom: '1.5rem', marginTop: '-0.25rem', paddingInline: '0.5rem' }}>
         <Box
           gap={1}
           sx={{ alignItems: 'center', display: 'flex', marginBottom: '1rem' }}
@@ -105,7 +110,7 @@ const DashboardSearchResult: PageComponent = () => {
                       ? `${terdekat}`
                       : `${searchImage}`
             }
-            style={{ marginRight: '0.25rem' }} />
+            style={{ height: '1.5rem', width: '1.5rem' }} />
           <Typography color="neutral-90" fontWeight="bold" variant="h5">
             {query === 'top-rate'
               ? 'Top Rated'
@@ -126,6 +131,7 @@ const DashboardSearchResult: PageComponent = () => {
               marginBottom: '1rem',
               padding: '0.5rem'
             }}
+            onClick={handleCardToRestoClick}
           >
             <Grid container={true} spacing={2}>
               <Grid item={true} xs={4}>
@@ -146,16 +152,18 @@ const DashboardSearchResult: PageComponent = () => {
                       height: '100%',
                       objectFit: 'cover'
                     }} />
-                  <VerifiedFilled
-                    color={theme.palette.primary.main}
-                    size={32}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      right: 0,
-                      maxHeight: '1.5rem',
-                      maxWidth: '1.5rem'
-                    }} />
+                  {resto.verified
+                    ? <img
+                        alt="Verified"
+                        src={verifyIcon}
+                        style={{
+                          maxHeight: '1.5rem',
+                          maxWidth: '1.5rem',
+                          position: 'absolute',
+                          right: '5px',
+                          top: '5px'
+                        }} />
+                    : null}
                 </div>
               </Grid>
               <Grid item={true} xs={8}>
@@ -250,6 +258,7 @@ const DashboardSearchResult: PageComponent = () => {
                   marginBottom: '1rem',
                   padding: '0.5rem'
                 }}
+                onClick={handleCardToRestoClick}
               >
                 <Grid container={true} spacing={2}>
                   <Grid item={true} xs={4}>
@@ -270,16 +279,18 @@ const DashboardSearchResult: PageComponent = () => {
                           height: '100%',
                           objectFit: 'cover'
                         }} />
-                      <VerifiedFilled
-                        color={theme.palette.primary.main}
-                        size={32}
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          right: 0,
-                          maxHeight: '1.5rem',
-                          maxWidth: '1.5rem'
-                        }} />
+                      {resto.verified
+                        ? <img
+                            alt="Verified"
+                            src={verifyIcon}
+                            style={{
+                              maxHeight: '1.5rem',
+                              maxWidth: '1.5rem',
+                              position: 'absolute',
+                              right: '5px',
+                              top: '5px'
+                            }} />
+                        : null}
                     </div>
                   </Grid>
                   <Grid item={true} xs={8}>

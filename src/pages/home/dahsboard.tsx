@@ -345,6 +345,10 @@ const Home: PageComponent = () => {
     navigate(`/beranda/search-result?query=${searchValue}`);
   };
 
+  const handleCardToRestoClick = () => {
+    navigate('/page-resto');
+  };
+
   return (
     <Box sx={{ margin: '1rem 1.5rem' }}>
       <Typography color="neutral-90" sx={{ marginBottom: '0.5rem' }} variant="body2">
@@ -424,7 +428,7 @@ const Home: PageComponent = () => {
             <Grid item={true} sx={{ display: 'flex', justifyContent: 'space-between' }}>
               {store?.menuBerandaOutput?.map((obj) => {
                 return (
-                  <Card key={obj.id} sx={{ borderColor: 'transparent', marginRight: '0.5rem', padding: '0.5rem', width: '9.25rem' }}>
+                  <Card key={obj.id} sx={{ borderColor: 'transparent', marginRight: '0.5rem', padding: '0.5rem', width: '9.25rem' }} onClick={handleCardToRestoClick}>
                     <CardMedia
                       image={recomendationImage}
                       sx={{ height: '6rem', marginBottom: '0.5' }}
@@ -498,7 +502,7 @@ const Home: PageComponent = () => {
               <Grid item={true} sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 {store?.menuBerandaOutput?.map((obj) => {
                   return (
-                    <Card key={obj.id} sx={{ borderColor: 'transparent', marginRight: '0.5rem', padding: '0.5rem', width: '9.25rem' }}>
+                    <Card key={obj.id} sx={{ borderColor: 'transparent', marginRight: '0.5rem', padding: '0.5rem', width: '9.25rem' }} onClick={handleCardToRestoClick}>
                       <CardMedia
                         image={recomendationImage}
                         sx={{ height: '6rem', marginBottom: '0.5' }}
