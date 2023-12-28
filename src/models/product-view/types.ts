@@ -1,22 +1,3 @@
-/* eslint-disable linebreak-style */
-
-/*
- * interface DetailProduct {
- *   idItem: number
- *   checked: boolean
- *   namaItem: string
- *   harga: number
- */
-
-/*
- * }
- * interface ProductView {
- *     id: number
- *     kategori: string
- *     jenis: DetailProduct[]
- */
-
-//   }
 interface Nasi {
   id: number
   checked: boolean
@@ -45,13 +26,83 @@ interface Sambel {
 
 }
 
-interface ProductViewsModel {
+// NEW DATA MODEL
 
-  //   ProductviewOutput?: ProductView[]
+interface ChannelListingsDataModel {
+  availableForPurchase: string
+  channel: {
+    id: string
+    name: string
+  }
+  id: string
+  isAvailableForPurchase: boolean
+  isPublished: boolean
+  publicationDate: string
+  visibleInListings: boolean
+}
+
+interface ProductDetailsDataModel {
+  data: {
+    product: {
+      channelListings: ChannelListingsDataModel[]
+      collections: {
+        id: string
+        name: string
+      }[]
+      description: string
+      id: string
+      media: {
+        url: string
+      }[]
+      metadata: {
+        key: string
+        value: string
+      }[]
+      name: string
+      productType: {
+        hasVariants: boolean
+        id: string
+        name: string
+      }
+      rating: number
+      variants: {
+        channelListings: [
+          {
+            channel: {
+              id: string
+              name: string
+            }
+            costPrice: {
+              amount: number
+              currency: string
+            }
+            id: string
+            price: {
+              amount: number
+              currency: string
+            }
+          }
+        ]
+        id: string
+        name: string
+      }[]
+    }
+  }
+}
+
+interface CreateCheckoutDataModel {
+  checkout_id: string
+}
+
+interface ProductViewsModel {
   nasiOutput?: Nasi[]
   ayamOutput?: Ayam[]
   sambelOutput?: Sambel[]
   menuOutput?: Menu[]
+
+  // NEW
+  productDetails?: ProductDetailsDataModel
+  responseCreateCheckout?: CreateCheckoutDataModel
 }
 
 enum ProductViewsActionType {
@@ -62,15 +113,19 @@ enum ProductViewsActionType {
   SambelLoad = 'sambel-load',
   SambelClear = 'sambel-clear',
   MenuLoad = 'menu-load',
-  MenuClear = 'menu-clear'
+  MenuClear = 'menu-clear',
+  // NEW
+  GetProductDetails = '⌘➝Product-View➝GetProductDetails',
+  GetCheckoutId = '⌘➝Product-View➝GetCheckoutId'
 
 }
 
 type ProductViewsAction = {
-
-  type: ProductViewsActionType.NasiLoad
-  value?: ProductViewsModel
-
+  data: ProductViewsModel
+  type: ProductViewsActionType.GetCheckoutId
+} | {
+  data: ProductViewsModel
+  type: ProductViewsActionType.GetProductDetails
 } | {
   type: ProductViewsActionType.AyamClear
 } | {
@@ -85,6 +140,9 @@ type ProductViewsAction = {
 } | {
   type: ProductViewsActionType.NasiClear
 } | {
+  type: ProductViewsActionType.NasiLoad
+  value?: ProductViewsModel
+} | {
   type: ProductViewsActionType.SambelClear
 } | {
   type: ProductViewsActionType.SambelLoad
@@ -92,4 +150,4 @@ type ProductViewsAction = {
 };
 
 export { ProductViewsActionType };
-export type { ProductViewsModel, ProductViewsAction };
+export type { ProductViewsModel, ProductViewsAction, ProductDetailsDataModel, CreateCheckoutDataModel };

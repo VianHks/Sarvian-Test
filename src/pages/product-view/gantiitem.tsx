@@ -21,7 +21,7 @@ import { useAuth } from '@hooks/use-auth';
 import { productviewCommand } from '@models/product-view/commands';
 import { useStore } from '@models/store';
 
-import SwipeableTextMobileStepper from './slidergambar';
+import SwipeableTextMobileStepper from './slider';
 
 type SelectedItemsNasi = Record<string, boolean>;
 type SelectedItemsAyam = Record<string, boolean>;
@@ -150,8 +150,6 @@ const GantiItem = () => {
     }
   }, [store]);
 
-  console.log('cekstore', store);
-
   return (
     <>
       <Container
@@ -163,7 +161,7 @@ const GantiItem = () => {
           alignItems: 'center'
         }}
       >
-        <SwipeableTextMobileStepper />
+        {/* <SwipeableTextMobileStepper /> */}
       </Container>
 
       <Container
