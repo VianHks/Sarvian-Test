@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
-import { Avatar, Button, Dialog, DialogContent, FormControl, Grid, IconButton, InputBase, Paper, InputLabel, Menu, MenuItem, Select, styled } from '@mui/material';
+import { SearchOutlined } from '@mui/icons-material';
+import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+import { Avatar, Button, Dialog, DialogContent, FormControl, Grid, IconButton, InputBase, InputLabel, Menu, MenuItem, Paper, Select, styled } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -12,8 +14,9 @@ import { ArrowBackFilled, ContentCopyOutlined, EmailOutlined, FileDownloadOutlin
 import { Facebook, Instagram, LINE, Telegram, Twitter, WhatsApp } from '@nxweb/icons/simple';
 
 import { routes } from '@config/routes';
-import { SearchOutlined } from '@mui/icons-material';
-import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+import { useAuth } from '@hooks/use-auth';
+import { ChannelCommand } from '@models/halaman-resto/reducers';
+import { useStore } from '@models/store';
 
 type ActionType = 'detailpesanan' | undefined;
 
@@ -36,7 +39,6 @@ const DUMMY_MENU = [
   { id: 3, category_name: 'Paket Komplit', active: true, category_description: 'Paket Komplit' }
 ];
 
-
 const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, readonly action?: ActionType }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedValue, setSelectedValue] = useState('');
@@ -44,6 +46,9 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const action = searchParams.get('action');
+  const { auth } = useAuth();
+  const token = useMemo(() => auth?.token.accessToken, [auth]);
+  const [store, dispatch] = useStore((state) => state);
   let dynamicIcon = null;
   let dynamicHandler: React.ReactNode = null;
 
@@ -52,8 +57,23 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
   const pageId = currentRoute?.meta?.appBarId || '';
 
   useEffect(() => {
+    const param = {
+
+      after: '',
+      channel: 'makan',
+      direction: 'ASC',
+      field: 'NAME',
+      first: 100,
+      published: 'PUBLISHED'
+
+    };
+
+    dispatch(ChannelCommand.getCollections(param, token || ''));
+
     setAnchorEl(document.body);
   }, []);
+
+  console.log('cekstorefromlyaout', store);
 
   const handleBack = () => {
     console.log('cek');
@@ -159,24 +179,24 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
                 id="filter"
                 label="Menu"
                 labelId="filter-label"
+                sx={{ width: 200, marginRight: 1, color: 'black' }}
                 value={selectedValue}
                 onChange={(event) => setSelectedValue(event.target.value as string)}
-                sx={{ width: 200, marginRight: 1, color: 'black' }}
               >
-                {DUMMY_MENU.filter((category) => category.category_name !== 'Menu').map((category) => (
-                  <MenuItem key={category.id} value={category.category_name}>
-                    {category.category_description}
+                {store?.halamanResto?.productListOutput?.data?.filter((category) => category.name !== 'Menu').map((category) => (
+                  <MenuItem key={category.id} value={category.name}>
+                    {category.name}
                   </MenuItem>
                 ))}
               </Select>
-              </FormControl>
-              <IconButton color="inherit" aria-label="search">
+            </FormControl>
+              <IconButton aria-label="search" color="inherit">
                 <SearchOutlined fontSize="medium" style={{ color: 'black' }} />
               </IconButton>
-              <IconButton color="inherit" aria-label="share">
+              <IconButton aria-label="share" color="inherit">
               <ShareOutlinedIcon fontSize="medium" style={{ color: 'black' }} />
               </IconButton>
-            </Box>
+          </Box>
           )}
           <Typography component="div" fontWeight="bold" sx={{ flexGrow: 1 }} variant="h5">
             {String(pageDescription)}

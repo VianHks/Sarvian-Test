@@ -5,12 +5,12 @@ import { useNavigate } from 'react-router-dom';
 import DiningRoundedIcon from '@mui/icons-material/DiningRounded';
 import { Alert, Avatar, Box, Button, Card, Divider, Grid, IconButton, TextField, Typography } from '@mui/material';
 
-
 import { AccessTimeFilled, AddBoxFilled, IndeterminateCheckBoxFilled, LocationOnFilled, StarFilled } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
 
 import { useAuth } from '@hooks/use-auth';
-import { halamanRestoCommand } from '@models/halaman-resto/commands';
+import { ChannelCommand } from '@models/halaman-resto/reducers';
+import { RatingCommand } from '@models/rating/commands';
 import { useStore } from '@models/store';
 
 import FloatingShoppingButton from './floatingshopping-button';
@@ -19,7 +19,6 @@ import Rating from './rating';
 import Bakar from '@assets/images/Bakar.png';
 import ProfilFoto from '@assets/images/Orang.svg';
 import Pisan from '@assets/images/Pisan.png';
-
 
 // eslint-disable-next-line import/exports-last
 export interface RestoItem {
@@ -178,6 +177,13 @@ const DEFAULT_PAKETHEMAT: PaketHematDataModel = {
   stok: 0
 };
 
+interface RestoSchedule {
+  day: string
+  open: string
+  closed: string
+  isOpen: boolean
+}
+
 const HalamanResto: PageComponent = () => {
   interface MenuItem {
     count: number
@@ -186,14 +192,25 @@ const HalamanResto: PageComponent = () => {
   }
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
-  const [store, dispatch] = useStore((state) => state?.halamanResto);
+  const [store, dispatch] = useStore((state) => state);
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const navigate = useNavigate();
+
   const [orders, setOrders] = useState<MenuRekomendDataModel[]>([DEFAULT_MENUREKOMEND]);
   const [ordersPaketHemat, setOrdersPaketHemat] = useState<PaketHematDataModel[]>([DEFAULT_PAKETHEMAT]);
+
   const [methode, setMethode] = useState('Pesan Antar');
   const [filteredResto, setFilteredResto] = useState(DUMMY_RESTO);
+  const channelId = 'Q2hhbm5lbDo0';
+  const daysOfWeek = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
+  const currentDayIndex = new Date().getDay();
+  const currentDay = daysOfWeek[currentDayIndex];
+  const jadwalOperasional = JSON.parse(store?.halamanResto?.channelDetailOutput?.data?.channel?.metafields?.jadwal_operasional || '[]');
+
+  const filteredJadwal = jadwalOperasional.filter((resto: RestoSchedule) => {
+    return resto.day.toLowerCase() === currentDay && resto.isOpen;
+  });
 
   const calculateTotal = (selectedItems: MenuItem[]) => {
     let amount = 0;
@@ -256,53 +273,48 @@ const HalamanResto: PageComponent = () => {
   };
 
   useEffect(() => {
-    if (token) {
-      dispatch(halamanRestoCommand.ulasanRatingLoad(token))
+    const paramMetadata = {
 
-        .catch((err: unknown) => {
-          console.error(err);
-        });
-      dispatch(halamanRestoCommand.menuRekomendLoad(token))
+      after: '',
+      channel: 'makan',
+      filterKey: 'recomendation',
+      filterValue: 'true',
+      first: 100
 
-        .catch((err: unknown) => {
-          console.error(err);
-        });
-      dispatch(halamanRestoCommand.paketHematLoad(token))
+    };
+    const paramCollection = {
 
-        .catch((err: unknown) => {
-          console.error(err);
-        });
-      dispatch(halamanRestoCommand.restoRatingLoad(token))
+      after: '',
+      channel: 'makan',
+      collection: ['Q29sbGVjdGlvbjo1MQ=='],
+      direction: 'ASC',
+      field: 'NAME',
+      first: 100
 
-        .catch((err: unknown) => {
-          console.error(err);
-        });
+    };
 
-      return () => {
-        dispatch(halamanRestoCommand.ulasanRatingClear());
-      };
-    }
-
-    if (MENU_REKOMEND) {
-      setOrders(MENU_REKOMEND);
-    }
-
-    if (PAKET_HEMAT) {
-      setOrdersPaketHemat(PAKET_HEMAT);
-    }
+    /*
+     * Dispatch(ChannelCommand.getChannelDetail(channelId, token || ''));
+     * Dispatch(
+     *   RatingCommand.RatingLoad(channelId)
+     * );
+     */
+    dispatch(ChannelCommand.getCollectionsbyMetadata(paramMetadata, token || ''));
+    dispatch(ChannelCommand.getproductbyCollection(paramCollection, token || ''));
   }, []);
 
   console.log('cekstore', store);
 
   return (
     <Box sx={{ margin: '0.5rem 0.5rem' }}>
-{store?.restoRatingOutput?.map((resto) => {
+{filteredJadwal.map((resto: RestoSchedule) => {
   const currentHour = new Date().getHours();
   const [openHour, closeHour] = resto.open.split(' - ').map((time) => parseInt(time));
+
   const isOpen = currentHour >= openHour && currentHour <= closeHour;
 
   return (
-   <div key={resto.id}>
+   <div key={store?.halamanResto?.channelDetailOutput?.data?.channel?.id}>
     <Grid item={true} xs={12}>
       {!isOpen && (
         <Alert color="info" severity="info" sx={{ alignItems: 'center', display: 'flex' }}>
@@ -313,7 +325,7 @@ const HalamanResto: PageComponent = () => {
       )}
     </Grid>
 
-        <Card key={resto.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem', marginTop: '2rem' }}>
+        <Card key={store?.halamanResto?.channelDetailOutput?.data?.channel?.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem', marginTop: '2rem' }}>
           <Grid container={true} spacing={2}>
         <Grid
           item={true}
@@ -324,11 +336,11 @@ const HalamanResto: PageComponent = () => {
           }}
           xs={2}
         >
-          <Avatar src={resto.foto} sx={{ height: '50px', width: '50px' }} />
+          <Avatar src={store?.halamanResto?.channelDetailOutput?.data?.channel?.metafields?.media} sx={{ height: '50px', width: '50px' }} />
         </Grid>
         <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'start', paddingTop: '0rem!important' }} xs={8}>
           <Box>
-          {resto.verified
+          {store?.halamanResto?.channelDetailOutput?.data?.channel?.name
             ? <Typography color="neutral-70" sx={{ marginBottom: '0.125' }} variant="body2">
                   Verified by TokoRumahan
               </Typography>
@@ -337,7 +349,7 @@ const HalamanResto: PageComponent = () => {
               sx={{ fontWeight: 'bold', textAlign: 'start' }}
               variant="h4"
             >
-              {resto.restoName}
+              {store?.halamanResto?.channelDetailOutput?.data?.channel?.name}
             </Typography>
           </Box>
         </Grid>
@@ -346,21 +358,21 @@ const HalamanResto: PageComponent = () => {
                 <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
                   <StarFilled size={10} style={{ color: '#FBD600' }} />
                   <Typography color="neutral-90" variant="caption">
-                    {resto.rating}
+                    {store?.halamanResto?.channelDetailOutput?.avgRating}
                   </Typography>
                 </Box>
                 <Divider flexItem={true} orientation="vertical" />
                 <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
                   <LocationOnFilled size={10} style={{ color: 'red' }} />
                   <Typography color="neutral-90" variant="caption">
-                    {resto.location}
+                    9m
                   </Typography>
                 </Box>
                 <Divider flexItem={true} orientation="vertical" />
                 <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
                   <AccessTimeFilled size={10} />
                   <Typography color="neutral-90" variant="caption">
-                    {resto.open}
+                  {`${resto.open} - ${resto.closed}`}
                   </Typography>
                 </Box>
               </Box>
@@ -395,7 +407,7 @@ const HalamanResto: PageComponent = () => {
          <Box sx={{ overflowX: 'auto' }}>
           <Grid container={true} sx={{ width: '100rem', overflowX: 'auto' }}>
             <Grid item={true} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              {store?.ulasanRatingOutput?.map((obj) => {
+              {store?.rating?.data?.map((obj) => {
                 return (
                 <Card key={obj.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem' }}>
                     <Grid container={true} spacing={2}>
@@ -417,15 +429,15 @@ const HalamanResto: PageComponent = () => {
                         sx={{ fontWeight: 'bold', textAlign: 'start', marginLeft: '0.5rem' }}
                         variant="h6"
                       >
-                        {obj.userName}
+                        {obj.customerId}
                       </Typography>
                         <Box sx={{ marginLeft: '0.5rem' }}>
-                          <Rating rating={obj.rating} />
+                          <Rating rating={obj.rating.toString()} />
                         </Box>
                     </Box>
                   </Grid>
                   <Box sx={{ marginTop: '10px', marginLeft: '10px', width: '100%    ' }}>
-                  <TextField fullWidth={true} placeholder={obj.commentTag} size="small" variant="outlined" />
+                  <TextField fullWidth={true} placeholder={obj.review} size="small" variant="outlined" />
                   </Box>
 
                     </Grid>
@@ -449,7 +461,7 @@ const HalamanResto: PageComponent = () => {
                 >
                     Menu Rekomendasi
                 </Typography>
-                {store?.menuRekomendOutput?.map((obj, index) => {
+                {store?.halamanResto?.productByMetadataOutput?.data?.map((obj, index) => {
                   return (
               <div key={obj.id} style={{ marginBottom: '0.5rem' }}>
                 <Card sx={{ paddingInline: '0.5rem' }}>
@@ -474,8 +486,8 @@ const HalamanResto: PageComponent = () => {
                       }}
                     >
                       <img
-                        alt={obj.title}
-                        src={obj.foto}
+                        alt={obj.name}
+                        src={obj.thumbnail.url}
                         style={{ maxHeight: '100%', maxWidth: '100%', marginTop: '0.5rem' }} />
                     </div>
                   </Grid>
@@ -490,7 +502,7 @@ const HalamanResto: PageComponent = () => {
                   >
                     <Box
                       sx={{
-                        marginTop: obj.stok > 0 ? '2.5rem' : '1rem',
+                        marginTop: obj.availableForPurchase ? '2.5rem' : '1rem',
                         alignItems: 'center',
                         display: 'flex',
                         justifyContent: 'space-between'
@@ -500,11 +512,11 @@ const HalamanResto: PageComponent = () => {
                         sx={{ fontWeight: 'bold', textAlign: 'start', marginTop: '-2rem', color: 'black' }}
                         variant="body2"
                       >
-                        {obj.title}
+                        {obj.name}
                       </Typography>
 
                     </Box>
-                    {obj.stok === 0 && (
+                    {!obj.availableForPurchase && (
                         <Typography
                           sx={{
                             fontWeight: 'bold',
@@ -516,15 +528,15 @@ const HalamanResto: PageComponent = () => {
                         Persediaan Habis
                         </Typography>
                     )}
-                    {obj.stok > 0 && (
-                        <div>
+                    {obj.availableForPurchase
+                      ? <div>
                     <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
                         <Grid item={true} xs={6}>
                             <Typography
                               sx={{ fontWeight: 'bold', textAlign: 'start', color: '#1f66d0' }}
                               variant="body2"
                             >
-                               Rp. {obj.harga.toLocaleString('id-ID')}
+                               Rp. {obj.pricing.priceRange.start.net.amount.toLocaleString()}
                             </Typography>
                         </Grid>
                         <Grid item={true} xs={6}>
@@ -532,7 +544,7 @@ const HalamanResto: PageComponent = () => {
                               sx={{ fontWeight: 'medium', textAlign: 'end' }}
                               variant="body2"
                             >
-                                Terjual {obj.terjual}
+                                Terjual 4
                             </Typography>
                         </Grid>
                     </Grid>
@@ -546,7 +558,7 @@ const HalamanResto: PageComponent = () => {
                       }}
                     >
 
-                        {obj.customized
+                        {/* {obj.customized
                           ? <Grid container={true} sx={{ alignItems: 'center', display: 'flex' }} xs={12}>
                         <Grid item={true} sx={{ textAlign: 'left' }} xs={2}>
                         <DiningRoundedIcon fontSize="small" />
@@ -560,7 +572,7 @@ const HalamanResto: PageComponent = () => {
                         </Typography>
                         </Grid>
                             </Grid>
-                          : null}
+                          : null} */}
                       <Grid item={true} sx={{ display: 'flex', justifyContent: 'end' }} xs="auto">
                         <IconButton
                           aria-label="min"
@@ -578,7 +590,7 @@ const HalamanResto: PageComponent = () => {
                           }}
                           variant="body2"
                         >
-                          {obj.count}
+                          0
                         </Typography>
                         <IconButton
                           aria-label="plus"
@@ -593,7 +605,7 @@ const HalamanResto: PageComponent = () => {
 
                     </Box>
                         </div>
-                    )}
+                      : null}
                   </Grid>
 
                 </Grid>
@@ -607,7 +619,7 @@ const HalamanResto: PageComponent = () => {
             >
                 Paket Hemat
             </Typography>
-            {store?.paketHematOutput?.map((obj, index) => {
+            {store?.halamanResto?.productByCollectionsOutput?.data?.map((obj, index) => {
               return (
               <div key={obj.id} style={{ marginBottom: '0.5rem' }}>
                 <Card sx={{ paddingInline: '0.5rem' }}>
@@ -632,8 +644,8 @@ const HalamanResto: PageComponent = () => {
                       }}
                     >
                       <img
-                        alt={obj.title}
-                        src={obj.foto}
+                        alt={obj.name}
+                        src={obj.thumbnail.url}
                         style={{ maxHeight: '100%', maxWidth: '100%', marginTop: '0.5rem' }} />
                     </div>
                   </Grid>
@@ -648,7 +660,7 @@ const HalamanResto: PageComponent = () => {
                   >
                     <Box
                       sx={{
-                        marginTop: obj.stok > 0 ? '2.5rem' : '1rem',
+                        marginTop: obj.channelListings[0].isAvailableForPurchase ? '2.5rem' : '1rem',
                         alignItems: 'center',
                         display: 'flex',
                         justifyContent: 'space-between'
@@ -658,11 +670,11 @@ const HalamanResto: PageComponent = () => {
                         sx={{ fontWeight: 'bold', textAlign: 'start', marginTop: '-2rem', color: 'black' }}
                         variant="body2"
                       >
-                        {obj.title}
+                        {obj.name}
                       </Typography>
 
                     </Box>
-                    {obj.stok === 0 && (
+                    {!obj.channelListings[0].isAvailableForPurchase && (
                         <Typography
                           sx={{
                             fontWeight: 'bold',
@@ -674,15 +686,15 @@ const HalamanResto: PageComponent = () => {
                         Persediaan Habis
                         </Typography>
                     )}
-                    {obj.stok > 0 && (
-                        <div>
+                    {obj.channelListings[0].isAvailableForPurchase
+                      ? <div>
                     <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
                         <Grid item={true} xs={6}>
                             <Typography
                               sx={{ fontWeight: 'bold', textAlign: 'start', color: '#1f66d0' }}
                               variant="body2"
                             >
-                               Rp. {obj.harga.toLocaleString('id-ID')}
+                               Rp. {obj.pricing.priceRange.start.net.amount.toLocaleString()}
                             </Typography>
                         </Grid>
                         <Grid item={true} xs={6}>
@@ -690,7 +702,7 @@ const HalamanResto: PageComponent = () => {
                               sx={{ fontWeight: 'medium', textAlign: 'end' }}
                               variant="body2"
                             >
-                                Terjual {obj.terjual}
+                                Terjual 2
                             </Typography>
                         </Grid>
                     </Grid>
@@ -704,7 +716,7 @@ const HalamanResto: PageComponent = () => {
                       }}
                     >
 
-                        {obj.customized
+                        {/* {obj.customized
                           ? <Grid container={true} sx={{ alignItems: 'center', display: 'flex' }} xs={12}>
                         <Grid item={true} sx={{ textAlign: 'left' }} xs={2}>
                         <DiningRoundedIcon fontSize="small" />
@@ -718,7 +730,7 @@ const HalamanResto: PageComponent = () => {
                         </Typography>
                         </Grid>
                             </Grid>
-                          : null}
+                          : null} */}
                       <Grid item={true} sx={{ display: 'flex', justifyContent: 'end' }} xs="auto">
                         <IconButton
                           aria-label="min"
@@ -736,7 +748,7 @@ const HalamanResto: PageComponent = () => {
                           }}
                           variant="body2"
                         >
-                          {obj.count}
+                          0
                         </Typography>
                         <IconButton
                           aria-label="plus"
@@ -751,7 +763,7 @@ const HalamanResto: PageComponent = () => {
 
                     </Box>
                         </div>
-                    )}
+                      : null}
                   </Grid>
 
                 </Grid>

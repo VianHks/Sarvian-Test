@@ -1,15 +1,15 @@
 /* eslint-disable linebreak-style */
 import type { Command } from '@nxweb/core';
 
+import { getRekomendMenu } from '@api/clients/menu-rekomend.js';
+import { getPaketHemat } from '@api/clients/paket-hemat.js';
+import { getRestoRating } from '@api/clients/resto-rating.js';
 import { getUlasanRating } from '@api/clients/ulasan-rating.js';
 import type { RootModel } from '@models/types.js';
 
 import { HalamanRestoActionType } from './types.js';
 
 import type { HalamanRestoAction, HalamanRestoModel } from './types.js';
-import { getRekomendMenu } from '@api/clients/menu-rekomend.js';
-import { getPaketHemat } from '@api/clients/paket-hemat.js';
-import { getRestoRating } from '@api/clients/resto-rating.js';
 
 const halamanRestoCommand = {
   ulasanRatingClear: (): HalamanRestoAction => {
@@ -104,7 +104,6 @@ const halamanRestoCommand = {
       }
     };
   }
-
 } satisfies Command<RootModel, HalamanRestoAction>;
 
 export { halamanRestoCommand };

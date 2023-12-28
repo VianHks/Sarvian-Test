@@ -3,6 +3,8 @@ import type { FetchURLOptions } from '@nxweb/core';
 
 import { apiMock } from './mock.js';
 
+export const getApiURL = () => `${window.NX?.env?.API_URL}`;
+
 export const apiURL = (endpoint: string, options: Readonly<FetchURLOptions> = {}) => {
   return createFetchURL(
     endpoint,
@@ -27,3 +29,14 @@ export const API = (token: string, type: string = 'Bearer' as const, mocked: boo
 
   return mocked ? apiMock(fetch) : fetch;
 };
+
+export const apiFetch = (token: string) => createFetch({
+  baseURL: getApiURL(),
+  headers: {
+    Authorization: token
+  }
+
+});
+export const apiFetchNonAuth = () => createFetch({
+  baseURL: getApiURL()
+});
