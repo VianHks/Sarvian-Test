@@ -55,6 +55,8 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
   const currentRoute = routes.find((route) => route.path === location.pathname);
   const pageDescription = currentRoute?.meta?.description || '';
   const pageId = currentRoute?.meta?.appBarId || '';
+  const filteredCategories = store?.halamanResto?.productListOutput?.data
+    ?.filter((category) => category.products.totalCount > 0) || [];
 
   useEffect(() => {
     const param = {
@@ -183,10 +185,10 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
                 value={selectedValue}
                 onChange={(event) => setSelectedValue(event.target.value as string)}
               >
-                {store?.halamanResto?.productListOutput?.data?.filter((category) => category.name !== 'Menu').map((category) => (
-                  <MenuItem key={category.id} value={category.name}>
-                    {category.name}
-                  </MenuItem>
+                {filteredCategories.map((category) => (
+        <MenuItem key={category.id} value={category.name}>
+          {category.name}
+        </MenuItem>
                 ))}
               </Select>
             </FormControl>

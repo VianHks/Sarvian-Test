@@ -146,6 +146,12 @@ const DefaultProductbyCollection: ProductbyCollectionsDataModel = {
           visibleInListings: true
         }
       ],
+      collections: [
+        {
+          id: '',
+          name: ''
+        }
+      ],
       description: '',
       id: '',
       name: '',

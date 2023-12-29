@@ -1,5 +1,5 @@
 /* eslint-disable linebreak-style */
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import DiningRoundedIcon from '@mui/icons-material/DiningRounded';
@@ -211,7 +211,8 @@ const HalamanResto: PageComponent = () => {
   const filteredJadwal = jadwalOperasional.filter((resto: RestoSchedule) => {
     return resto.day.toLowerCase() === currentDay && resto.isOpen;
   });
-
+  const [colIds, setColIds] = useState<{ id: string, name: string }[]>([]);
+  const uniqueCollectionIds = new Set();
   const calculateTotal = (selectedItems: MenuItem[]) => {
     let amount = 0;
     let items = 0;
@@ -282,28 +283,45 @@ const HalamanResto: PageComponent = () => {
       first: 100
 
     };
-    const paramCollection = {
+    if (colIds && colIds.length > 0) {
+      const colIdsOnly = colIds.map((colObj) => colObj.id);
 
-      after: '',
-      channel: 'makan',
-      collection: ['Q29sbGVjdGlvbjo1MQ=='],
-      direction: 'ASC',
-      field: 'NAME',
-      first: 100
+      console.log('cekcollid', colIdsOnly);
 
-    };
+      const paramCollection = {
 
-    /*
-     * Dispatch(ChannelCommand.getChannelDetail(channelId, token || ''));
-     * Dispatch(
-     *   RatingCommand.RatingLoad(channelId)
-     * );
-     */
+        after: '',
+        channel: 'makan',
+        collection: colIdsOnly,
+        direction: 'ASC',
+        field: 'NAME',
+        first: 100
+
+      };
+
+      dispatch(ChannelCommand.getproductbyCollection(paramCollection, token || ''));
+    }
+
     dispatch(ChannelCommand.getCollectionsbyMetadata(paramMetadata, token || ''));
-    dispatch(ChannelCommand.getproductbyCollection(paramCollection, token || ''));
-  }, []);
+  }, [dispatch, colIds, token]);
 
-  console.log('cekstore', store);
+  useEffect(() => {
+    const collectionIds = (store?.halamanResto?.productListOutput?.data || [])
+      .filter((category) => category.products.totalCount > 0)
+      .map((category) => ({
+        id: category.id.toString(),
+        name: category.name
+      }));
+
+    setColIds(collectionIds);
+  }, [store?.halamanResto?.productListOutput]);
+
+  /*
+   * Console.log('cekcollid', collectionIds);
+   * Console.log('cekids', store);
+   */
+  console.log('cekdata', store?.halamanResto?.productByCollectionsOutput?.data);
+  console.log('cekid', colIds);
 
   return (
     <Box sx={{ margin: '0.5rem 0.5rem' }}>
@@ -455,100 +473,101 @@ const HalamanResto: PageComponent = () => {
                 >
                     Menu
                 </Typography>
+                {colIds.map((colId, colIndex) => (
+                  <Fragment key={colIndex}>
                 <Typography
                   sx={{ fontWeight: 'medium', textAlign: 'start', marginBottom: '0.25rem' }}
                   variant="h5"
                 >
-                    Menu Rekomendasi
+              {colId.name}
+
                 </Typography>
-                {store?.halamanResto?.productByMetadataOutput?.data?.map((obj, index) => {
-                  return (
-              <div key={obj.id} style={{ marginBottom: '0.5rem' }}>
-                <Card sx={{ paddingInline: '0.5rem' }}>
-                <Grid
-                  container={true}
-                  spacing={2}
-                  sx={{
-                    alignItems: 'center',
+                {store?.halamanResto?.productByCollectionsOutput?.data
+                  ?.filter((obj) => obj.collections.some((collection) => collection.id === colId.id))
+                  .map((obj, index) => (
+
+        <div key={obj.id} style={{ marginBottom: '0.5rem' }}>
+
+          <Card sx={{ paddingInline: '0.5rem' }}>
+            <Grid
+              container={true}
+              spacing={2}
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '0.5rem'
+              }}
+            >
+              <Grid item={true} xs={3}>
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
                     display: 'flex',
-                    justifyContent: 'space-between',
-                    marginBottom: '0.5rem'
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}
                 >
-                  <Grid item={true} xs={3}>
-                    <div
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      <img
-                        alt={obj.name}
-                        src={obj.thumbnail.url}
-                        style={{ maxHeight: '100%', maxWidth: '100%', marginTop: '0.5rem' }} />
-                    </div>
-                  </Grid>
-                  <Grid
-                    item={true}
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between'
-                    }}
-                    xs={9}
+                  <img
+                    alt={obj.name}
+                    src={obj.thumbnail.url}
+                    style={{ maxHeight: '100%', maxWidth: '100%', marginTop: '0.5rem' }} />
+                </div>
+              </Grid>
+              <Grid
+                item={true}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
+                }}
+                xs={9}
+              >
+                <Box
+                  sx={{
+                    marginTop: obj.channelListings[0].isAvailableForPurchase ? '2.5rem' : '1rem',
+                    alignItems: 'center',
+                    display: 'flex',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <Typography
+                    sx={{ fontWeight: 'bold', textAlign: 'start', marginTop: '-2rem', color: 'black' }}
+                    variant="body2"
                   >
-                    <Box
-                      sx={{
-                        marginTop: obj.availableForPurchase ? '2.5rem' : '1rem',
-                        alignItems: 'center',
-                        display: 'flex',
-                        justifyContent: 'space-between'
-                      }}
-                    >
-                      <Typography
-                        sx={{ fontWeight: 'bold', textAlign: 'start', marginTop: '-2rem', color: 'black' }}
-                        variant="body2"
-                      >
-                        {obj.name}
-                      </Typography>
-
-                    </Box>
-                    {!obj.availableForPurchase && (
+                    {obj.name}
+                  </Typography>
+                </Box>
+                {!obj.channelListings[0].isAvailableForPurchase && (
+                  <Typography
+                    sx={{
+                      fontWeight: 'bold',
+                      textAlign: 'start',
+                      color: 'red'
+                    }}
+                    variant="body2"
+                  >
+                    Persediaan Habis
+                  </Typography>
+                )}
+                {obj.channelListings[0].isAvailableForPurchase
+                  ? <div>
+                    <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
+                      <Grid item={true} xs={6}>
                         <Typography
-                          sx={{
-                            fontWeight: 'bold',
-                            textAlign: 'start',
-                            color: 'red'
-                          }}
+                          sx={{ fontWeight: 'bold', textAlign: 'start', color: '#1f66d0' }}
                           variant="body2"
                         >
-                        Persediaan Habis
+                          Rp. {obj.pricing.priceRange.start.net.amount.toLocaleString()}
                         </Typography>
-                    )}
-                    {obj.availableForPurchase
-                      ? <div>
-                    <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
-                        <Grid item={true} xs={6}>
-                            <Typography
-                              sx={{ fontWeight: 'bold', textAlign: 'start', color: '#1f66d0' }}
-                              variant="body2"
-                            >
-                               Rp. {obj.pricing.priceRange.start.net.amount.toLocaleString()}
-                            </Typography>
-                        </Grid>
-                        <Grid item={true} xs={6}>
-                            <Typography
-                              sx={{ fontWeight: 'medium', textAlign: 'end' }}
-                              variant="body2"
-                            >
-                                Terjual 4
-                            </Typography>
-                        </Grid>
+                      </Grid>
+                      <Grid item={true} xs={6}>
+                        <Typography sx={{ fontWeight: 'medium', textAlign: 'end' }} variant="body2">
+                          Terjual 4
+                        </Typography>
+                      </Grid>
                     </Grid>
-
                     <Box
                       sx={{
                         alignItems: 'center',
@@ -557,22 +576,6 @@ const HalamanResto: PageComponent = () => {
                         marginTop: '-1rem'
                       }}
                     >
-
-                        {/* {obj.customized
-                          ? <Grid container={true} sx={{ alignItems: 'center', display: 'flex' }} xs={12}>
-                        <Grid item={true} sx={{ textAlign: 'left' }} xs={2}>
-                        <DiningRoundedIcon fontSize="small" />
-                        </Grid>
-                        <Grid item={true} sx={{ textAlign: 'left' }} xs={9}>
-                        <Typography
-                          sx={{ fontWeight: 'medium', textAlign: 'start' }}
-                          variant="body2"
-                        >
-                            Bisa Di Custom
-                        </Typography>
-                        </Grid>
-                            </Grid>
-                          : null} */}
                       <Grid item={true} sx={{ display: 'flex', justifyContent: 'end' }} xs="auto">
                         <IconButton
                           aria-label="min"
@@ -596,182 +599,21 @@ const HalamanResto: PageComponent = () => {
                           aria-label="plus"
                           size="small"
                           sx={{ color: 'black' }}
-
                           onClick={() => handleIncrement(index)}
                         >
                           <AddBoxFilled size={24} />
                         </IconButton>
                       </Grid>
-
                     </Box>
-                        </div>
-                      : null}
-                  </Grid>
-
-                </Grid>
-                </Card>
-              </div>
-                  );
-                })}
-            <Typography
-              sx={{ fontWeight: 'medium', textAlign: 'start', marginBottom: '0.25rem' }}
-              variant="h5"
-            >
-                Paket Hemat
-            </Typography>
-            {store?.halamanResto?.productByCollectionsOutput?.data?.map((obj, index) => {
-              return (
-              <div key={obj.id} style={{ marginBottom: '0.5rem' }}>
-                <Card sx={{ paddingInline: '0.5rem' }}>
-                <Grid
-                  container={true}
-                  spacing={2}
-                  sx={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    marginBottom: '0.5rem'
-                  }}
-                >
-                  <Grid item={true} xs={3}>
-                    <div
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      <img
-                        alt={obj.name}
-                        src={obj.thumbnail.url}
-                        style={{ maxHeight: '100%', maxWidth: '100%', marginTop: '0.5rem' }} />
                     </div>
-                  </Grid>
-                  <Grid
-                    item={true}
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between'
-                    }}
-                    xs={9}
-                  >
-                    <Box
-                      sx={{
-                        marginTop: obj.channelListings[0].isAvailableForPurchase ? '2.5rem' : '1rem',
-                        alignItems: 'center',
-                        display: 'flex',
-                        justifyContent: 'space-between'
-                      }}
-                    >
-                      <Typography
-                        sx={{ fontWeight: 'bold', textAlign: 'start', marginTop: '-2rem', color: 'black' }}
-                        variant="body2"
-                      >
-                        {obj.name}
-                      </Typography>
-
-                    </Box>
-                    {!obj.channelListings[0].isAvailableForPurchase && (
-                        <Typography
-                          sx={{
-                            fontWeight: 'bold',
-                            textAlign: 'start',
-                            color: 'red'
-                          }}
-                          variant="body2"
-                        >
-                        Persediaan Habis
-                        </Typography>
-                    )}
-                    {obj.channelListings[0].isAvailableForPurchase
-                      ? <div>
-                    <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
-                        <Grid item={true} xs={6}>
-                            <Typography
-                              sx={{ fontWeight: 'bold', textAlign: 'start', color: '#1f66d0' }}
-                              variant="body2"
-                            >
-                               Rp. {obj.pricing.priceRange.start.net.amount.toLocaleString()}
-                            </Typography>
-                        </Grid>
-                        <Grid item={true} xs={6}>
-                            <Typography
-                              sx={{ fontWeight: 'medium', textAlign: 'end' }}
-                              variant="body2"
-                            >
-                                Terjual 2
-                            </Typography>
-                        </Grid>
-                    </Grid>
-
-                    <Box
-                      sx={{
-                        alignItems: 'center',
-                        display: 'flex',
-                        justifyContent: 'end',
-                        marginTop: '-1rem'
-                      }}
-                    >
-
-                        {/* {obj.customized
-                          ? <Grid container={true} sx={{ alignItems: 'center', display: 'flex' }} xs={12}>
-                        <Grid item={true} sx={{ textAlign: 'left' }} xs={2}>
-                        <DiningRoundedIcon fontSize="small" />
-                        </Grid>
-                        <Grid item={true} sx={{ textAlign: 'left' }} xs={9}>
-                        <Typography
-                          sx={{ fontWeight: 'medium', textAlign: 'start' }}
-                          variant="body2"
-                        >
-                            Bisa Di Custom
-                        </Typography>
-                        </Grid>
-                            </Grid>
-                          : null} */}
-                      <Grid item={true} sx={{ display: 'flex', justifyContent: 'end' }} xs="auto">
-                        <IconButton
-                          aria-label="min"
-                          size="small"
-                          sx={{ color: 'black' }}
-                          onClick={() => handleDecrementPaketHemat(index)}
-                        >
-                          <IndeterminateCheckBoxFilled size={24} />
-                        </IconButton>
-                        <Typography
-                          style={{
-                            display: 'inline-block',
-                            margin: '0 0.5rem',
-                            marginTop: '0.5rem'
-                          }}
-                          variant="body2"
-                        >
-                          0
-                        </Typography>
-                        <IconButton
-                          aria-label="plus"
-                          size="small"
-                          sx={{ color: 'black' }}
-
-                          onClick={() => handleIncrementPaketHemat(index)}
-                        >
-                          <AddBoxFilled size={24} />
-                        </IconButton>
-                      </Grid>
-
-                    </Box>
-                        </div>
-                      : null}
-                  </Grid>
-
-                </Grid>
-
-                </Card>
-              </div>
-              );
-            })}
+                  : null}
+              </Grid>
+            </Grid>
+          </Card>
+        </div>
+                  ))}
+                  </Fragment>
+                ))}
                 <Typography
                   sx={{ fontWeight: 'medium', textAlign: 'start', color: '#1F66D0' }}
                   variant="body2"
