@@ -1,7 +1,7 @@
 /* eslint-disable no-lonely-if */
 /* eslint-disable @typescript-eslint/no-dynamic-delete */
 /* eslint-disable linebreak-style */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import {
@@ -19,82 +19,31 @@ import {
 import type { PageComponent } from '@nxweb/react';
 
 import { useAuth } from '@hooks/use-auth';
+import { DEFAULT_LINES, OrderCommand } from '@models/order/reducers';
+import type { linesDataModel } from '@models/order/types';
+import { useCommand, useStore } from '@models/store';
 
-import Bakar from '@assets/images/Bakar.png';
-import Brownies from '@assets/images/Brownies.png';
-import CheeseCake from '@assets/images/CheeseCake.png';
-import Kopi from '@assets/images/Kopi.png';
-import MieBaso from '@assets/images/MieBaso.png';
-import Pisan from '@assets/images/Pisan.png';
-
-interface PesananDataModel {
-  date: string
-  order: {
-    detail: string
-    foto: string
-    harga: number
-    item: number
-    title: string
-  }[]
-  profile: string
-  resto: string
-  total: number
-}
-
-const DUMMY_PESANAN: PesananDataModel[] = [
-  {
-    date: '2 Aug 2023',
-    order: [
-      {
-        detail: 'Gg. Jalanin Dulu Aja No. 171',
-        foto: `${Pisan}`,
-        harga: 100000,
-        item: 2,
-        title: 'Ayam Goreng Pisan'
-      },
-      {
-        detail: 'Gg. Jalanin Dulu Aja No. 171',
-        foto: `${Bakar}`,
-        harga: 50000,
-        item: 2,
-        title: 'Ayam Bakar'
-      }
-    ],
-    profile: `${MieBaso}`,
-    resto: 'Resto Bunda Gila',
-    total: 150000
-  },
-  {
-    date: '2 Aug 2023',
-    order: [
-      {
-        detail: 'Gg. Jalanin Dulu Aja No. 171',
-        foto: `${CheeseCake}`,
-        harga: 100000,
-        item: 2,
-        title: 'Cheese Cake'
-      },
-      {
-        detail: 'Gg. Jalanin Dulu Aja No. 171',
-        foto: `${Brownies}`,
-        harga: 80000,
-        item: 2,
-        title: 'Brownies'
-      }
-    ],
-    profile: `${Kopi}`,
-    resto: 'Cake Mamah',
-    total: 180000
-  }
-];
+const SESSION_STORAGE_CHECKOUT = 'CheckoutId';
 
 const Keranjang: PageComponent = () => {
   const navigate = useNavigate();
   const { auth } = useAuth();
+  const token = useMemo(() => auth?.token.accessToken, [auth]);
   const [searchParams] = useSearchParams();
   const action = searchParams.get('action');
-  const [orders, setOrders] = useState<PesananDataModel[]>([]);
-  const [checkedItems, setCheckedItems] = useState<Record<string, PesananDataModel | boolean>>({});
+  const checkoutId = searchParams.get('checkoutId');
+  const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '';
+  const command = useCommand((cmd) => cmd);
+
+  const [store, dispatch] = useStore((state) => state?.order);
+  const [orders, setOrders] = useState<linesDataModel[]>(DEFAULT_LINES);
+  const [checkedItems, setCheckedItems] = useState<Record<string, linesDataModel | boolean>>({});
+  const inputTime = useMemo(() => store?.cart?.data?.checkout?.created, [store?.cart]);
+  const dateTime = new Date(inputTime || '');
+
+  const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+  const createdTime = dateTime.toLocaleDateString('en-US', options);
+
   const [selectAll, setSelectAll] = useState(false);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>, orderId: string) => {
@@ -102,14 +51,14 @@ const Keranjang: PageComponent = () => {
 
     setCheckedItems((prevCheckedItems) => {
       if (isChecked) {
-        const selectedItem = DUMMY_PESANAN.find((item) => item.resto === orderId);
+        const selectedItem = orders.find((item) => item?.id === orderId);
 
-        return { ...prevCheckedItems, [orderId]: selectedItem } as Record<string, PesananDataModel | boolean>;
+        return { ...prevCheckedItems, [orderId]: selectedItem } as Record<string, linesDataModel | boolean>;
       }
 
       const { [orderId]: omit, ...rest } = prevCheckedItems;
 
-      return rest as Record<string, PesananDataModel | boolean>;
+      return rest as Record<string, linesDataModel | boolean>;
     });
   };
 
@@ -119,10 +68,10 @@ const Keranjang: PageComponent = () => {
     setSelectAll(isChecked);
     setCheckedItems((_prevCheckedItems) => {
       if (isChecked) {
-        const selectedItems: Record<string, PesananDataModel | boolean> = {};
+        const selectedItems: Record<string, linesDataModel | boolean> = {};
 
-        DUMMY_PESANAN.forEach((item) => {
-          selectedItems[item.resto] = item;
+        orders.forEach((item) => {
+          selectedItems[item.variant?.name] = item;
         });
 
         return selectedItems;
@@ -134,7 +83,7 @@ const Keranjang: PageComponent = () => {
 
   const handleDelete = () => {
     setOrders((prevOrders) => {
-      const updatedOrders = prevOrders.filter((order) => !checkedItems[order.resto]);
+      const updatedOrders = prevOrders.filter((order) => !checkedItems[order?.variant?.name]);
 
       setCheckedItems({});
 
@@ -143,177 +92,183 @@ const Keranjang: PageComponent = () => {
   };
 
   useEffect(() => {
-    if (DUMMY_PESANAN) {
-      setOrders(DUMMY_PESANAN);
+    dispatch(
+      OrderCommand.getCart(checkoutId || '', token || '')
+    );
+  }, [dispatch, checkoutId, token]);
+
+  useEffect(() => {
+    if (store?.cart) {
+      setOrders(store?.cart?.data?.checkout?.lines);
     }
-  }, []);
+  }, [store?.cart]);
 
   return (
     <Container>
       {orders.map((obj) => {
+        const originalText = obj?.metafields?.note;
+        const truncatedText = obj?.metafields?.note.length > 20 ? `${originalText.slice(0, 15)}...` : originalText;
+
         return (
-          <Card key={obj.resto} sx={{ marginBottom: '1rem', padding: '1rem' }}>
+          <Card key={obj.id} sx={{ marginBottom: '1rem', padding: '1rem' }}>
+          <Box
+            sx={{
+              alignItems: 'center',
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '1rem'
+            }}
+          >
             <Box
               sx={{
                 alignItems: 'center',
                 display: 'flex',
-                justifyContent: 'space-between',
-                marginBottom: '1rem'
+                justifyContent: 'start'
               }}
             >
-              <Box
-                sx={{
-                  alignItems: 'center',
-                  display: 'flex',
-                  justifyContent: 'start'
-                }}
-              >
-                {action === 'edit'
-                  ? <Checkbox
-                      checked={checkedItems[obj.resto] !== undefined && typeof checkedItems[obj.resto] !== 'boolean'}
+              {action === 'edit'
+                ? <Checkbox
+                    checked={checkedItems[obj.variant?.name] !== undefined && typeof checkedItems[obj.variant?.name] !== 'boolean'}
+                    inputProps={{ 'aria-label': 'controlled' }}
+                    size="small"
+                    onChange={(event) => handleChange(event, obj.variant?.name)} />
+                : null}
+              <Avatar
+                src=""
+                sx={{ height: '24px', marginRight: '0.5rem', width: '24px' }} />
+              <Typography sx={{ fontWeight: 'bold' }} variant="body1">
+                {store?.cart?.data?.checkout?.channel?.name}
+              </Typography>
+            </Box>
+            <Box sx={{ textAlign: 'end' }}>
+              <Typography variant="caption">{createdTime}</Typography>
+            </Box>
+          </Box>
+          <div style={{ marginBottom: '1rem' }}>
+            <Grid
+              container={true}
+              spacing={2}
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '0.5rem'
+              }}
+            >
+              {action === 'edit'
+                ? <Grid
+                    item={true}
+                    sx={{ alignItems: 'top', display: 'flex', justifyContent: 'end', paddingLeft: '0rem!important' }}
+                    xs={3}
+                  >
+                    <Checkbox
+                      checked={checkedItems[obj.variant?.name] !== undefined && typeof checkedItems[obj.variant?.name] !== 'boolean'}
                       inputProps={{ 'aria-label': 'controlled' }}
                       size="small"
-                      onChange={(event) => handleChange(event, obj.resto)} />
-                  : null}
-                <Avatar
-                  src={obj.profile}
-                  sx={{ height: '24px', marginRight: '0.5rem', width: '24px' }} />
-                <Typography sx={{ fontWeight: 'bold' }} variant="body1">
-                  {obj.resto}
-                </Typography>
-              </Box>
-              <Box sx={{ textAlign: 'end' }}>
-                <Typography variant="caption">{obj.date}</Typography>
-              </Box>
-            </Box>
-            {obj.order.map((order) => {
-              return (
-                <div key={order.title} style={{ marginBottom: '1rem' }}>
-                  <Grid
-                    container={true}
-                    spacing={2}
-                    sx={{
-                      alignItems: 'center',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      marginBottom: '0.5rem'
-                    }}
-                  >
-                    {action === 'edit'
-                      ? <Grid
-                          item={true}
-                          sx={{ alignItems: 'top', display: 'flex', justifyContent: 'end', paddingLeft: '0rem!important' }}
-                          xs={3}
-                        >
-                          <Checkbox
-                            checked={checkedItems[obj.resto] !== undefined && typeof checkedItems[obj.resto] !== 'boolean'}
-                            inputProps={{ 'aria-label': 'controlled' }}
-                            size="small"
-                            onChange={(event) => handleChange(event, order.title)} />
-                        </Grid>
-                      : null}
-                    <Grid
-                      item={true}
-                      sx={{ paddingLeft: '0rem!important' }}
-                      xs={3}
-                    >
-                      <div
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        <img
-                          alt={order.title}
-                          src={order.foto}
-                          style={{ maxHeight: '100%', maxWidth: '100%' }} />
-                      </div>
-                    </Grid>
-                    <Grid
-                      item={true}
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between'
-                      }}
-                      xs={action === 'edit' ? 6 : 9}
-                    >
-                      <Box
-                        sx={{
-                          alignItems: 'center',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          marginBottom: '1rem'
-                        }}
-                      >
-                        <Typography
-                          sx={{ fontWeight: 'bold', textAlign: 'start' }}
-                          variant="body2"
-                        >
-                          {order.title}
-                        </Typography>
-                        <Typography
-                          sx={{ fontWeight: 'bold' }}
-                          variant="caption"
-                        >
-                          {order.item} item
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          alignItems: 'center',
-                          display: 'flex',
-                          justifyContent: 'space-between'
-                        }}
-                      >
-                        <Typography
-                          sx={{ fontWeight: 'bold', textAlign: 'start' }}
-                          variant="body2"
-                        >
-                          Rp. {order.harga.toLocaleString('id-ID')}
-                        </Typography>
-                      </Box>
-                    </Grid>
+                      onChange={(event) => handleChange(event, obj?.variant?.product?.name)} />
                   </Grid>
-                  <Box sx={{ display: 'flex', justifyContent: 'end', marginBottom: '1rem' }}>
-                    <TextField
-                      id="detail"
-                      size="small"
-                      sx={{ width: action === 'edit' ? '50%' : '100%' }}
-                      value={order.detail}
-                      variant="outlined" />
-                  </Box>
-                </div>
-              );
-            })}
-            <hr style={{ borderTop: 'dotted 1px' }} />
-            <Box
-              sx={{
-                alignItems: 'center',
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginBottom: '1rem'
-              }}
-            >
-              <Typography sx={{ fontWeight: 'bold' }} variant="h6">
-                Total Pembayaran
-              </Typography>
-              <Typography
-                color="primary"
-                sx={{ fontWeight: 'bold' }}
-                variant="h5"
+                : null}
+              <Grid
+                item={true}
+                sx={{ display: 'flex', justifyContent: 'center' }}
+                xs={3}
               >
-                Rp 150.000
-              </Typography>
+                <div
+                  style={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    height: '100%',
+                    justifyContent: 'center',
+                    width: '100%'
+                  }}
+                >
+                  <img
+                    alt={obj?.variant?.product?.name}
+                    src={obj?.variant?.product?.thumbnail?.url}
+                    style={{ borderRadius: '8px', maxHeight: '100%', maxWidth: '100%' }} />
+                </div>
+              </Grid>
+              <Grid
+                item={true}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
+                }}
+                xs={action === 'edit' ? 6 : 9}
+              >
+                <Box
+                  sx={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginBottom: '1rem'
+                  }}
+                >
+                  <Typography
+                    sx={{ fontWeight: 'bold', textAlign: 'start' }}
+                    variant="body2"
+                  >
+                    {obj?.variant?.product?.name}
+                  </Typography>
+                  <Typography
+                    sx={{ fontWeight: 'bold' }}
+                    variant="caption"
+                  >
+                    {obj?.quantity} item
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <Typography
+                    sx={{ fontWeight: 'bold', textAlign: 'start' }}
+                    variant="body2"
+                  >
+                    Rp. {obj?.variant?.pricing?.price?.gross?.amount.toLocaleString('id-ID')}
+                  </Typography>
+                </Box>
+              </Grid>
+            </Grid>
+            <Box sx={{ display: 'flex', justifyContent: 'end', marginBottom: '1rem' }}>
+              <TextField
+                id="detail"
+                size="small"
+                sx={{ width: action === 'edit' ? '50%' : '100%' }}
+                value={action === 'edit' ? truncatedText : originalText}
+                variant="outlined" />
             </Box>
-            <Box>
-              <Button color="primary" fullWidth={true} variant="contained">
-                Checkout
-              </Button>
-            </Box>
+          </div>
+
+          <hr style={{ borderTop: 'dotted 1px' }} />
+          <Box
+            sx={{
+              alignItems: 'center',
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '1rem'
+            }}
+          >
+            <Typography sx={{ fontWeight: 'bold' }} variant="h6">
+              Total Pembayaran
+            </Typography>
+            <Typography
+              color="primary"
+              sx={{ fontWeight: 'bold' }}
+              variant="h5"
+            >
+              Rp {obj?.totalPrice?.gross?.amount.toLocaleString('id-ID')}
+            </Typography>
+          </Box>
+          <Box>
+            <Button color="primary" fullWidth={true} variant="contained">
+              Checkout
+            </Button>
+          </Box>
           </Card>
         );
       })}
@@ -349,5 +304,4 @@ const Keranjang: PageComponent = () => {
 };
 
 Keranjang.displayName = 'Keranjang';
-
 export default Keranjang;

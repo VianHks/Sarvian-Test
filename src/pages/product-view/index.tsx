@@ -67,6 +67,8 @@ const DEFAULT_FORM_DATA: FormData = {
   variantId: ''
 };
 
+const SESSION_STORAGE_CHECKOUT = 'CheckoutId';
+
 const ProductView = () => {
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
@@ -154,6 +156,7 @@ const ProductView = () => {
     command.productView.postCreateCheckout(formData, token || '')
       .then((response) => {
         if (response) {
+          window.sessionStorage.setItem(SESSION_STORAGE_CHECKOUT, JSON.stringify(response));
           setTimeout(() => navigate(`/keranjang?checkoutId=${response}`), 1000);
         }
       });
