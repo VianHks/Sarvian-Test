@@ -1,6 +1,6 @@
 /* eslint-disable linebreak-style */
 import { Fragment, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import DiningRoundedIcon from '@mui/icons-material/DiningRounded';
 import { Alert, Avatar, Box, Button, Card, Divider, Grid, IconButton, TextField, Typography } from '@mui/material';
@@ -8,6 +8,7 @@ import { Alert, Avatar, Box, Button, Card, Divider, Grid, IconButton, TextField,
 import { AccessTimeFilled, AddBoxFilled, IndeterminateCheckBoxFilled, LocationOnFilled, StarFilled } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
 
+import { routes } from '@config/routes';
 import { useAuth } from '@hooks/use-auth';
 import { ChannelCommand } from '@models/halaman-resto/reducers';
 import { RatingCommand } from '@models/rating/commands';
@@ -199,7 +200,7 @@ const HalamanResto: PageComponent = () => {
 
   const [orders, setOrders] = useState<MenuRekomendDataModel[]>([DEFAULT_MENUREKOMEND]);
   const [ordersPaketHemat, setOrdersPaketHemat] = useState<PaketHematDataModel[]>([DEFAULT_PAKETHEMAT]);
-
+  const location = useLocation();
   const [methode, setMethode] = useState('Pesan Antar');
   const [filteredResto, setFilteredResto] = useState(DUMMY_RESTO);
   const channelId = 'Q2hhbm5lbDo0';
@@ -207,12 +208,13 @@ const HalamanResto: PageComponent = () => {
   const currentDayIndex = new Date().getDay();
   const currentDay = daysOfWeek[currentDayIndex];
   const jadwalOperasional = JSON.parse(store?.halamanResto?.channelDetailOutput?.data?.channel?.metafields?.jadwal_operasional || '[]');
-
+  const currentRoute = routes.find((route) => route.path === location.pathname);
+  let dropDownValue = currentRoute?.meta?.dropDownValue || '';
   const filteredJadwal = jadwalOperasional.filter((resto: RestoSchedule) => {
     return resto.day.toLowerCase() === currentDay && resto.isOpen;
   });
   const [colIds, setColIds] = useState<{ id: string, name: string }[]>([]);
-  const uniqueCollectionIds = new Set();
+
   const calculateTotal = (selectedItems: MenuItem[]) => {
     let amount = 0;
     let items = 0;
@@ -303,6 +305,17 @@ const HalamanResto: PageComponent = () => {
     }
 
     dispatch(ChannelCommand.getCollectionsbyMetadata(paramMetadata, token || ''));
+    dispatch(ChannelCommand.getChannelDetail(channelId, token || ''));
+    dispatch(
+      RatingCommand.RatingLoad(channelId)
+    )
+      .catch((err: unknown) => {
+        console.error(err);
+      });
+
+    return () => {
+      dispatch(RatingCommand.RatingClear());
+    };
   }, [dispatch, colIds, token]);
 
   useEffect(() => {
@@ -314,14 +327,9 @@ const HalamanResto: PageComponent = () => {
       }));
 
     setColIds(collectionIds);
-  }, [store?.halamanResto?.productListOutput]);
+  }, [store?.halamanResto?.productListOutput, dropDownValue]);
 
-  /*
-   * Console.log('cekcollid', collectionIds);
-   * Console.log('cekids', store);
-   */
-  console.log('cekdata', store?.halamanResto?.productByCollectionsOutput?.data);
-  console.log('cekid', colIds);
+  console.log('cekdihalrestonilainya', dropDownValue);
 
   return (
     <Box sx={{ margin: '0.5rem 0.5rem' }}>
@@ -450,7 +458,7 @@ const HalamanResto: PageComponent = () => {
                         {obj.customerId}
                       </Typography>
                         <Box sx={{ marginLeft: '0.5rem' }}>
-                          <Rating rating={obj.rating.toString()} />
+                        {obj.rating ? <Rating rating={obj.rating.toString()} /> : null}
                         </Box>
                     </Box>
                   </Grid>

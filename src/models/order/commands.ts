@@ -13,25 +13,25 @@ const orderCommand = {
     return {
       type: OrderActionType.OrderClear
     };
-  },
-  orderLoad: (token: string) => {
-    return async (dispatch) => {
-      try {
-        const res = await getListOrder(token);
-
-        if (res) {
-          const value = res as OrderModel;
-
-          dispatch({
-            type: OrderActionType.OrderLoad,
-            value
-          });
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
   }
+  // orderLoad: (token: string) => {
+  //   return async (dispatch) => {
+  //     try {
+  //       const res = await getListOrder(token);
+
+  //       if (res) {
+  //         const value = res as OrderModel;
+
+  //         dispatch({
+  //           type: OrderActionType.OrderLoad,
+  //           value
+  //         });
+  //       }
+  //     } catch (err) {
+  //       console.error(err);
+  //     }
+  //   };
+  // }
 
 } satisfies Command<RootModel, OrderAction>;
 

@@ -161,11 +161,11 @@ const Orders: PageComponent = () => {
 
   useEffect(() => {
     if (token) {
-      dispatch(orderCommand.orderLoad(token))
+      // dispatch(orderCommand.orderLoad(token))
 
-        .catch((err: unknown) => {
-          console.error(err);
-        });
+      //   .catch((err: unknown) => {
+      //     console.error(err);
+      //   });
       dispatch(checkoutCommand.loadCheckoutMenu(token))
 
         .catch((err: unknown) => {
@@ -182,17 +182,17 @@ const Orders: PageComponent = () => {
       };
     }
 
-    if (id) {
-      const selectedOrder = store?.order?.orderOutput?.find((order) => order.NO_ORDER === parseInt(id, 10));
+    // if (id) {
+    //   const selectedOrder = store?.order?.orderOutput?.find((order) => order.NO_ORDER === parseInt(id, 10));
 
-      if (selectedOrder) {
-        setDetailOrder([selectedOrder]);
-      } else {
-        setDetailOrder([]);
-      }
-    } else {
-      setDetailOrder([]);
-    }
+    //   if (selectedOrder) {
+    //     setDetailOrder([selectedOrder]);
+    //   } else {
+    //     setDetailOrder([]);
+    //   }
+    // } else {
+    //   setDetailOrder([]);
+    // }
   }, [id]);
 
   useEffect(() => {

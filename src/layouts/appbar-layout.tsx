@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState  } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { SearchOutlined } from '@mui/icons-material';
@@ -17,6 +17,8 @@ import { routes } from '@config/routes';
 import { useAuth } from '@hooks/use-auth';
 import { ChannelCommand } from '@models/halaman-resto/reducers';
 import { useStore } from '@models/store';
+
+import type { SelectChangeEvent } from '@mui/material/Select';
 
 type ActionType = 'detailpesanan' | undefined;
 
@@ -41,7 +43,7 @@ const DUMMY_MENU = [
 
 const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, readonly action?: ActionType }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [selectedValue, setSelectedValue] = useState('');
+  const [selectedValue, setSelectedValue] = useState<string>('');
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -51,10 +53,13 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
   const [store, dispatch] = useStore((state) => state);
   let dynamicIcon = null;
   let dynamicHandler: React.ReactNode = null;
+  const selectedValueRef = useRef(null);
 
+  const colRefs: React.RefObject<HTMLDivElement>[] = [];
   const currentRoute = routes.find((route) => route.path === location.pathname);
   const pageDescription = currentRoute?.meta?.description || '';
   const pageId = currentRoute?.meta?.appBarId || '';
+  let dropDownValue = currentRoute?.meta?.dropDownValue || '';
   const filteredCategories = store?.halamanResto?.productListOutput?.data
     ?.filter((category) => category.products.totalCount > 0) || [];
 
@@ -75,7 +80,25 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
     setAnchorEl(document.body);
   }, []);
 
-  console.log('cekstorefromlyaout', store);
+  const handleSelectChange = (event: SelectChangeEvent<string>) => {
+    const selectedCategory = event.target.value as string;
+
+    // Find the corresponding ref for the selected category
+    const selectedRef = colRefs.find(
+      (ref) => ref.current && ref.current.getAttribute('data-category') === selectedCategory
+    );
+
+    if (selectedRef && selectedRef.current) {
+      // Scroll to the selected component
+      selectedRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    dropDownValue = selectedCategory;
+    console.log('cekdropdvalue', dropDownValue);
+    setSelectedValue(selectedCategory);
+  };
+
+  
 
   const handleBack = () => {
     console.log('cek');
@@ -183,7 +206,8 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
                 labelId="filter-label"
                 sx={{ width: 200, marginRight: 1, color: 'black' }}
                 value={selectedValue}
-                onChange={(event) => setSelectedValue(event.target.value as string)}
+                // OnChange={(event) => setSelectedValue(event.target.value as string)}
+                onChange={handleSelectChange}
               >
                 {filteredCategories.map((category) => (
         <MenuItem key={category.id} value={category.name}>
