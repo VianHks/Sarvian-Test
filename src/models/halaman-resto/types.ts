@@ -186,6 +186,9 @@ export interface ProductbyCollectionsDataModel {
   }
   totalCount: number
 }
+export interface CheckoutDataModel {
+  checkout_id: string
+}
 interface UlasanAndRating {
   id: number
   userName: string
@@ -238,6 +241,7 @@ interface HalamanRestoModel {
   productListOutput?: ProductListDataModel
   productByMetadataOutput?: ProductByMetadataDataModel
   productByCollectionsOutput?: ProductbyCollectionsDataModel
+  checkoutOutput?: CheckoutDataModel
 
 }
 
@@ -253,7 +257,8 @@ enum HalamanRestoActionType {
   ChannelDetailLoad = 'channel-channelDetail-load',
   ProductListLoad = 'productlist-load',
   ProductbyMetadataLoad = 'productbyMetadata-load',
-  ProductbyCollectionLoad = 'productbyCollection-load'
+  ProductbyCollectionLoad = 'productbyCollection-load',
+  CheckoutLoad = 'checkout-load'
 }
 
   type HalamanRestoAction = {
@@ -263,6 +268,9 @@ enum HalamanRestoActionType {
   } | {
     data: HalamanRestoModel
     type: HalamanRestoActionType.ChannelDetailLoad
+  } | {
+    data: HalamanRestoModel
+    type: HalamanRestoActionType.CheckoutLoad
   } | {
     data: HalamanRestoModel
     type: HalamanRestoActionType.ProductbyCollectionLoad

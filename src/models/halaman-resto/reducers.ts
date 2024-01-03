@@ -4,7 +4,7 @@ import type { TAction, TDispatch } from '@models/types';
 
 import { HalamanRestoActionType } from './types.js';
 
-import type { ChannelDetailDataModel, HalamanRestoAction, HalamanRestoModel, ProductbyCollectionsDataModel, ProductByMetadataDataModel, ProductListDataModel } from './types.js';
+import type { ChannelDetailDataModel, CheckoutDataModel, HalamanRestoAction, HalamanRestoModel, ProductbyCollectionsDataModel, ProductByMetadataDataModel, ProductListDataModel } from './types.js';
 
 const DefaultChannelDetail: ChannelDetailDataModel = {
   avgRating: '',
@@ -189,12 +189,15 @@ const DefaultProductbyCollection: ProductbyCollectionsDataModel = {
   },
   totalCount: 0
 };
-
+const DefaultCheckout: CheckoutDataModel = {
+  checkout_id: ''
+};
 const ChannelDefault: HalamanRestoModel = {
   channelDetailOutput: DefaultChannelDetail,
   productListOutput: DefaultProductList,
   productByMetadataOutput: DefaultCollectionsbyMetadata,
-  productByCollectionsOutput: DefaultProductbyCollection
+  productByCollectionsOutput: DefaultProductbyCollection,
+  checkoutOutput: DefaultCheckout
 };
 const HalamanRestoReducer = (
   state: HalamanRestoModel = ChannelDefault,
@@ -208,6 +211,8 @@ const HalamanRestoReducer = (
     case HalamanRestoActionType.ProductbyMetadataLoad:
       return { ...state, ...action.data };
     case HalamanRestoActionType.ProductbyCollectionLoad:
+      return { ...state, ...action.data };
+    case HalamanRestoActionType.CheckoutLoad:
       return { ...state, ...action.data };
 
     default:
@@ -314,6 +319,32 @@ export const ChannelCommand = {
               dispatch({
                 data: ChannelDefault,
                 type: HalamanRestoActionType.ProductbyCollectionLoad
+              });
+            }
+          }
+        });
+    };
+  },
+  postCheckout: (params: unknown, token: string): TAction<HalamanRestoAction, void> => {
+    return (dispatch: TDispatch<HalamanRestoAction>) => {
+      return apiFetch(token)
+        .post(`/foodbuyer/0.1/checkout`, params)
+        .then((response) => {
+          if (response.status === 200) {
+            if (response.data !== null) {
+              console.log('cekresp', response.data);
+              const checkout: HalamanRestoModel = {
+                checkoutOutput: response.data as CheckoutDataModel
+              };
+
+              dispatch({
+                data: checkout,
+                type: HalamanRestoActionType.CheckoutLoad
+              });
+            } else {
+              dispatch({
+                data: ChannelDefault,
+                type: HalamanRestoActionType.CheckoutLoad
               });
             }
           }

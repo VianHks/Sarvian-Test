@@ -3,9 +3,10 @@ import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import DiningRoundedIcon from '@mui/icons-material/DiningRounded';
-import { Alert, Avatar, Box, Button, Card, Divider, Grid, IconButton, TextField, Typography } from '@mui/material';
+import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+import { Alert, Avatar, Box, Button, Card, Divider, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField, Toolbar, Typography } from '@mui/material';
 
-import { AccessTimeFilled, AddBoxFilled, IndeterminateCheckBoxFilled, LocationOnFilled, StarFilled } from '@nxweb/icons/material';
+import { AccessTimeFilled, AddBoxFilled, ArrowBackFilled, IndeterminateCheckBoxFilled, LocationOnFilled, SearchOutlined, StarFilled } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
 
 import { routes } from '@config/routes';
@@ -20,6 +21,8 @@ import Rating from './rating';
 import Bakar from '@assets/images/Bakar.png';
 import ProfilFoto from '@assets/images/Orang.svg';
 import Pisan from '@assets/images/Pisan.png';
+
+import type { SelectChangeEvent } from '@mui/material/Select';
 
 // eslint-disable-next-line import/exports-last
 export interface RestoItem {
@@ -185,6 +188,62 @@ interface RestoSchedule {
   isOpen: boolean
 }
 
+interface LinesModel {
+  metadata: [
+    {
+      key: string
+      value: string
+
+    }
+  ]
+  price: string
+  quantity: number
+  variantId: string
+}
+const DefaultLines: LinesModel = {
+  metadata: [
+    {
+      key: '',
+      value: ''
+
+    }
+  ],
+  price: '',
+  quantity: 0,
+  variantId: ''
+};
+
+interface PayloadDataModel {
+  after: string
+  channel: string
+  deliveryMethodId: string
+  first: number
+  lines: string[]
+  userId: string
+}
+const DEFAULT_PAYLOAD: PayloadDataModel = {
+  after: '',
+  channel: 'makan',
+  deliveryMethodId: 'string',
+  first: 100,
+  lines: [''],
+  userId: ''
+};
+
+const DATA = [
+  {
+    after: '',
+    channel: 'makan',
+    deliveryMethodId: 'string',
+    first: 100,
+    lines: [
+      { ...DefaultLines }
+    ],
+    userId: 'string'
+  }
+
+];
+
 const HalamanResto: PageComponent = () => {
   interface MenuItem {
     count: number
@@ -197,7 +256,7 @@ const HalamanResto: PageComponent = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const navigate = useNavigate();
-
+  // const [childChecked, setChildChecked] = useState<Record<string, []>>({});
   const [orders, setOrders] = useState<MenuRekomendDataModel[]>([DEFAULT_MENUREKOMEND]);
   const [ordersPaketHemat, setOrdersPaketHemat] = useState<PaketHematDataModel[]>([DEFAULT_PAKETHEMAT]);
   const location = useLocation();
@@ -208,13 +267,18 @@ const HalamanResto: PageComponent = () => {
   const currentDayIndex = new Date().getDay();
   const currentDay = daysOfWeek[currentDayIndex];
   const jadwalOperasional = JSON.parse(store?.halamanResto?.channelDetailOutput?.data?.channel?.metafields?.jadwal_operasional || '[]');
-  const currentRoute = routes.find((route) => route.path === location.pathname);
-  let dropDownValue = currentRoute?.meta?.dropDownValue || '';
+
   const filteredJadwal = jadwalOperasional.filter((resto: RestoSchedule) => {
     return resto.day.toLowerCase() === currentDay && resto.isOpen;
   });
   const [colIds, setColIds] = useState<{ id: string, name: string }[]>([]);
+  const [selectedValue, setSelectedValue] = useState<string>('');
 
+  const filteredCategories = store?.halamanResto?.productListOutput?.data
+    ?.filter((category) => category.products.totalCount > 0) || [];
+
+  const [formData, setFormData] = useState(DATA);
+  const [childChecked, setChildChecked] = useState<Record<string, boolean>>({});
   const calculateTotal = (selectedItems: MenuItem[]) => {
     let amount = 0;
     let items = 0;
@@ -232,21 +296,17 @@ const HalamanResto: PageComponent = () => {
   };
 
   const handleIncrement = (index: number) => {
-    const updatedOrders = [...orders];
+    const updatedFormData = [...formData];
 
-    updatedOrders[index].count += 1;
-    setOrders(updatedOrders);
-    calculateTotal([...updatedOrders, ...ordersPaketHemat]);
+    updatedFormData[0].lines[index].quantity++;
+    setFormData(updatedFormData);
   };
 
   const handleDecrement = (index: number) => {
-    if (orders[index].count > 0) {
-      const updatedOrders = [...orders];
+    const updatedFormData = [...formData];
 
-      updatedOrders[index].count -= 1;
-      setOrders(updatedOrders);
-      calculateTotal([...updatedOrders, ...ordersPaketHemat]);
-    }
+    updatedFormData[0].lines[index].quantity = Math.max(0, updatedFormData[0].lines[index].quantity - 1);
+    setFormData(updatedFormData);
   };
 
   const handleIncrementPaketHemat = (index: number) => {
@@ -272,10 +332,37 @@ const HalamanResto: PageComponent = () => {
   };
 
   const handleLanjutPembayaranClick = () => {
-    navigate('/keranjang');
+    const param = {
+
+      after: '',
+      channel: 'makan',
+      deliveryMethodId: 'string',
+      first: 100,
+      lines: [
+        { ...DefaultLines }
+      ],
+      userId: 'string'
+    };
+
+    dispatch(ChannelCommand.postCheckout(param, token || ''));
+
+    // Navigate('/keranjang');
   };
 
   useEffect(() => {
+    const param = {
+
+      after: '',
+      channel: 'makan',
+      direction: 'ASC',
+      field: 'NAME',
+      first: 100,
+      published: 'PUBLISHED'
+
+    };
+
+    dispatch(ChannelCommand.getCollections(param, token || ''));
+
     const paramMetadata = {
 
       after: '',
@@ -285,24 +372,24 @@ const HalamanResto: PageComponent = () => {
       first: 100
 
     };
-    if (colIds && colIds.length > 0) {
-      const colIdsOnly = colIds.map((colObj) => colObj.id);
+    // If (colIds && colIds.length > 0) {
+    const colIdsOnly = colIds.map((colObj) => colObj.id);
 
-      console.log('cekcollid', colIdsOnly);
+    console.log('cekcollid', colIdsOnly);
 
-      const paramCollection = {
+    const paramCollection = {
 
-        after: '',
-        channel: 'makan',
-        collection: colIdsOnly,
-        direction: 'ASC',
-        field: 'NAME',
-        first: 100
+      after: '',
+      channel: 'makan',
+      collection: ['Q29sbGVjdGlvbjo1MQ==', 'Q29sbGVjdGlvbjoxMw=='],
+      direction: 'ASC',
+      field: 'NAME',
+      first: 100
 
-      };
+    };
 
-      dispatch(ChannelCommand.getproductbyCollection(paramCollection, token || ''));
-    }
+    dispatch(ChannelCommand.getproductbyCollection(paramCollection, token || ''));
+    // }
 
     dispatch(ChannelCommand.getCollectionsbyMetadata(paramMetadata, token || ''));
     dispatch(ChannelCommand.getChannelDetail(channelId, token || ''));
@@ -316,7 +403,11 @@ const HalamanResto: PageComponent = () => {
     return () => {
       dispatch(RatingCommand.RatingClear());
     };
-  }, [dispatch, colIds, token]);
+  }, [dispatch, token]);
+
+  useEffect(() => {
+    console.log('cekvalue', selectedValue);
+  }, [selectedValue]);
 
   useEffect(() => {
     const collectionIds = (store?.halamanResto?.productListOutput?.data || [])
@@ -326,13 +417,66 @@ const HalamanResto: PageComponent = () => {
         name: category.name
       }));
 
+    console.log('Collection IDs:', collectionIds);
     setColIds(collectionIds);
-  }, [store?.halamanResto?.productListOutput, dropDownValue]);
+  }, [store?.halamanResto?.productListOutput]);
 
-  console.log('cekdihalrestonilainya', dropDownValue);
+  const scrollToKategoriMenu = (event: SelectChangeEvent<string>) => {
+    const selectedCategory = event.target.value as string;
+
+    const footerElement = document.getElementById('tes');
+
+    footerElement?.scrollIntoView({ behavior: 'smooth' });
+    setSelectedValue(selectedCategory);
+  };
+
+  console.log('cekstore', store);
 
   return (
+    <div>
+    <Toolbar>
+          <IconButton
+            aria-label="back"
+            color="default"
+            edge="start"
+            size="large"
+            sx={{ mr: 2, marginTop: '0.2rem' }}
+          >
+            <ArrowBackFilled />
+          </IconButton>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <FormControl sx={{ marginTop: '0.5rem' }}>
+            <InputLabel id="filter-label" sx={{ color: 'black' }}>Menu</InputLabel>
+              <Select
+                id="filter"
+                label="Menu"
+                labelId="filter-label"
+                sx={{ width: 200, marginRight: 1, color: 'black' }}
+
+                value={selectedValue}
+                onChange={scrollToKategoriMenu}
+
+              >
+
+{filteredCategories.map((category) => (
+        <MenuItem key={category.id} value={category.name}>
+          {category.name}
+        </MenuItem>
+))}
+
+              </Select>
+            </FormControl>
+
+            <IconButton aria-label="search" color="inherit" sx={{ marginTop: '0.5rem' }}>
+                <SearchOutlined fontSize="25px" style={{ color: 'black' }} />
+            </IconButton>
+              <IconButton aria-label="share" color="inherit" sx={{ marginTop: '0.5rem' }}>
+              <ShareOutlinedIcon fontSize="medium" style={{ color: 'black' }} />
+              </IconButton>
+          </Box>
+    </Toolbar>
     <Box sx={{ margin: '0.5rem 0.5rem' }}>
+
 {filteredJadwal.map((resto: RestoSchedule) => {
   const currentHour = new Date().getHours();
   const [openHour, closeHour] = resto.open.split(' - ').map((time) => parseInt(time));
@@ -484,6 +628,7 @@ const HalamanResto: PageComponent = () => {
                 {colIds.map((colId, colIndex) => (
                   <Fragment key={colIndex}>
                 <Typography
+                  id="tes"
                   sx={{ fontWeight: 'medium', textAlign: 'start', marginBottom: '0.25rem' }}
                   variant="h5"
                 >
@@ -520,7 +665,7 @@ const HalamanResto: PageComponent = () => {
                   <img
                     alt={obj.name}
                     src={obj.thumbnail.url}
-                    style={{ maxHeight: '100%', maxWidth: '100%', marginTop: '0.5rem' }} />
+                    style={{ maxHeight: '100%', maxWidth: '100%', marginTop: '0.5rem', borderRadius: '8px' }} />
                 </div>
               </Grid>
               <Grid
@@ -594,6 +739,7 @@ const HalamanResto: PageComponent = () => {
                           <IndeterminateCheckBoxFilled size={24} />
                         </IconButton>
                         <Typography
+                          key={obj.id}
                           style={{
                             display: 'inline-block',
                             margin: '0 0.5rem',
@@ -603,6 +749,19 @@ const HalamanResto: PageComponent = () => {
                         >
                           0
                         </Typography>
+                        {/* {formData.map((item, itemIndex) => item.lines.map((line, lineIndex) => (
+    <Typography
+      key={`${itemIndex}-${lineIndex}`}
+      style={{
+        display: 'inline-block',
+        margin: '0 0.5rem',
+        marginTop: '0.5rem'
+      }}
+      variant="body2"
+    >
+      {line.quantity}
+    </Typography>
+                        )))} */}
                         <IconButton
                           aria-label="plus"
                           size="small"
@@ -657,6 +816,7 @@ const HalamanResto: PageComponent = () => {
             </Button>
             <FloatingShoppingButton onClick={handleShoppingButtonClick} />
     </Box>
+    </div>
   );
 };
 
