@@ -86,15 +86,6 @@ export const routes: Route[] = [
     path: '/product-view',
     search: true
   },
-
-  {
-    auth: false,
-    element: lazy(() => import('@pages/product-view/gantiitem.js')),
-    hash: true,
-    layout: 'blank',
-    path: '/ganti-item',
-    search: true
-  },
   {
     auth: false,
     element: lazy(() => import('@pages/halaman-resto/index.js')),

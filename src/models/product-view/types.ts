@@ -1,33 +1,3 @@
-interface Nasi {
-  id: number
-  checked: boolean
-  itemName: string
-  price: number
-
-}
-
-interface Menu {
-  id: number
-  itemName: string
-  price: number
-  terjual: number
-
-}
-interface Ayam {
-  id: number
-  itemName: string
-  price: number
-
-}
-interface Sambel {
-  id: number
-  itemName: string
-  price: number
-
-}
-
-// NEW DATA MODEL
-
 interface ChannelListingsDataModel {
   availableForPurchase: string
   channel: {
@@ -95,26 +65,11 @@ interface CreateCheckoutDataModel {
 }
 
 interface ProductViewsModel {
-  nasiOutput?: Nasi[]
-  ayamOutput?: Ayam[]
-  sambelOutput?: Sambel[]
-  menuOutput?: Menu[]
-
-  // NEW
   productDetails?: ProductDetailsDataModel
   responseCreateCheckout?: CreateCheckoutDataModel
 }
 
 enum ProductViewsActionType {
-  NasiLoad = 'nasi-load',
-  NasiClear = 'nasi-clear',
-  AyamLoad = 'ayam-load',
-  AyamClear = 'ayam-clear',
-  SambelLoad = 'sambel-load',
-  SambelClear = 'sambel-clear',
-  MenuLoad = 'menu-load',
-  MenuClear = 'menu-clear',
-  // NEW
   GetProductDetails = '⌘➝Product-View➝GetProductDetails',
   GetCheckoutId = '⌘➝Product-View➝GetCheckoutId'
 
@@ -126,27 +81,6 @@ type ProductViewsAction = {
 } | {
   data: ProductViewsModel
   type: ProductViewsActionType.GetProductDetails
-} | {
-  type: ProductViewsActionType.AyamClear
-} | {
-  type: ProductViewsActionType.AyamLoad
-  value?: ProductViewsModel
-} | {
-  type: ProductViewsActionType.MenuClear
-} | {
-  type: ProductViewsActionType.MenuLoad
-  value?: ProductViewsModel
-
-} | {
-  type: ProductViewsActionType.NasiClear
-} | {
-  type: ProductViewsActionType.NasiLoad
-  value?: ProductViewsModel
-} | {
-  type: ProductViewsActionType.SambelClear
-} | {
-  type: ProductViewsActionType.SambelLoad
-  value?: ProductViewsModel
 };
 
 export { ProductViewsActionType };

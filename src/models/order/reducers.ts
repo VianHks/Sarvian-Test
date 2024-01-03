@@ -85,6 +85,25 @@ const OrderReducer = (
 };
 
 const OrderCommand = {
+  deleteCheckoutLines: (checkoutId: string, linesIds: string[], token: string): Promise<string> => {
+    return fetch(`https://apigateway-dev.tokrum.com:8081/foodbuyer/0.1/checkout/${checkoutId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token
+      },
+      body: JSON.stringify({ checkoutId, linesIds })
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          return 'ok';
+        }
+
+        return 'err';
+      }).catch(() => {
+        return 'err';
+      });
+  },
   getCart: (checkoutId: string, token: string): TAction<OrderAction, void> => {
     return (dispatch: TDispatch<OrderAction>) => {
       return apiFetch(token).get(`/foodbuyer/0.1/checkout/${checkoutId}`).then((response) => {
@@ -107,6 +126,21 @@ const OrderCommand = {
         }
       });
     };
+  },
+  postCreateOrder: (payload: unknown, token: string): Promise<string> => {
+    return apiFetch(token).post(`/foodbuyer/0.1/order`, payload)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .then((response: any) => {
+        const id: string = response?.data?.orderId;
+
+        if (response.status === 200) {
+          return id;
+        }
+
+        return 'err';
+      }).catch(() => {
+        return 'err';
+      });
   }
 };
 

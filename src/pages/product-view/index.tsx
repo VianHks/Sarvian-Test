@@ -6,8 +6,6 @@ import {
   Box,
   Button,
   Card,
-  Container,
-  Drawer,
   IconButton,
   TextField,
   Typography,
@@ -21,6 +19,7 @@ import {
 
 import { Grid } from '@components/material.js';
 import { useAuth } from '@hooks/use-auth';
+import { OrderCommand } from '@models/order/reducers';
 import { useCommand, useStore } from '@models/store';
 
 import SwipeableTextMobileStepper from './slider';
@@ -51,6 +50,7 @@ const DEFAULT_DESCRIPTION: DescriptionDataModel = {
 
 interface FormData {
   channel: string
+  deliveryMethodId: string
   price: string
   quantity: number
   userId: string
@@ -60,12 +60,31 @@ interface FormData {
 
 const DEFAULT_FORM_DATA: FormData = {
   channel: '',
+  deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
   price: '',
   quantity: 0,
   userId: '',
   value: '',
   variantId: ''
 };
+
+interface Payload {
+  after: string
+  channel: string
+  deliveryMethodId: string
+  first: number
+  lines: {
+    metadata:
+    {
+      key: string
+      value: string
+    }[]
+    price: string
+    quantity: number
+    variantId: string
+  }[]
+  userId: string
+}
 
 const SESSION_STORAGE_CHECKOUT = 'CheckoutId';
 
@@ -77,13 +96,14 @@ const ProductView = () => {
   const [searchParams] = useSearchParams();
   const channel = searchParams.get('channel');
   const productId = searchParams.get('productId');
-  const variantId = searchParams.get('variantId');
+  const variantId = searchParams.get('variantId') || 'UHJvZHVjdFZhcmlhbnQ6NDEy';
   const command = useCommand((cmd) => cmd);
 
-  const [store, dispatch] = useStore((state) => state?.productView);
-  const [description, setDescription] = useState<DescriptionDataModel>(DEFAULT_DESCRIPTION);
+  const [store, dispatch] = useStore((state) => state);
   const [formData, setFormData] = useState<FormData>(DEFAULT_FORM_DATA);
-  const productPrice = useMemo(() => store?.productDetails?.data?.product.variants[0]?.channelListings[0]?.price?.amount, [store]);
+  const [description, setDescription] = useState<DescriptionDataModel>(DEFAULT_DESCRIPTION);
+  const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '';
+  const productPrice = useMemo(() => store?.productView?.productDetails?.data?.product.variants[0]?.channelListings[0]?.price?.amount, [store]);
   const [total, setTotal] = useState(0);
 
   const [count, setCount] = useState(0);
@@ -113,8 +133,14 @@ const ProductView = () => {
   }, [dispatch]);
 
   useEffect(() => {
+    if (checkoutIdFromStorage !== '') {
+      dispatch(OrderCommand.getCart(checkoutIdFromStorage, token || ''));
+    }
+  }, [checkoutIdFromStorage, dispatch, token]);
+
+  useEffect(() => {
     if (store) {
-      const descriptionString = store?.productDetails?.data?.product.description || '';
+      const descriptionString = store?.productView?.productDetails?.data?.product.description || '';
       const descriptionObject = descriptionString
         ? JSON.parse(descriptionString)
         : DEFAULT_DESCRIPTION;
@@ -141,6 +167,29 @@ const ProductView = () => {
   }, [channel, count, productId, store, variantId]);
 
   useEffect(() => {
+    if (checkoutIdFromStorage && store?.order?.cart?.data?.checkout) {
+      const { lines } = store.order.cart.data.checkout;
+      const variantIndex = lines.findIndex((item) => item?.variant?.id === variantId);
+
+      if (variantIndex !== -1) {
+        const processedFormData = {
+          channel: 'makan',
+          deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
+          price: lines[variantIndex]?.totalPrice?.gross?.amount.toString() || '',
+          quantity: lines[variantIndex]?.quantity || 0,
+          userId: 'VXNlcjozMTc4NjkwMDc=',
+          value: lines[variantIndex]?.metafields?.note || '',
+          variantId: variantId || ''
+        };
+
+        setFormData(processedFormData);
+        setCount(formData.quantity);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkoutIdFromStorage, store?.order]);
+
+  useEffect(() => {
     if (count !== 0 && productPrice) {
       setTotal(count * productPrice);
       setFormData({
@@ -153,7 +202,28 @@ const ProductView = () => {
   }, [count, productPrice]);
 
   const handleAddToCart = () => {
-    command.productView.postCreateCheckout(formData, token || '')
+    const payload: Payload = {
+      after: '',
+      channel: 'makan',
+      deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
+      first: 100,
+      lines: [
+        {
+          metadata: [
+            {
+              key: 'note',
+              value: formData.value
+            }
+          ],
+          price: formData.price,
+          quantity: 1,
+          variantId: formData.variantId
+        }
+      ],
+      userId: 'VXNlcjozMTc4NjkwMDc='
+    };
+
+    command.productView.postCreateCheckout(payload, token || '')
       .then((response) => {
         if (response) {
           window.sessionStorage.setItem(SESSION_STORAGE_CHECKOUT, JSON.stringify(response));
@@ -165,10 +235,10 @@ const ProductView = () => {
   return (
     <Box sx={{ minHeight: '100vh', position: 'relative' }}>
 
-        <SwipeableTextMobileStepper images={store?.productDetails?.data?.product?.media || []} />
+        <SwipeableTextMobileStepper images={store?.productView?.productDetails?.data?.product?.media || []} />
         <Card sx={{ borderRadius: '1rem', bottom: 0, height: '650px', left: 0, padding: '1rem 1.5rem', position: 'fixed', right: 0 }}>
         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.5rem' }} variant="h3">
-          {store?.productDetails?.data?.product?.name}
+          {store?.productView?.productDetails?.data?.product?.name}
         </Typography>
         <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '0.5rem' }}>
           <Grid item={true} xs={6}>
@@ -176,7 +246,7 @@ const ProductView = () => {
               sx={{ color: theme?.palette?.primary?.main, fontWeight: 'bold', marginBottom: '0.25rem' }}
               variant="h5"
             >
-              Rp {store?.productDetails?.data?.product?.variants[0]?.channelListings[0]?.price?.amount.toLocaleString('id-ID')}
+              Rp {store?.productView?.productDetails?.data?.product?.variants[0]?.channelListings[0]?.price?.amount.toLocaleString('id-ID')}
             </Typography>
           </Grid>
           <Grid item={true} xs="auto">
@@ -210,6 +280,7 @@ const ProductView = () => {
             size="small"
             sx={{ marginBottom: '1rem', width: '100%' }}
             type="text"
+            value={formData?.value}
             variant="outlined"
             onChange={(e) => setFormData({ ...formData, value: e.target.value })} />
           <Grid
