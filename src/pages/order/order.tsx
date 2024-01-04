@@ -172,6 +172,16 @@ const Order: PageComponent = () => {
   };
 
   useEffect(() => {
+    const param = {
+      after: '',
+      customer: 'string',
+      direction: 'DESC',
+      field: 'name',
+      first: 100,
+      paymentStatus: 'UNFULFILLED',
+      status: 'string'
+    };
+
     dispatch(OrderCommand.getOrderDetail(idOrder, token || ''));
   }, []);
 
@@ -898,7 +908,7 @@ const Order: PageComponent = () => {
                     Single Order
                   </Typography>
                 </Grid>
-              </Grid>
+        </Grid>
               <hr style={{ opacity: '0.2' }} />
               <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                 <Box

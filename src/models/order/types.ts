@@ -1,5 +1,82 @@
 /* eslint-disable import/exports-last */
 /* eslint-disable linebreak-style */
+export interface OrderList {
+  data: [
+    {
+      billingAddress: {
+        city: string
+        cityArea: string
+        companyName: string
+        country: {
+          code: string
+          country: string
+        }
+        countryArea: string
+        firstName: string
+        id: string
+        lastName: string
+        phone: string
+        postalCode: string
+        streetAddress1: string
+        streetAddress2: string
+      }
+      created: string
+      id: string
+      lines: [
+        {
+          id: string
+          isShippingRequired: string
+          metafields: {
+            note: string
+          }
+          productName: string
+          quantity: string
+          quantityFulfilled: string
+          thumbnail: {
+            url: string
+          }
+          totalPrice: {
+            gross: {
+              amount: string
+              currency: string
+            }
+            net: {
+              amount: string
+              currency: string
+            }
+          }
+          unitPrice: {
+            gross: {
+              amount: string
+              currency: string
+            }
+            net: {
+              amount: string
+              currency: string
+            }
+          }
+        }
+      ]
+      number: string
+      paymentStatus: string
+      status: string
+      total: {
+        gross: {
+          amount: number
+          currency: string
+        }
+      }
+      userEmail: string
+    }
+  ]
+  pageInfo: {
+    endCursor: string
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+    startCursor: string
+  }
+
+}
 
 export interface OrderListDetail {
   data: {
@@ -112,13 +189,15 @@ interface OrderModel {
   //   ProductviewOutput?: ProductView[]
   orderOutput?: Order
   orderDetailOutput?: OrderListDetail
+  orderListOutput?: OrderList
 
 }
 
 enum OrderActionType {
   OrderLoad = 'order-load',
   OrderClear = 'order-clear',
-  OrderDetailLoad = 'orderdetail-load'
+  OrderDetailLoad = 'orderdetail-load',
+  OrderList = 'orderlist-load'
 }
 
   type OrderAction = {
@@ -129,6 +208,9 @@ enum OrderActionType {
   } | {
     data: OrderModel
     type: OrderActionType.OrderDetailLoad
+  } | {
+    data: OrderModel
+    type: OrderActionType.OrderList
   } | {
     type: OrderActionType.OrderClear
 

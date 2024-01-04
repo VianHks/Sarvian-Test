@@ -178,7 +178,12 @@ const DefaultProductbyCollection: ProductbyCollectionsDataModel = {
       thumbnail: {
         url: ''
       },
-      updatedAt: ''
+      updatedAt: '',
+      variants: [
+        {
+          id: ''
+        }
+      ]
     }
   ],
   pageInfo: {
@@ -332,7 +337,7 @@ export const ChannelCommand = {
         .then((response) => {
           if (response.status === 200) {
             if (response.data !== null) {
-              console.log('cekresp', response.data);
+              console.log('cekrespPost', response.data);
               const checkout: HalamanRestoModel = {
                 checkoutOutput: response.data as CheckoutDataModel
               };

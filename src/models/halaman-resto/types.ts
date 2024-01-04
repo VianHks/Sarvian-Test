@@ -176,6 +176,11 @@ export interface ProductbyCollectionsDataModel {
         url: string
       }
       updatedAt: string
+      variants: [
+        {
+          id: string
+        }
+      ]
     }
   ]
   pageInfo: {

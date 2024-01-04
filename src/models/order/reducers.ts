@@ -1,10 +1,87 @@
 /* eslint-disable linebreak-style */
-import { OrderActionType } from './types.js';
 import { apiFetch } from '@api/base.js';
 import type { TAction, TDispatch } from '@models/types';
 
-import type { Order, OrderAction, OrderListDetail, OrderModel } from './types.js';
+import { OrderActionType } from './types.js';
 
+import type { Order, OrderAction, OrderList, OrderListDetail, OrderModel } from './types.js';
+
+const DefaultOrderList: OrderList = {
+  data: [
+    {
+      billingAddress: {
+        city: '',
+        cityArea: '',
+        companyName: '',
+        country: {
+          code: '',
+          country: ''
+        },
+        countryArea: '',
+        firstName: '',
+        id: '',
+        lastName: '',
+        phone: '',
+        postalCode: '',
+        streetAddress1: '',
+        streetAddress2: ''
+      },
+      created: '',
+      id: '',
+      lines: [
+        {
+          id: '',
+          isShippingRequired: '',
+          metafields: {
+            note: ''
+          },
+          productName: '',
+          quantity: '',
+          quantityFulfilled: '',
+          thumbnail: {
+            url: ''
+          },
+          totalPrice: {
+            gross: {
+              amount: '',
+              currency: ''
+            },
+            net: {
+              amount: '',
+              currency: ''
+            }
+          },
+          unitPrice: {
+            gross: {
+              amount: '',
+              currency: ''
+            },
+            net: {
+              amount: '',
+              currency: ''
+            }
+          }
+        }
+      ],
+      number: '',
+      paymentStatus: '',
+      status: '',
+      total: {
+        gross: {
+          amount: 0,
+          currency: ''
+        }
+      },
+      userEmail: ''
+    }
+  ],
+  pageInfo: {
+    endCursor: '',
+    hasNextPage: false,
+    hasPreviousPage: false,
+    startCursor: ''
+  }
+};
 const DefaultOrderDetail: OrderListDetail = {
   data: {
     order: {
@@ -94,7 +171,7 @@ const DefaultOrderDetail: OrderListDetail = {
   }
 };
 
-const DefaultOrder: Order ={
+const DefaultOrder: Order = {
   DELIVERY_STATUS: '',
   NO_ORDER: 0,
   ORDER_DATE: '',
@@ -106,8 +183,8 @@ const DefaultOrder: Order ={
 
 const OrderDefault: OrderModel = {
   orderOutput: DefaultOrder,
-  orderDetailOutput: DefaultOrderDetail
-
+  orderDetailOutput: DefaultOrderDetail,
+  orderListOutput: DefaultOrderList
 };
 
 const OrderReducer = (
@@ -119,6 +196,8 @@ const OrderReducer = (
       return { ...state, ...action.data };
     case OrderActionType.OrderDetailLoad:
       return { ...state, ...action.data };
+    case OrderActionType.OrderList:
+      return { ...state, ...action.data };
 
     default:
       return state;
@@ -126,6 +205,31 @@ const OrderReducer = (
 };
 
 export const OrderCommand = {
+  getOrderList: (token: string): TAction<OrderAction, void> => {
+    return (dispatch: TDispatch<OrderAction>) => {
+      return apiFetch(token)
+        .get('/foodbuyer/0.1/orders')
+        .then((response) => {
+          if (response.status === 200) {
+            if (response.data !== null) {
+              const orderList: OrderModel = {
+                orderListOutput: response.data as OrderList
+              };
+
+              dispatch({
+                data: orderList,
+                type: OrderActionType.OrderList
+              });
+            } else {
+              dispatch({
+                data: OrderDefault,
+                type: OrderActionType.OrderList
+              });
+            }
+          }
+        });
+    };
+  },
   getOrderDetail: (id: string, token: string): TAction<OrderAction, void> => {
     return (dispatch: TDispatch<OrderAction>) => {
       return apiFetch(token)

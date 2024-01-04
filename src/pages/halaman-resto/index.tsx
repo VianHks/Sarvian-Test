@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import DiningRoundedIcon from '@mui/icons-material/DiningRounded';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import { Alert, Avatar, Box, Button, Card, Divider, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField, Toolbar, Typography } from '@mui/material';
+import { ClockNumberClassKey } from '@mui/x-date-pickers';
 
 import { AccessTimeFilled, AddBoxFilled, ArrowBackFilled, IndeterminateCheckBoxFilled, LocationOnFilled, SearchOutlined, StarFilled } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
@@ -203,7 +204,7 @@ interface LinesModel {
 const DefaultLines: LinesModel = {
   metadata: [
     {
-      key: '',
+      key: 'note',
       value: ''
 
     }
@@ -211,6 +212,7 @@ const DefaultLines: LinesModel = {
   price: '',
   quantity: 0,
   variantId: ''
+
 };
 
 interface PayloadDataModel {
@@ -218,31 +220,19 @@ interface PayloadDataModel {
   channel: string
   deliveryMethodId: string
   first: number
-  lines: string[]
+  lines: LinesModel[]
   userId: string
 }
-const DEFAULT_PAYLOAD: PayloadDataModel = {
-  after: '',
-  channel: 'makan',
-  deliveryMethodId: 'string',
-  first: 100,
-  lines: [''],
-  userId: ''
-};
 
-const DATA = [
+const DATA: PayloadDataModel =
   {
     after: '',
     channel: 'makan',
     deliveryMethodId: 'string',
     first: 100,
-    lines: [
-      { ...DefaultLines }
-    ],
+    lines: [DefaultLines],
     userId: 'string'
-  }
-
-];
+  };
 
 const HalamanResto: PageComponent = () => {
   interface MenuItem {
@@ -256,7 +246,7 @@ const HalamanResto: PageComponent = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const navigate = useNavigate();
-  // const [childChecked, setChildChecked] = useState<Record<string, []>>({});
+  // Const [childChecked, setChildChecked] = useState<Record<string, []>>({});
   const [orders, setOrders] = useState<MenuRekomendDataModel[]>([DEFAULT_MENUREKOMEND]);
   const [ordersPaketHemat, setOrdersPaketHemat] = useState<PaketHematDataModel[]>([DEFAULT_PAKETHEMAT]);
   const location = useLocation();
@@ -267,8 +257,8 @@ const HalamanResto: PageComponent = () => {
   const currentDayIndex = new Date().getDay();
   const currentDay = daysOfWeek[currentDayIndex];
   const jadwalOperasional = JSON.parse(store?.halamanResto?.channelDetailOutput?.data?.channel?.metafields?.jadwal_operasional || '[]');
-
-  const filteredJadwal = jadwalOperasional.filter((resto: RestoSchedule) => {
+  const jadwalDummy = JSON.parse('[{"day":"senin","open":"07:00","closed":"12:00","isOpen":true},{"day":"selasa","open":"07:00","closed":"12:00","isOpen":true},{"day":"rabu","open":"07:00","closed":"12:00","isOpen":true},{"day":"kamis","open":"07:00","closed":"12:00","isOpen":true},{"day":"jumat","open":"07:00","closed":"12:00","isOpen":false},{"day":"sabtu","open":"07:00","closed":"12:00","isOpen":true},{"day":"minggu","open":"07:00","closed":"12:00","isOpen":false}]');
+  const filteredJadwal = jadwalDummy.filter((resto: RestoSchedule) => {
     return resto.day.toLowerCase() === currentDay && resto.isOpen;
   });
   const [colIds, setColIds] = useState<{ id: string, name: string }[]>([]);
@@ -278,7 +268,8 @@ const HalamanResto: PageComponent = () => {
     ?.filter((category) => category.products.totalCount > 0) || [];
 
   const [formData, setFormData] = useState(DATA);
-  const [childChecked, setChildChecked] = useState<Record<string, boolean>>({});
+  const [lines, setLines] = useState<LinesModel[]>([DefaultLines]);
+
   const calculateTotal = (selectedItems: MenuItem[]) => {
     let amount = 0;
     let items = 0;
@@ -295,18 +286,41 @@ const HalamanResto: PageComponent = () => {
     console.log('Tombol Belanja Diklik');
   };
 
-  const handleIncrement = (index: number) => {
-    const updatedFormData = [...formData];
+  const handleIncrement = (id: string) => {
+    console.log('cekvariant', id);
 
-    updatedFormData[0].lines[index].quantity++;
-    setFormData(updatedFormData);
+    setFormData((prevFormData) => {
+      const updatedFormData = { ...prevFormData };
+
+      // Find the index based on the variantId
+      const lineToUpdate = updatedFormData.lines.find((line) => line.variantId === id);
+
+      // Check if the index is valid and the lines array exists
+      if (lineToUpdate) {
+        // Increment the quantity for the found line
+        lineToUpdate.quantity = Math.max(lineToUpdate.quantity + 1, 0);
+      }
+
+      return updatedFormData;
+    });
   };
 
-  const handleDecrement = (index: number) => {
-    const updatedFormData = [...formData];
+  console.log('cekformdata', formData);
 
-    updatedFormData[0].lines[index].quantity = Math.max(0, updatedFormData[0].lines[index].quantity - 1);
-    setFormData(updatedFormData);
+  const handleDecrement = (id: string) => {
+    setFormData((prevFormData) => {
+      const updatedFormData = { ...prevFormData };
+
+      if (updatedFormData.lines) {
+        const lineToUpdate = updatedFormData.lines.find((line) => line.variantId === id);
+
+        if (lineToUpdate) {
+          lineToUpdate.quantity = Math.max(lineToUpdate.quantity - 1, 0);
+        }
+      }
+
+      return updatedFormData;
+    });
   };
 
   const handleIncrementPaketHemat = (index: number) => {
@@ -332,21 +346,22 @@ const HalamanResto: PageComponent = () => {
   };
 
   const handleLanjutPembayaranClick = () => {
+    const filteredLines = formData.lines.filter((line) => line.quantity > 0);
+
     const param = {
 
       after: '',
       channel: 'makan',
-      deliveryMethodId: 'string',
+      deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
       first: 100,
-      lines: [
-        { ...DefaultLines }
-      ],
-      userId: 'string'
+      lines: filteredLines,
+      userId: 'VXNlcjozMTc4NjkwMDc='
     };
 
+    console.log('cekparam', param);
     dispatch(ChannelCommand.postCheckout(param, token || ''));
 
-    // Navigate('/keranjang');
+    navigate('/keranjang');
   };
 
   useEffect(() => {
@@ -405,9 +420,41 @@ const HalamanResto: PageComponent = () => {
     };
   }, [dispatch, token]);
 
+  const mapDataToIndex = <T extends { id: string }>(data: T[] | undefined, targetId: string): number => {
+    return data?.findIndex((obj) => obj.id === targetId) || -1;
+  };
+
   useEffect(() => {
-    console.log('cekvalue', selectedValue);
-  }, [selectedValue]);
+    if (store?.halamanResto?.productByCollectionsOutput) {
+      const linesUpdate = Array.from(
+        { length: store?.halamanResto?.productByCollectionsOutput.totalCount },
+        (_, index) => {
+          const matchingColId = colIds.find((colId) => store?.halamanResto?.productByCollectionsOutput?.data[index]?.collections.some(
+            (collection) => collection.id === colId.id
+
+          ));
+
+          const targetId = matchingColId
+            ? store?.halamanResto?.productByCollectionsOutput?.data[index]?.variants[0].id || ''
+            : '';
+          const matchingProduct = store?.halamanResto?.productByCollectionsOutput?.data.find(
+            (product) => product.id === targetId
+          );
+
+          const defaultPrice =
+              matchingProduct?.pricing?.priceRange?.start?.net?.amount || 0;
+
+          return {
+            ...DefaultLines,
+            variantId: targetId,
+            price: String(defaultPrice)
+          };
+        }
+      );
+
+      setFormData({ ...formData, lines: linesUpdate });
+    }
+  }, [store?.halamanResto?.productByCollectionsOutput]);
 
   useEffect(() => {
     const collectionIds = (store?.halamanResto?.productListOutput?.data || [])
@@ -637,7 +684,7 @@ const HalamanResto: PageComponent = () => {
                 </Typography>
                 {store?.halamanResto?.productByCollectionsOutput?.data
                   ?.filter((obj) => obj.collections.some((collection) => collection.id === colId.id))
-                  .map((obj, index) => (
+                  .map((obj) => (
 
         <div key={obj.id} style={{ marginBottom: '0.5rem' }}>
 
@@ -734,7 +781,7 @@ const HalamanResto: PageComponent = () => {
                           aria-label="min"
                           size="small"
                           sx={{ color: 'black' }}
-                          onClick={() => handleDecrement(index)}
+                          onClick={() => handleDecrement(obj.variants[0].id)}
                         >
                           <IndeterminateCheckBoxFilled size={24} />
                         </IconButton>
@@ -747,7 +794,7 @@ const HalamanResto: PageComponent = () => {
                           }}
                           variant="body2"
                         >
-                          0
+                          {formData?.lines.find((line) => line.variantId === obj.variants[0].id)?.quantity || 0}
                         </Typography>
                         {/* {formData.map((item, itemIndex) => item.lines.map((line, lineIndex) => (
     <Typography
@@ -766,7 +813,7 @@ const HalamanResto: PageComponent = () => {
                           aria-label="plus"
                           size="small"
                           sx={{ color: 'black' }}
-                          onClick={() => handleIncrement(index)}
+                          onClick={() => handleIncrement(obj.variants[0].id)}
                         >
                           <AddBoxFilled size={24} />
                         </IconButton>
