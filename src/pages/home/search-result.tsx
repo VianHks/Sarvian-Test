@@ -61,7 +61,7 @@ const DashboardSearchResult: PageComponent = () => {
 
   const [filteredResto, setFilteredResto] = useState<SearchResultDataDataModel[]>([]);
   const [filteredMenu, setFilteredMenu] = useState<SearchResultDataDataModel[]>([]);
-  const [restaurantsSellingMenu, setRestaurantsSellingMenu] = useState<SearchResultDataDataModel[]>([]);
+  const [restaurantsSellingMenu, setRestaurantsSellingMenu] = useState<SearchResultDataDataModel[][]>([]);
   const [searchResult, setSearchResult] = useState<SearchResultDataModel>();
 
   const tokrumCoordinate = '-6.878979254712864, 107.60084527975108';
@@ -83,6 +83,31 @@ const DashboardSearchResult: PageComponent = () => {
   useEffect(() => {
     setSearchResult(store?.searchResultOutput);
   }, [store]);
+
+  useEffect(() => {
+    const newFilteredMenu = searchResult?.data?.filter(
+      (menu) => menu.name.toLowerCase().includes(query.toLowerCase())
+    ) ?? [];
+
+    setFilteredMenu(newFilteredMenu);
+
+    const uniqueRestaurants: Record<string, SearchResultDataDataModel[]> = {};
+
+    newFilteredMenu.forEach((menu) => {
+      const restaurantName = menu.channelListings[0].channel.name.toLowerCase();
+
+      uniqueRestaurants[restaurantName] ||= [];
+
+      uniqueRestaurants[restaurantName].push(menu);
+    });
+
+    // Convert the object back to an array
+    const restaurantsSellingMenu = Object.values(uniqueRestaurants);
+
+    setRestaurantsSellingMenu(restaurantsSellingMenu);
+  }, [query, searchResult?.data]);
+
+  console.log('restaurantsSellingMenu', restaurantsSellingMenu);
 
   const deg2rad = (deg: number) => {
     return deg * (Math.PI / 180);
@@ -127,267 +152,266 @@ const DashboardSearchResult: PageComponent = () => {
 
   return (
     <Box sx={{ marginBottom: '1.5rem', marginTop: '-0.25rem', paddingInline: '0.5rem' }}>
-        <Box
-          gap={1}
-          sx={{ alignItems: 'center', display: 'flex', marginBottom: '1rem' }}
-        >
-          <img
-            alt="test"
-            src={
-              query === 'top-rate'
-                ? `${topRated}`
-                : query === 'terlaris'
-                  ? `${terlaris}`
-                  : query === 'terhemat'
-                    ? `${terhemat}`
-                    : query === 'terdekat'
-                      ? `${terdekat}`
-                      : `${searchImage}`
-            }
-            style={{ height: '1.5rem', width: '1.5rem' }} />
-          <Typography color="neutral-90" fontWeight="bold" variant="h5">
-            {query === 'top-rate'
-              ? 'Top Rated'
+      <Box
+        gap={1}
+        sx={{ alignItems: 'center', display: 'flex', marginBottom: '1rem' }}
+      >
+        <img
+          alt="test"
+          src={
+            query === 'top-rate'
+              ? `${topRated}`
               : query === 'terlaris'
-                ? 'Terlaris'
+                ? `${terlaris}`
                 : query === 'terhemat'
-                  ? 'Terhemat'
+                  ? `${terhemat}`
                   : query === 'terdekat'
-                    ? 'Terdekat'
-                    : 'Hasil Pencarian'}
-          </Typography>
-        </Box>
-        {searchResult?.data.map((resto) => {
-          return (
-            <Card
-              key={resto.id}
-              sx={{
-                borderColor: 'transparent',
-                marginBottom: '1rem',
-                padding: '0.5rem'
-              }}
-              onClick={handleCardToRestoClick}
-            >
-              <Grid container={true} spacing={2}>
-                <Grid item={true} xs={4}>
-                  <div
+                    ? `${terdekat}`
+                    : `${searchImage}`
+          }
+          style={{ height: '1.5rem', width: '1.5rem' }} />
+        <Typography color="neutral-90" fontWeight="bold" variant="h5">
+          {query === 'top-rate'
+            ? 'Top Rated'
+            : query === 'terlaris'
+              ? 'Terlaris'
+              : query === 'terhemat'
+                ? 'Terhemat'
+                : query === 'terdekat'
+                  ? 'Terdekat'
+                  : 'Hasil Pencarian'}
+        </Typography>
+      </Box>
+      {restaurantsSellingMenu.map((resto, index) => {
+        return (
+          <Card
+            key={resto[index].channelListings[0].channel.id}
+            sx={{
+              borderColor: 'transparent',
+              marginBottom: '1rem',
+              padding: '0.5rem'
+            }}
+            onClick={handleCardToRestoClick}
+          >
+            <Grid container={true} spacing={2}>
+              <Grid item={true} xs={4}>
+                <div
+                  style={{
+                    height: '100%',
+                    position: 'relative',
+                    width: '100%'
+                  }}
+                >
+                  <img
+                    alt="test"
+                    src={restoImage}
                     style={{
+                      borderRadius: '8px',
                       height: '100%',
-                      position: 'relative',
+                      maxHeight: '100%',
+                      maxWidth: '100%',
+                      objectFit: 'cover',
                       width: '100%'
-                    }}
-                  >
-                    <img
-                      alt="test"
-                      src={restoImage}
-                      style={{
-                        height: '100%',
-                        maxHeight: '100%',
-                        maxWidth: '100%',
-                        objectFit: 'cover',
-                        width: '100%'
-                      }} />
-                    {resto?.channelListings[0]?.channel?.metafields.badgeVerification === 'true'
-                      ? <img
-                          alt="Verified"
-                          src={verifyIcon}
-                          style={{
-                            maxHeight: '1.5rem',
-                            maxWidth: '1.5rem',
-                            position: 'absolute',
-                            right: '5px',
-                            top: '5px'
-                          }} />
-                      : null}
-                  </div>
-                </Grid>
-                <Grid item={true} xs={8}>
-                  {resto?.channelListings[0]?.channel?.metafields.verified === 'true' ? (
-                    <Typography
-                      color="neutral-70"
-                      sx={{ marginBottom: '0.125' }}
-                      variant="body2"
-                    >
-                      Verified by TokoRumahan
-                    </Typography>
-                  ) : null}
+                    }} />
+                  {resto[index].channelListings[0].channel.metafields.badgeVerification
+                    ? <img
+                        alt="Verified"
+                        src={verifyIcon}
+                        style={{
+                          maxHeight: '1.5rem',
+                          maxWidth: '1.5rem',
+                          position: 'absolute',
+                          right: '5px',
+                          top: '5px'
+                        }} />
+                    : null}
+                </div>
+              </Grid>
+              <Grid item={true} xs={8}>
+                {resto[index]?.channelListings[0].channel.metafields.verified === 'true' ? (
                   <Typography
-                    color="neutral-90"
-                    fontWeight="bold"
+                    color="neutral-70"
                     sx={{ marginBottom: '0.125' }}
-                    variant="h6"
+                    variant="body2"
                   >
-                    {resto.channelListings[0].channel.name}
+                    Verified by TokoRumahan
                   </Typography>
-                  <Box gap={1} sx={{ display: 'flex' }}>
-                    <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
-                      <StarFilled size={10} style={{ color: 'yellow' }} />
-                      <Typography color="neutral-90" variant="caption">
-                        {resto?.channelListings[0]?.channel?.metafields.rating}
-                      </Typography>
-                    </Box>
-                    <Divider flexItem={true} orientation="vertical" />
-                    <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
-                      <LocationOnFilled size={10} style={{ color: 'red' }} />
-                      <Typography color="neutral-90" variant="caption">
+                ) : null}
+                <Typography
+                  color="neutral-90"
+                  fontWeight="bold"
+                  sx={{ marginBottom: '0.125' }}
+                  variant="h6"
+                >
+                  {resto[index].channelListings[0].channel.name}
+                </Typography>
+                <Box gap={1} sx={{ display: 'flex' }}>
+                  <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
+                    <StarFilled size={10} style={{ color: 'yellow' }} />
+                    <Typography color="neutral-90" variant="caption">
+                      {resto[index]?.channelListings[0]?.channel?.metafields.rating}
+                    </Typography>
+                  </Box>
+                  <Divider flexItem={true} orientation="vertical" />
+                  <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
+                    <LocationOnFilled size={10} style={{ color: 'red' }} />
+                    <Typography color="neutral-90" variant="caption">
                       {calculateDistance(
                         coordinate1.latitude,
                         coordinate1.longitude,
-                        parseFloat(resto.channelListings[0].channel.metafields.coordinate.split(',')[0] || ''),
-                        parseFloat(resto.channelListings[0].channel.metafields.coordinate.split(',')[1] || '')
+                        parseFloat(resto[index].channelListings[0].channel.metafields.coordinate.split(',')[0] || ''),
+                        parseFloat(resto[index].channelListings[0].channel.metafields.coordinate.split(',')[1] || '')
                       ).toFixed(2)} km
-                      </Typography>
-                    </Box>
-                    <Divider flexItem={true} orientation="vertical" />
-                    <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
-                      <AccessTimeFilled size={10} />
-                      <Typography color="neutral-90" variant="caption">
-                        {/* {resto.open} */} 07.00-12.00 WIB
-                      </Typography>
-                    </Box>
+                    </Typography>
                   </Box>
-                </Grid>
+                  <Divider flexItem={true} orientation="vertical" />
+                  <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
+                    <AccessTimeFilled size={10} />
+                    <Typography color="neutral-90" variant="caption">
+                      {/* {resto.open} */} 07.00-12.00 WIB
+                    </Typography>
+                  </Box>
+                </Box>
               </Grid>
-              {searchResult.data
-                .filter(
-                  (menu) => menu.name.toLowerCase() === resto.name.toLowerCase()
-                )
-                .map((menu) => (
-                  <Grid container={true} key={menu.id}>
-                    <Grid item={true} xs={4} />
-                    <Grid item={true} sx={{ display: 'flex' }} xs={8}>
-                      <img
-                        alt="MenuImg"
-                        src={menuImage}
-                        style={{
-                          height: '3.5rem',
-                          marginRight: '0.5rem',
-                          width: '3.5rem'
-                        }} />
-                      <Box>
-                        <Typography
-                          color="neutral-90"
-                          fontWeight="bold"
-                          sx={{ marginBottom: '0.24rem' }}
-                          variant="caption"
-                        >
-                          {menu.name}
-                        </Typography>
-                        <Typography
-                          color="primary"
-                          fontWeight="bold"
-                          variant="body2"
-                        >
-                          {/* Rp {menu..toLocaleString('id-ID')} */}
-                        </Typography>
-                      </Box>
-                    </Grid>
+            </Grid>
+            {restaurantsSellingMenu
+              .flat()
+              .map((menu) => (
+                <Grid container={true} key={menu.id} sx={{ marginBottom: '1rem' }}>
+                  <Grid item={true} xs={4} />
+                  <Grid item={true} sx={{ display: 'flex' }} xs={8}>
+                    <img
+                      alt="MenuImg"
+                      src={menuImage}
+                      style={{
+                        height: '3.5rem',
+                        marginRight: '0.5rem',
+                        width: '3.5rem'
+                      }} />
+                    <Box>
+                      <Typography
+                        color="neutral-90"
+                        fontWeight="bold"
+                        sx={{ marginBottom: '0.24rem' }}
+                        variant="caption"
+                      >
+                        {menu.name}
+                      </Typography>
+                      <Typography
+                        color="primary"
+                        fontWeight="bold"
+                        variant="body2"
+                      >
+                        Rp {menu.pricing.toLocaleString('id-ID')}
+                      </Typography>
+                    </Box>
                   </Grid>
-                ))}
-            </Card>
-          );
-        })}
-        {query === 'top-rate' ||
+                </Grid>
+              ))}
+          </Card>
+        );
+      })}
+      {query === 'top-rate' ||
         query === 'terhemat' ||
         query === 'terlaris' ||
         query === 'terdekat'
-          ? DUMMY_RESTO.map((resto) => (
-              <Card
-                key={resto.id}
-                sx={{
-                  borderColor: 'transparent',
-                  marginBottom: '1rem',
-                  padding: '0.5rem'
-                }}
-                onClick={handleCardToRestoClick}
-              >
-                <Grid container={true} spacing={2}>
-                  <Grid item={true} xs={4}>
-                    <div
-                      style={{
-                        height: '100%',
-                        position: 'relative',
-                        width: '100%'
-                      }}
-                    >
-                      <img
-                        alt="test"
-                        src={restoImage}
+        ? DUMMY_RESTO.map((resto) => (
+          <Card
+            key={resto.id}
+            sx={{
+              borderColor: 'transparent',
+              marginBottom: '1rem',
+              padding: '0.5rem'
+            }}
+            onClick={handleCardToRestoClick}
+          >
+            <Grid container={true} spacing={2}>
+              <Grid item={true} xs={4}>
+                <div
+                  style={{
+                    height: '100%',
+                    position: 'relative',
+                    width: '100%'
+                  }}
+                >
+                  <img
+                    alt="test"
+                    src={restoImage}
+                    style={{
+                      height: '100%',
+                      maxHeight: '100%',
+                      maxWidth: '100%',
+                      objectFit: 'cover',
+                      width: '100%'
+                    }} />
+                  {resto.verified
+                    ? <img
+                        alt="Verified"
+                        src={verifyIcon}
                         style={{
-                          height: '100%',
-                          maxHeight: '100%',
-                          maxWidth: '100%',
-                          objectFit: 'cover',
-                          width: '100%'
+                          maxHeight: '1.5rem',
+                          maxWidth: '1.5rem',
+                          position: 'absolute',
+                          right: '5px',
+                          top: '5px'
                         }} />
-                      {resto.verified
-                        ? <img
-                            alt="Verified"
-                            src={verifyIcon}
-                            style={{
-                              maxHeight: '1.5rem',
-                              maxWidth: '1.5rem',
-                              position: 'absolute',
-                              right: '5px',
-                              top: '5px'
-                            }} />
-                        : null}
-                    </div>
-                  </Grid>
-                  <Grid item={true} xs={8}>
-                    {resto.verified ? (
-                      <Typography
-                        color="neutral-70"
-                        sx={{ marginBottom: '0.125' }}
-                        variant="body2"
-                      >
-                        Verified by TokoRumahan
-                      </Typography>
-                    ) : null}
-                    <Typography
-                      color="neutral-90"
-                      fontWeight="bold"
-                      sx={{ marginBottom: '0.125' }}
-                      variant="h6"
-                    >
-                      {resto.restoName}
+                    : null}
+                </div>
+              </Grid>
+              <Grid item={true} xs={8}>
+                {resto.verified ? (
+                  <Typography
+                    color="neutral-70"
+                    sx={{ marginBottom: '0.125' }}
+                    variant="body2"
+                  >
+                    Verified by TokoRumahan
+                  </Typography>
+                ) : null}
+                <Typography
+                  color="neutral-90"
+                  fontWeight="bold"
+                  sx={{ marginBottom: '0.125' }}
+                  variant="h6"
+                >
+                  {resto.restoName}
+                </Typography>
+                <Box gap={1} sx={{ display: 'flex' }}>
+                  <Box
+                    gap={1}
+                    sx={{ alignItems: 'center', display: 'flex' }}
+                  >
+                    <StarFilled size={10} style={{ color: 'yellow' }} />
+                    <Typography color="neutral-90" variant="caption">
+                      {resto.rating}
                     </Typography>
-                    <Box gap={1} sx={{ display: 'flex' }}>
-                      <Box
-                        gap={1}
-                        sx={{ alignItems: 'center', display: 'flex' }}
-                      >
-                        <StarFilled size={10} style={{ color: 'yellow' }} />
-                        <Typography color="neutral-90" variant="caption">
-                          {resto.rating}
-                        </Typography>
-                      </Box>
-                      <Divider flexItem={true} orientation="vertical" />
-                      <Box
-                        gap={1}
-                        sx={{ alignItems: 'center', display: 'flex' }}
-                      >
-                        <LocationOnFilled size={10} style={{ color: 'red' }} />
-                        <Typography color="neutral-90" variant="caption">
-                          {resto.location}
-                        </Typography>
-                      </Box>
-                      <Divider flexItem={true} orientation="vertical" />
-                      <Box
-                        gap={1}
-                        sx={{ alignItems: 'center', display: 'flex' }}
-                      >
-                        <AccessTimeFilled size={10} />
-                        <Typography color="neutral-90" variant="caption">
-                          {resto.open}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Grid>
-                </Grid>
-              </Card>
-          ))
-          : null}
+                  </Box>
+                  <Divider flexItem={true} orientation="vertical" />
+                  <Box
+                    gap={1}
+                    sx={{ alignItems: 'center', display: 'flex' }}
+                  >
+                    <LocationOnFilled size={10} style={{ color: 'red' }} />
+                    <Typography color="neutral-90" variant="caption">
+                      {resto.location}
+                    </Typography>
+                  </Box>
+                  <Divider flexItem={true} orientation="vertical" />
+                  <Box
+                    gap={1}
+                    sx={{ alignItems: 'center', display: 'flex' }}
+                  >
+                    <AccessTimeFilled size={10} />
+                    <Typography color="neutral-90" variant="caption">
+                      {resto.open}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
+            </Grid>
+          </Card>
+        ))
+        : null}
     </Box>
   );
 };

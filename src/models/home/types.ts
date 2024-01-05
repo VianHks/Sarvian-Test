@@ -91,6 +91,7 @@ export interface SearchResultDataDataModel {
   description: string
   id: string
   name: string
+  pricing: number
   productType: {
     hasVariants: true
     id: string
@@ -130,6 +131,9 @@ enum HomeActionType {
     data?: HomeModel
     type: HomeActionType.HomeRestoListLoad
   } | {
+    data?: HomeModel
+    type: HomeActionType.SearchResultLoad
+  } | {
     type: HomeActionType.MakananClear
   } | {
     type: HomeActionType.MakananLoad
@@ -139,9 +143,6 @@ enum HomeActionType {
   } | {
     type: HomeActionType.MenuBerandaLoad
     value?: HomeModel
-  } | {
-    type: HomeActionType.SearchResultLoad
-    data?: HomeModel
   };
 
 export { HomeActionType };
