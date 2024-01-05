@@ -1,8 +1,9 @@
+/* eslint-disable multiline-ternary */
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable jsx-a11y/prefer-tag-over-role */
 /* eslint-disable linebreak-style */
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { Global } from '@emotion/react';
 
@@ -36,23 +37,16 @@ import {
 } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
 
-import {
-  Card,
-  CardContent,
-  Grid,
-  Typography
-} from '@components/material.js';
+import { Card, CardContent, Grid, Typography } from '@components/material.js';
 import { useAuth } from '@hooks/use-auth';
-import { checkoutCommand } from '@models/checkout/commands';
-import { useStore } from '@models/store';
+import { OrderCommand } from '@models/order/reducers';
+import { useCommand, useStore } from '@models/store';
 
-import Bakar from '@assets/images/Bakar.png';
 import Bike from '@assets/images/Bike.svg';
 import DineIn from '@assets/images/DineIn.svg';
 import MieBaso from '@assets/images/MieBaso.png';
-import PesanAntar from '@assets/images/PesanAntar.svg';
 import PickUp from '@assets/images/PickUp.svg';
-import Pisan from '@assets/images/Pisan.png';
+import LogoBilo from '@assets/images/logoBiloCheckout.svg';
 
 import type { Dayjs } from 'dayjs';
 
@@ -68,43 +62,10 @@ const style = {
   width: 300
 };
 
-interface PesananDataModel {
-  count: number
-  detail: string
-  foto: string
-  harga: number
-  title: string
-}
-
-const DUMMY_PESANAN: PesananDataModel[] = [
-  {
-    count: 1,
-    detail: 'Nasi di pisah',
-    foto: `${Pisan}`,
-    harga: 100000,
-    title: 'Ayam Goreng Pisan'
-  },
-  {
-    count: 1,
-    detail: 'Jangan terlalu gosong',
-    foto: `${Bakar}`,
-    harga: 50000,
-    title: 'Ayam Bakar'
-  }
-];
-
-const DEFAULT_PESANAN: PesananDataModel = {
-  count: 0,
-  detail: '',
-  foto: '',
-  harga: 0,
-  title: ''
-};
-
 const drawerBleeding = 120;
 
 interface Props {
-  readonly window?: () => Window
+  readonly windowProps?: () => Window
 }
 
 const StyledBox = styled(Box)(({ theme }) => ({
@@ -122,43 +83,221 @@ const Puller = styled(Box)(({ theme }) => ({
 }));
 
 const DeliveryType = [
-  { text: 'Pesan Antar', icon: `${PesanAntar}` },
-  { text: 'Pick Up', icon: `${PickUp}` },
-  { text: 'Dine In', icon: `${DineIn}` }
+  // { text: 'Pesan Antar', icon: `${PesanAntar}`, value: 'delivery' },
+  { text: 'Pick Up', icon: `${PickUp}`, value: 'pickUp' },
+  { text: 'Dine In', icon: `${DineIn}`, value: 'dineIn' }
 ];
 
 const Delivery = [
-  { text: 'SiJago', icon: `${Bike}` },
-  { text: 'SiJabat', icon: `${Bike}` }
+  { text: 'SiJago', icon: `${Bike}`, value: 'siJago' },
+  { text: 'SiJabat', icon: `${Bike}`, value: 'siJabat' }
 ];
+
+interface ChekoutDetailDataModel {
+  channel: {
+    id: string
+    metadata: {
+      key: string
+      value: string
+    }[]
+    name: string
+  }
+  created: string
+  id: string
+  lines: {
+    id: string
+    metadata: {
+      key: string
+      value: string
+    }[]
+    metafields: {
+      note: string
+    }
+    quantity: number
+    totalPrice: {
+      gross: {
+        amount: number
+        currency: string
+      }
+    }
+    variant: {
+      id: string
+      name: string
+      pricing: {
+        price: {
+          gross: {
+            amount: number
+            currency: string
+          }
+        }
+      }
+      product: {
+        id: string
+        name: string
+        slug: string
+        thumbnail: {
+          alt: string
+          url: string
+        }
+      }
+    }
+  }[]
+  totalPrice: {
+    gross: {
+      amount: number
+      currency: string
+    }
+  }
+  user: {
+    addresses: {
+      city: string
+      countryArea: string
+      id: string
+      postalCode: string
+      streetAddress1: string
+    }[]
+    firstName: string
+    id: string
+    lastName: string
+  }
+}
+
+const DEFAULT_CHECKOUT_DETAILS: ChekoutDetailDataModel = {
+  channel: {
+    id: '',
+    metadata: [
+      {
+        key: '',
+        value: ''
+      }
+    ],
+    name: ''
+  },
+  created: '',
+  id: '',
+  lines: [
+    {
+      id: '',
+      metadata: [
+        {
+          key: '',
+          value: ''
+        }
+      ],
+      metafields: {
+        note: ''
+      },
+      quantity: 0,
+      totalPrice: {
+        gross: {
+          amount: 0,
+          currency: ''
+        }
+      },
+      variant: {
+        id: '',
+        name: '',
+        pricing: {
+          price: {
+            gross: {
+              amount: 0,
+              currency: ''
+            }
+          }
+        },
+        product: {
+          id: '',
+          name: '',
+          slug: '',
+          thumbnail: {
+            alt: '',
+            url: ''
+          }
+        }
+      }
+    }
+  ],
+  totalPrice: {
+    gross: {
+      amount: 0,
+      currency: ''
+    }
+  },
+  user: {
+    addresses: [
+      {
+        city: '',
+        countryArea: '',
+        id: '',
+        postalCode: '',
+        streetAddress1: ''
+      }
+    ],
+    firstName: '',
+    id: '',
+    lastName: ''
+  }
+};
+
+interface FormOrderDataModel {
+  buyerName: string
+  channel: string
+  checkoutId: string
+  estimation: Dayjs
+  note: string
+  orderType: string
+  transactionReference: string
+}
+
+const DEFAULT_FORM_ORDER: FormOrderDataModel = {
+  buyerName: '',
+  channel: '',
+  checkoutId: '',
+  estimation: dayjs(),
+  note: '',
+  orderType: 'Dine In',
+  transactionReference: ''
+};
+
+const SESSION_STORAGE_CHECKOUT = 'CheckoutId';
 
 const Checkout: PageComponent = (props: Props) => {
   const navigate = useNavigate();
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
-  const [store, dispatch] = useStore((state) => state?.checkout);
   const theme = useTheme();
-  const { window } = props;
-  const [totalMenu, setTotalMenu] = useState(0);
-  const [totalPembayaran, setTotalPembayaran] = useState(0);
-  const [biayaLayanan, setBiayaLayanan] = useState(2000);
-  const [biayaFasilitas, setBiayaFasilitas] = useState(600);
-  const [orders, setOrders] = useState<PesananDataModel[]>([DEFAULT_PESANAN]);
-  const [delivery, setDelivery] = useState('Dine In');
-  const [selectedTime, setSelectedTime] = useState(dayjs());
-  const [open, setOpen] = useState(false),
-    [openSummary, setOpenSummary] = useState(false),
-    [openTime, setOpenTime] = useState(false);
+  const { windowProps } = props;
+  const [searchParams] = useSearchParams();
+  const checkoutId = searchParams.get('checkoutId');
+  const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '';
+  const command = useCommand((cmd) => cmd);
 
-  const [isCheckout, setIsCheckOut] = useState(false),
+  const [store, dispatch] = useStore((state) => state?.order);
+  const [checkoutDetails, setCheckoutDetails] =
+    useState<ChekoutDetailDataModel>(DEFAULT_CHECKOUT_DETAILS);
+  const [formOrder, setFormOrder] =
+    useState<FormOrderDataModel>(DEFAULT_FORM_ORDER);
+  const [total, setTotal] = useState(0);
+
+  const [open, setOpen] = useState(false),
+    [openTime, setOpenTime] = useState(false),
     [openModal, setOpenModal] = useState(false);
+
+  const container =
+    windowProps !== undefined ? () => windowProps().document.body : undefined;
+
+  const calculateTotal = () => {
+    const newTotal = checkoutDetails.lines.reduce((acc, line) => {
+      const lineTotal = line.quantity * line.variant.pricing.price.gross.amount;
+
+      return acc + lineTotal;
+    }, 0);
+
+    setTotal(newTotal);
+  };
 
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpen(newOpen);
-  };
-
-  const toggleDrawerSummary = (newOpen: boolean) => () => {
-    setOpenSummary(newOpen);
   };
 
   const toggleDrawerTime = (newOpen: boolean) => () => {
@@ -169,37 +308,93 @@ const Checkout: PageComponent = (props: Props) => {
     setOpenModal(!openModal);
   };
 
-  const handleConfirmCheckout = () => {
-    setIsCheckOut(true);
+  const handleConfirmOrder = () => {
     setOpenModal(!openModal);
-  };
+    const payloadOrder = {
+      buyerName: `${checkoutDetails?.user?.firstName} ${checkoutDetails?.user?.lastName}`,
+      channel: 'makanan',
+      checkoutId: checkoutIdFromStorage,
+      estimation: formOrder.estimation.format('HH:mm'),
+      note: formOrder.note,
+      orderType: formOrder.orderType,
+      transactionReference: ''
+    };
 
-  const container =
-    window !== undefined ? () => window().document.body : undefined;
+    if (store?.checkoutDetails?.data?.checkout !== checkoutDetails) {
+      const payload = {
+        checkoutId: checkoutIdFromStorage,
+        lines: checkoutDetails?.lines.map((item) => ({
+          lineId: item?.id,
+          note: item?.metafields?.note,
+          price: item?.variant?.pricing?.price?.gross?.amount.toString(),
+          quantity: item?.quantity
+        }))
+      };
 
-  const handleIncrement = (index: number) => {
-    const updatedOrders = [...orders];
-
-    updatedOrders[index].count += 1;
-    setOrders(updatedOrders);
-  };
-
-  const handleDecrement = (index: number) => {
-    if (orders[index].count > 0) {
-      const updatedOrders = [...orders];
-
-      updatedOrders[index].count -= 1;
-      setOrders(updatedOrders);
+      command.productView.putCheckout(payload, token || '')
+        .then(() => {
+          OrderCommand.postCreateOrder(payloadOrder, token || '').then(
+            (res) => {
+              window?.sessionStorage?.removeItem(SESSION_STORAGE_CHECKOUT);
+              navigate(`/order-in-progress/single-order?orderId=${res}`);
+            }
+          );
+        });
+    } else {
+      OrderCommand.postCreateOrder(payloadOrder, token || '').then((res) => {
+        window?.sessionStorage?.removeItem(SESSION_STORAGE_CHECKOUT);
+        navigate(`/order-in-progress/single-order?orderId=${res}`);
+      });
     }
   };
 
-  const handleDelivery = (item: string) => {
-    setDelivery(item);
+  const handleIncrement = (index: number) => {
+    const updatedCheckout = { ...checkoutDetails };
+    const updatedLines = [...updatedCheckout.lines];
+    const updatedLine = { ...updatedLines[index] };
+
+    updatedLine.quantity += 1;
+    updatedLines[index] = updatedLine;
+    updatedCheckout.lines = updatedLines;
+
+    setCheckoutDetails(updatedCheckout);
+  };
+
+  const handleDecrement = (index: number) => {
+    const updatedCheckout = { ...checkoutDetails };
+    const updatedLines = [...updatedCheckout.lines];
+    const updatedLine = { ...updatedLines[index] };
+
+    if (updatedLine.quantity > 0) {
+      updatedLine.quantity -= 1;
+      updatedLines[index] = updatedLine;
+      updatedCheckout.lines = updatedLines;
+
+      setCheckoutDetails(updatedCheckout);
+    }
+  };
+
+  const handleNoteChange = (index: number, newValue: string) => {
+    const updatedCheckout = { ...checkoutDetails };
+    const updatedLines = [...updatedCheckout.lines];
+    const updatedLine = { ...updatedLines[index] };
+
+    updatedLine.metafields.note = newValue;
+    updatedLines[index] = updatedLine;
+    updatedCheckout.lines = updatedLines;
+
+    setCheckoutDetails(updatedCheckout);
+  };
+
+  const handleOrderType = (item: string) => {
+    setFormOrder({ ...formOrder, orderType: item });
     setOpen(false);
   };
 
-  const handleTimeChange = (newTime: Dayjs) => {
-    setSelectedTime(newTime);
+  const handleTimeChange = (newTime: Dayjs | null) => {
+    if (newTime !== null) {
+      setFormOrder({ ...formOrder, estimation: newTime });
+    }
   };
 
   const handlePilihButtonClick = () => {
@@ -207,315 +402,336 @@ const Checkout: PageComponent = (props: Props) => {
   };
 
   useEffect(() => {
-    if (token) {
-      dispatch(checkoutCommand.loadCheckoutMenu(token))
-
-        .catch((err: unknown) => {
-          console.error(err);
-        });
-
-      return () => {
-        dispatch(checkoutCommand.clearCheckoutMenu());
-      };
+    if (checkoutIdFromStorage) {
+      dispatch(OrderCommand.getCheckoutDetails(checkoutIdFromStorage || '', token || ''));
     }
-
-    if (DUMMY_PESANAN) {
-      setOrders(DUMMY_PESANAN);
-    }
-  }, [orders]);
+  }, [dispatch, token, checkoutIdFromStorage]);
 
   useEffect(() => {
-    if (store?.checkoutMenuOutput) {
-      const calculatedTotalMenu = store.checkoutMenuOutput.reduce(
-        (total, menu) => total + menu.harga * menu.count,
-        0
+    if (store?.checkoutDetails) {
+      setCheckoutDetails(store?.checkoutDetails?.data?.checkout);
+
+      setTotal(
+        store?.checkoutDetails?.data?.checkout?.totalPrice?.gross?.amount
       );
-
-      setTotalMenu(calculatedTotalMenu);
-
-      const calculatedTotalPembayaran = calculatedTotalMenu + biayaLayanan + biayaFasilitas;
-
-      setTotalPembayaran(calculatedTotalPembayaran);
     }
-  }, [store, biayaFasilitas, biayaLayanan]);
+  }, [store?.checkoutDetails]);
 
-  console.log('cekstore', store);
+  useEffect(() => {
+    calculateTotal();
+  }, [checkoutDetails]);
 
   return (
     <Container>
-      <Typography
-        sx={{ fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'start' }}
-        variant="h5"
-      >
-        Alamat Resto:
-      </Typography>
-      <Grid container={true} spacing={2} sx={{ marginBottom: '1rem' }}>
-        <Grid
-          item={true}
-          sx={{
-            alignItems: 'center',
-            display: 'flex',
-            justifyContent: 'center'
-          }}
-          xs={2}
-        >
-          <Avatar sx={{ backgroundColor: '#BDD7FF' }}>
-            <MYLocationFilled size={24} />
-          </Avatar>
-        </Grid>
-        <Grid item={true} xs={10}>
-          <Box>
-            <Typography
-              sx={{ fontWeight: 'bold', textAlign: 'start' }}
-              variant="h6"
-            >
-              TokoRumahan
-            </Typography>
-            <Typography variant="body2">
-              Jl. Hegarmanah No. 28, Hermanah, Cidadap, Kota Bandung, Jawa Barat
-            </Typography>
-          </Box>
-        </Grid>
-      </Grid>
-      <Card
-        sx={{ borderColor: theme.palette.primary.main, marginBottom: '1rem' }}
-        onClick={toggleDrawer(true)}
-      >
-        <CardContent
-          sx={{
-            alignItems: 'center',
-            display: 'flex',
-            justifyContent: 'space-between',
-            padding: '0.5rem 1rem 0.5rem 1rem!important'
-          }}
-        >
+      {checkoutIdFromStorage ? (
+        <>
           <Typography
-            sx={{ fontWeight: 'bold', textAlign: 'start' }}
+            sx={{
+              fontWeight: 'bold',
+              marginBottom: '0.5rem',
+              textAlign: 'start'
+            }}
             variant="h5"
           >
-            Pilih Pengantaran
+            Alamat Resto:
           </Typography>
-          <Box
-            sx={{
-              alignItems: 'center',
-              display: 'flex',
-              gap: '0.5rem',
-              justifyContent: 'end'
-            }}
-          >
-            <Typography
-              color="primary"
-              sx={{ fontWeight: 'bold' }}
-              variant="body1"
+          <Grid container={true} spacing={2} sx={{ marginBottom: '1rem' }}>
+            <Grid
+              item={true}
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                justifyContent: 'center'
+              }}
+              xs={2}
             >
-              {delivery}
-            </Typography>
-            <ChevronRightFilled color={theme.palette.primary.main} size={20} />
-          </Box>
-        </CardContent>
-      </Card>
-      <Card
-        sx={{ borderColor: theme.palette.primary.main, marginBottom: '1rem' }}
-        onClick={toggleDrawerTime(true)}
-      >
-        <CardContent
-          sx={{
-            alignItems: 'center',
-            display: 'flex',
-            justifyContent: 'space-between',
-            padding: '0.5rem 1rem 0.5rem 1rem!important'
-          }}
-        >
-          <Typography
-            sx={{ fontWeight: 'bold', textAlign: 'start' }}
-            variant="h5"
-          >
-            Waktu Penyiapan
-          </Typography>
-          <Box
-            sx={{
-              alignItems: 'center',
-              display: 'flex',
-              gap: '0.5rem',
-              justifyContent: 'end'
-            }}
-          >
-            <Typography
-              color="primary"
-              sx={{ fontWeight: 'bold' }}
-              variant="body1"
-            >
-              {selectedTime.format('HH:mm')}
-            </Typography>
-            <ChevronRightFilled color={theme.palette.primary.main} size={20} />
-          </Box>
-        </CardContent>
-      </Card>
-      <Typography sx={{ fontWeight: 'bold' }} variant="h5">
-        Pesanan Kamu
-      </Typography>
-      <Accordion sx={{ marginBottom: '1rem' }}>
-        <AccordionSummary
-          aria-controls="panel1a-content"
-          expandIcon={<KeyboardArrowDownFilled />}
-          id="panel1a-header"
-          sx={{ padding: '0.5rem, 1rem, 0.5rem, 1rem!important' }}
-        >
-          <Box
-            sx={{
-              alignItems: 'center',
-              display: 'flex',
-              gap: '0.5rem',
-              justifyContent: 'start'
-            }}
-          >
-            <Avatar src={MieBaso} sx={{ height: '24px', width: '24px' }} />
-            <Typography sx={{ fontWeight: 'bold' }} variant="body1">
-              Resto Bunda Gila
-            </Typography>
-          </Box>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Grid
-            container={true}
-            spacing={5}
-            sx={{
-              alignItems: 'center',
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginBottom: '1rem'
-            }}
-          >
-            <Grid item={true} xs={6}>
-              <Button
-                color="primary"
-                fullWidth={true}
-                size="small"
-                variant="outlined"
-              >
-                Ganti Resto
-              </Button>
+              <Avatar sx={{ backgroundColor: '#BDD7FF' }}>
+                <MYLocationFilled size={24} />
+              </Avatar>
             </Grid>
-            <Grid item={true} xs={6}>
-              <Button
-                color="primary"
-                fullWidth={true}
-                size="small"
-                sx={{ paddingInline: '0.5rem' }}
-                variant="outlined"
-              >
-                Tambah Pesanan
-              </Button>
+            <Grid item={true} xs={10}>
+              <Box>
+                <Typography
+                  sx={{ fontWeight: 'bold', textAlign: 'start' }}
+                  variant="h6"
+                >
+                  {checkoutDetails?.channel?.name}
+                </Typography>
+                <Typography variant="body2">
+                  {
+                    checkoutDetails?.channel?.metadata.find(
+                      (item) => item.key === 'address'
+                    )?.value
+                  }
+                </Typography>
+              </Box>
             </Grid>
           </Grid>
-          {store?.checkoutMenuOutput?.map((obj, index) => {
-            return (
-              <div key={obj.title} style={{ marginBottom: '1rem' }}>
-                <Grid
-                  container={true}
-                  spacing={2}
-                  sx={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    marginBottom: '0.5rem'
-                  }}
+          <Card
+            sx={{
+              borderColor: theme.palette.primary.main,
+              marginBottom: '1rem'
+            }}
+            onClick={toggleDrawer(true)}
+          >
+            <CardContent
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '0.5rem 1rem 0.5rem 1rem!important'
+              }}
+            >
+              <Typography
+                sx={{ fontWeight: 'bold', textAlign: 'start' }}
+                variant="h5"
+              >
+                Pilih Pengantaran
+              </Typography>
+              <Box
+                sx={{
+                  alignItems: 'center',
+                  display: 'flex',
+                  gap: '0.5rem',
+                  justifyContent: 'end'
+                }}
+              >
+                <Typography
+                  color="primary"
+                  sx={{ fontWeight: 'bold' }}
+                  variant="body1"
                 >
-                  <Grid item={true} xs={3}>
-                    <div
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      <img
-                        alt={obj.title}
-                        src={obj.foto}
-                        style={{ maxHeight: '100%', maxWidth: '100%' }} />
-                    </div>
-                  </Grid>
-                  <Grid
-                    item={true}
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between'
-                    }}
-                    xs={9}
+                  {formOrder.orderType}
+                </Typography>
+                <ChevronRightFilled
+                  color={theme.palette.primary.main}
+                  size={20} />
+              </Box>
+            </CardContent>
+          </Card>
+          <Card
+            sx={{
+              borderColor: theme.palette.primary.main,
+              marginBottom: '1rem'
+            }}
+            onClick={toggleDrawerTime(true)}
+          >
+            <CardContent
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '0.5rem 1rem 0.5rem 1rem!important'
+              }}
+            >
+              <Typography
+                sx={{ fontWeight: 'bold', textAlign: 'start' }}
+                variant="h5"
+              >
+                Waktu Penyiapan
+              </Typography>
+              <Box
+                sx={{
+                  alignItems: 'center',
+                  display: 'flex',
+                  gap: '0.5rem',
+                  justifyContent: 'end'
+                }}
+              >
+                <Typography
+                  color="primary"
+                  sx={{ fontWeight: 'bold' }}
+                  variant="body1"
+                >
+                  {formOrder.estimation.format('HH:mm')}
+                </Typography>
+                <ChevronRightFilled
+                  color={theme.palette.primary.main}
+                  size={20} />
+              </Box>
+            </CardContent>
+          </Card>
+          <Typography sx={{ fontWeight: 'bold' }} variant="h5">
+            Pesanan Kamu
+          </Typography>
+          <Accordion expanded={true} sx={{ marginBottom: '1rem !important' }}>
+            <AccordionSummary
+              aria-controls="panel1a-content"
+              expandIcon={<KeyboardArrowDownFilled />}
+              id="panel1a-header"
+              sx={{ padding: '0.5rem, 1rem, 0.5rem, 1rem!important' }}
+            >
+              <Box
+                sx={{
+                  alignItems: 'center',
+                  display: 'flex',
+                  gap: '0.5rem',
+                  justifyContent: 'start'
+                }}
+              >
+                <Avatar src={MieBaso} sx={{ height: '24px', width: '24px' }} />
+                <Typography sx={{ fontWeight: 'bold' }} variant="body1">
+                  {checkoutDetails?.channel?.name}
+                </Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Grid
+                container={true}
+                spacing={5}
+                sx={{
+                  alignItems: 'center',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginBottom: '1rem'
+                }}
+              >
+                <Grid item={true} xs={6}>
+                  <Button
+                    color="primary"
+                    fullWidth={true}
+                    size="small"
+                    variant="outlined"
                   >
-                    <Box
+                    Ganti Resto
+                  </Button>
+                </Grid>
+                <Grid item={true} xs={6}>
+                  <Button
+                    color="primary"
+                    fullWidth={true}
+                    size="small"
+                    sx={{ paddingInline: '0.5rem' }}
+                    variant="outlined"
+                  >
+                    Tambah Pesanan
+                  </Button>
+                </Grid>
+              </Grid>
+              {checkoutDetails?.lines.map((obj, index) => {
+                return (
+                  <div key={obj.id} style={{ marginBottom: '1rem' }}>
+                    <Grid
+                      container={true}
+                      spacing={2}
                       sx={{
                         alignItems: 'center',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        marginBottom: '1rem'
+                        marginBottom: '0.5rem'
                       }}
                     >
-                      <Typography
-                        sx={{ fontWeight: 'bold', textAlign: 'start' }}
-                        variant="body2"
+                      <Grid
+                        item={true}
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          paddingTop: '0px !important'
+                        }}
+                        xs={3}
                       >
-                        {obj.title}
-                      </Typography>
-                      <Button color="primary" size="small" variant="text">
-                        Edit
-                      </Button>
-                    </Box>
-                    <Box
-                      sx={{
-                        alignItems: 'center',
-                        display: 'flex',
-                        justifyContent: 'space-between'
-                      }}
-                    >
-                      <Typography
-                        sx={{ fontWeight: 'bold', textAlign: 'start' }}
-                        variant="body2"
-                      >
-                        Rp. {obj.harga.toLocaleString('id-ID')}
-                      </Typography>
-                      <Box sx={{ textAlign: 'center' }}>
-                        <IconButton
-                          aria-label="min"
-                          size="small"
-                          onClick={() => handleDecrement(index)}
-                        >
-                          <IndeterminateCheckBoxFilled size={24} />
-                        </IconButton>
-                        <Typography
+                        <div
                           style={{
-                            display: 'inline-block',
-                            margin: '0 0.5rem'
+                            alignItems: 'center',
+                            display: 'flex',
+                            height: '100%',
+                            justifyContent: 'center',
+                            width: '100%'
                           }}
-                          variant="body2"
                         >
-                          {obj.count}
-                        </Typography>
-                        <IconButton
-                          aria-label="plus"
-                          size="small"
-                          onClick={() => handleIncrement(index)}
+                          <img
+                            alt={obj?.variant?.product?.name}
+                            src={obj?.variant?.product?.thumbnail?.url}
+                            style={{
+                              borderRadius: '8px',
+                              maxHeight: '100%',
+                              maxWidth: '100%'
+                            }} />
+                        </div>
+                      </Grid>
+                      <Grid
+                        item={true}
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between'
+                        }}
+                        xs={9}
+                      >
+                        <Box
+                          sx={{
+                            alignItems: 'center',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            marginBottom: '1rem'
+                          }}
                         >
-                          <AddBoxFilled size={24} />
-                        </IconButton>
-                      </Box>
+                          <Typography
+                            sx={{ fontWeight: 'bold', textAlign: 'start' }}
+                            variant="body2"
+                          >
+                            {obj?.variant?.product?.name}
+                          </Typography>
+                          <Button color="primary" size="small" variant="text">
+                            Edit
+                          </Button>
+                        </Box>
+                        <Box
+                          sx={{
+                            alignItems: 'center',
+                            display: 'flex',
+                            justifyContent: 'space-between'
+                          }}
+                        >
+                          <Typography
+                            sx={{ fontWeight: 'bold', textAlign: 'start' }}
+                            variant="body2"
+                          >
+                            Rp.{' '}
+                            {obj?.variant?.pricing?.price?.gross?.amount.toLocaleString(
+                              'id-ID'
+                            )}
+                          </Typography>
+                          <Box sx={{ textAlign: 'center' }}>
+                            <IconButton
+                              aria-label="min"
+                              size="small"
+                              onClick={() => handleDecrement(index)}
+                            >
+                              <IndeterminateCheckBoxFilled size={24} />
+                            </IconButton>
+                            <Typography
+                              style={{
+                                display: 'inline-block',
+                                margin: '0 0.5rem'
+                              }}
+                              variant="body2"
+                            >
+                              {obj?.quantity}
+                            </Typography>
+                            <IconButton
+                              aria-label="plus"
+                              size="small"
+                              onClick={() => handleIncrement(index)}
+                            >
+                              <AddBoxFilled size={24} />
+                            </IconButton>
+                          </Box>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                    <Box sx={{ marginBottom: '1rem' }}>
+                      <TextField
+                        fullWidth={true}
+                        id="detail"
+                        size="small"
+                        value={obj?.metafields?.note}
+                        variant="outlined"
+                        onChange={(e) => handleNoteChange(index, e.target.value)} />
                     </Box>
-                  </Grid>
-                </Grid>
-                <Box sx={{ marginBottom: '1rem' }}>
-                  <TextField
-                    fullWidth={true}
-                    id="detail"
-                    size="small"
-                    value={obj.detail}
-                    variant="outlined" />
-                </Box>
-              </div>
-            );
-          })}
+                  </div>
+                );
+              })}
               <Typography
                 sx={{ fontWeight: 'bold', marginBottom: '0.5rem' }}
                 variant="body1"
@@ -526,13 +742,17 @@ const Checkout: PageComponent = (props: Props) => {
                 <TextField
                   fullWidth={true}
                   id="detail"
+                  placeholder="Tulis catatan untuk resto disini"
                   size="small"
-                  value="Jangan terlalu Gosong"
-                  variant="outlined" />
+                  value={formOrder.note}
+                  variant="outlined"
+                  onChange={(e) => setFormOrder({ ...formOrder, note: e.target.value })} />
               </Box>
-        </AccordionDetails>
-      </Accordion>
-      <Typography
+            </AccordionDetails>
+          </Accordion>
+
+          {/* SKENARIO MULTIPLE CHANNEL */}
+          {/* <Typography
         sx={{ fontWeight: 'bold', marginBottom: '0.5rem', marginTop: '1rem' }}
         variant="h5"
       >
@@ -542,166 +762,218 @@ const Checkout: PageComponent = (props: Props) => {
         <Button color="primary" fullWidth={true} variant="contained">
           Tambah Resto
         </Button>
-      </Box>
-      <Box
-        sx={{
-          alignItems: 'center',
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: '1rem'
-        }}
-      >
-        <Typography
-          sx={{ fontWeight: 'bold', textAlign: 'start' }}
-          variant="h5"
-        >
-          Pilih Pengantaran
-        </Typography>
-        <Box
-          sx={{
-            alignItems: 'center',
-            display: 'flex',
-            gap: '0.5rem',
-            justifyContent: 'end'
-          }}
-        >
-          <Typography
-            color="primary"
-            sx={{ fontWeight: 'bold' }}
-            variant="body1"
+      </Box> */}
+
+          <Box
+            sx={{
+              alignItems: 'center',
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '1rem'
+            }}
           >
-            DANA
-          </Typography>
-          <ChevronRightFilled color={theme.palette.primary.main} size={20} />
-        </Box>
-      </Box>
-      <Card>
-        <CardContent sx={{ padding: '1rem 1rem 1rem 1rem!important' }}>
-          <Typography
-            sx={{ marginBottom: '0.5rem', textAlign: 'start' }}
-            variant="h5"
-          >
-            Detail Pembayaran
-          </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography
-              sx={{ marginBottom: '0.5rem', textAlign: 'start' }}
-              variant="body2"
-            >
-              Harga Menu
-            </Typography>
-            <Typography
-              sx={{
-                fontWeight: 'bold',
-                marginBottom: '0.5rem',
-                textAlign: 'end'
-              }}
-              variant="body2"
-            >
-
-              Rp. {totalMenu.toLocaleString('id-ID')}
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography
-              sx={{ marginBottom: '0.5rem', textAlign: 'start' }}
-              variant="body2"
-            >
-              Biaya Layanan
-            </Typography>
-            <Typography
-              sx={{
-                fontWeight: 'bold',
-                marginBottom: '0.5rem',
-                textAlign: 'end'
-              }}
-              variant="body2"
-            >
-
-              Rp. {biayaLayanan.toLocaleString('id-ID')}
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography
-              sx={{ marginBottom: '0.5rem', textAlign: 'start' }}
-              variant="body2"
-            >
-              Biaya Fasilitas Pembayaran
-            </Typography>
-            <Typography
-              sx={{
-                fontWeight: 'bold',
-                marginBottom: '0.5rem',
-                textAlign: 'end'
-              }}
-              variant="body2"
-            >
-
-              Rp. {biayaFasilitas.toLocaleString('id-ID')}
-            </Typography>
-          </Box>
-        </CardContent>
-      </Card>
-      <Global
-        styles={{
-          '.MuiDrawer-root > .MuiPaper-root': {
-            height: `calc(50% - ${drawerBleeding}px)`,
-            overflow: 'visible'
-          }
-        }} />
-      <SwipeableDrawer
-        ModalProps={{
-          keepMounted: true
-        }}
-        anchor="bottom"
-        container={container}
-        disableSwipeToOpen={!open}
-        open={open}
-        swipeAreaWidth={drawerBleeding}
-        onClose={toggleDrawer(false)}
-        onOpen={toggleDrawer(true)}
-      >
-        <StyledBox
-          sx={{
-            borderTopLeftRadius: 8,
-            borderTopRightRadius: 8,
-            left: 0,
-            position: 'relative',
-            right: 0,
-            top: -drawerBleeding
-          }}
-        >
-          <Puller />
-          <Box sx={{ p: 4 }}>
-            <Typography
-              sx={{ fontWeight: 'bold', marginTop: '1rem' }}
+              sx={{ fontWeight: 'bold', textAlign: 'start' }}
               variant="h5"
             >
-              Pilih Tipe Pengantaran
+              Pilih Pembayaran
             </Typography>
-            <hr />
-            {DeliveryType.map((obj) => {
-              return (
-                <Button
-                  fullWidth={true}
-                  key={obj.text}
-                  size="small"
-                  sx={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    gap: '0.5rem',
-                    justifyContent: 'start',
-                    marginBottom: '0.5rem'
-                  }}
-                  variant="text"
-                  onClick={() => handleDelivery(obj.text)}
+            <Box
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                gap: '0.5rem',
+                justifyContent: 'end'
+              }}
+            >
+              <Typography
+                color="primary"
+                sx={{ fontWeight: 'bold' }}
+                variant="body1"
+              >
+                DANA
+              </Typography>
+              <ChevronRightFilled
+                color={theme.palette.primary.main}
+                size={20} />
+            </Box>
+          </Box>
+          <Card>
+            <CardContent sx={{ padding: '1rem 1rem 1rem 1rem!important' }}>
+              <Typography
+                sx={{ marginBottom: '0.5rem', textAlign: 'start' }}
+                variant="h5"
+              >
+                Detail Pembayaran
+              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography
+                  sx={{ marginBottom: '0.5rem', textAlign: 'start' }}
+                  variant="body2"
                 >
-                  <img alt={obj.text} src={obj.icon} />
-                  <Typography>{obj.text}</Typography>
-                </Button>
-              );
-            })}
-            <Typography
+                  Harga Menu
+                </Typography>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                    marginBottom: '0.5rem',
+                    textAlign: 'end'
+                  }}
+                  variant="body2"
+                >
+                  Rp. {total.toLocaleString('id-ID')}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography
+                  sx={{ marginBottom: '0.5rem', textAlign: 'start' }}
+                  variant="body2"
+                >
+                  Biaya Layanan
+                </Typography>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                    marginBottom: '0.5rem',
+                    textAlign: 'end'
+                  }}
+                  variant="body2"
+                >
+                  Rp. -
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography
+                  sx={{ marginBottom: '0.5rem', textAlign: 'start' }}
+                  variant="body2"
+                >
+                  Biaya Fasilitas Pembayaran
+                </Typography>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                    marginBottom: '0.5rem',
+                    textAlign: 'end'
+                  }}
+                  variant="body2"
+                >
+                  Rp. -
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+          <Card
+            sx={{
+              borderRadius: '1rem',
+              bottom: 0,
+              height: '125px',
+              left: 0,
+              padding: '1rem',
+              position: 'fixed',
+              right: 0
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '1rem'
+              }}
+            >
+              <Typography
+                sx={{ fontWeight: 'bold', marginTop: '1rem' }}
+                variant="h5"
+              >
+                Total Pembayaran
+              </Typography>
+              <Typography
+                sx={{ fontWeight: 'bold', marginTop: '1rem' }}
+                variant="h5"
+              >
+                Rp. {total.toLocaleString('id-ID')}
+              </Typography>
+            </Box>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between'
+              }}
+            >
+              <Button
+                color="primary"
+                fullWidth={true}
+                variant="contained"
+                onClick={
+                  checkoutIdFromStorage
+                    ? toggleOpenModalCheckout
+                    : () => navigate('./order-in-progress')
+                }
+              >
+                Proses Pesanan
+              </Button>
+            </Box>
+          </Card>
+          <Global
+            styles={{
+              '.MuiDrawer-root > .MuiPaper-root': {
+                height: `calc(50% - ${drawerBleeding}px)`,
+                overflow: 'visible'
+              }
+            }} />
+          <SwipeableDrawer
+            ModalProps={{
+              keepMounted: true
+            }}
+            anchor="bottom"
+            container={container}
+            disableSwipeToOpen={!open}
+            open={open}
+            swipeAreaWidth={drawerBleeding}
+            onClose={toggleDrawer(false)}
+            onOpen={toggleDrawer(true)}
+          >
+            <StyledBox
+              sx={{
+                borderTopLeftRadius: 8,
+                borderTopRightRadius: 8,
+                left: 0,
+                position: 'relative',
+                right: 0,
+                top: -drawerBleeding
+              }}
+            >
+              <Puller />
+              <Box sx={{ p: 4 }}>
+                <Typography
+                  sx={{ fontWeight: 'bold', marginTop: '1rem' }}
+                  variant="h5"
+                >
+                  Pilih Tipe Pengantaran
+                </Typography>
+                <hr />
+                {DeliveryType.map((obj) => {
+                  return (
+                    <Button
+                      fullWidth={true}
+                      key={obj.text}
+                      size="small"
+                      sx={{
+                        alignItems: 'center',
+                        display: 'flex',
+                        gap: '0.5rem',
+                        justifyContent: 'start',
+                        marginBottom: '0.5rem'
+                      }}
+                      variant="text"
+                      onClick={() => handleOrderType(obj.text)}
+                    >
+                      <img alt={obj.text} src={obj.icon} />
+                      <Typography>{obj.text}</Typography>
+                    </Button>
+                  );
+                })}
+                {/* DELIVERY SCENARIO */}
+                {/* <Typography
               sx={{ fontWeight: 'bold', marginTop: '1rem' }}
               variant="h5"
             >
@@ -722,171 +994,182 @@ const Checkout: PageComponent = (props: Props) => {
                     marginBottom: '0.5rem'
                   }}
                   variant="text"
-                  onClick={() => handleDelivery(obj.text)}
+                  onClick={() => handleOrderType(obj.text)}
                 >
                   <img alt={obj.text} src={obj.icon} />
                   <Typography>{obj.text}</Typography>
                 </Button>
               );
-            })}
-          </Box>
-        </StyledBox>
-      </SwipeableDrawer>
+            })} */}
+              </Box>
+            </StyledBox>
+          </SwipeableDrawer>
 
-      <Global
-        styles={{
-          '.MuiDrawer-root > .MuiPaper-root': {
-            height: `calc(50% - ${drawerBleeding}px)`,
-            overflow: 'visible'
-          }
-        }} />
-      <SwipeableDrawer
-        ModalProps={{
-          keepMounted: true
-        }}
-        anchor="bottom"
-        disableSwipeToOpen={false}
-        open={openSummary}
-        swipeAreaWidth={drawerBleeding}
-        onClose={toggleDrawerSummary(false)}
-        onOpen={toggleDrawerSummary(true)}
-      >
-        <StyledBox
-          sx={{
-            borderTopLeftRadius: 8,
-            borderTopRightRadius: 8,
-            left: 0,
-            position: 'relative',
-            right: 0,
-            top: -drawerBleeding,
-            visibility: open ? 'hidden' : 'visible'
-          }}
-        >
-          <Puller />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1rem 0rem 1rem' }}>
-            <Typography sx={{ fontWeight: 'bold', marginTop: '1rem' }} variant="h5">Total Pembayaran</Typography>
-            <Typography sx={{ fontWeight: 'bold', marginTop: '1rem' }} variant="h5">
-                        Rp. {totalPembayaran.toLocaleString('id-ID')}
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1rem 1rem 1rem' }}>
-          <Button
-            color="primary"
-            fullWidth={true}
-            variant="contained"
-            onClick={!isCheckout ? toggleOpenModalCheckout : () => navigate('./order-in-progress')}
+          <Global
+            styles={{
+              '.MuiDrawer-root > .MuiPaper-root': {
+                height: `calc(50% - ${drawerBleeding}px)`,
+                overflow: 'visible'
+              }
+            }} />
+
+          <Global
+            styles={{
+              '.MuiDrawer-root > .MuiPaper-root': {
+                height: `calc(50% - ${drawerBleeding}px)`,
+                overflow: 'visible'
+              }
+            }} />
+          <SwipeableDrawer
+            ModalProps={{
+              keepMounted: true
+            }}
+            anchor="bottom"
+            container={container}
+            disableSwipeToOpen={!openTime}
+            open={openTime}
+            swipeAreaWidth={drawerBleeding}
+            onClose={toggleDrawerTime(false)}
+            onOpen={toggleDrawerTime(true)}
           >
-            {isCheckout ? 'Checkout' : 'Proses Pesanan'}
-          </Button>
-          </Box>
-        </StyledBox>
-      </SwipeableDrawer>
-
-      <Global
-        styles={{
-          '.MuiDrawer-root > .MuiPaper-root': {
-            height: `calc(50% - ${drawerBleeding}px)`,
-            overflow: 'visible'
-          }
-        }} />
-      <SwipeableDrawer
-        ModalProps={{
-          keepMounted: true
-        }}
-        anchor="bottom"
-        container={container}
-        disableSwipeToOpen={!openTime}
-        open={openTime}
-        swipeAreaWidth={drawerBleeding}
-        onClose={toggleDrawerTime(false)}
-        onOpen={toggleDrawerTime(true)}
-      >
-        <StyledBox
-          sx={{
-            borderTopLeftRadius: 8,
-            borderTopRightRadius: 8,
-            left: 0,
-            position: 'relative',
-            right: 0,
-            top: -drawerBleeding
-          }}
-        >
-          <Puller />
-          <Box sx={{ p: 4 }}>
-            <Typography
-              sx={{ fontWeight: 'bold', marginTop: '1rem' }}
-              variant="h5"
+            <StyledBox
+              sx={{
+                borderTopLeftRadius: 8,
+                borderTopRightRadius: 8,
+                left: 0,
+                position: 'relative',
+                right: 0,
+                top: -drawerBleeding
+              }}
             >
-              Pilih Waktu Penyiapan Pesanan
-            </Typography>
-            <hr />
-            <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', marginTop: '3rem' }}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <MobileTimePicker
-                  value={selectedTime}
-                  onChange={() => handleTimeChange} />
-              </LocalizationProvider>
+              <Puller />
+              <Box sx={{ p: 4 }}>
+                <Typography
+                  sx={{ fontWeight: 'bold', marginTop: '1rem' }}
+                  variant="h5"
+                >
+                  Pilih Waktu Penyiapan Pesanan
+                </Typography>
+                <hr />
+                <Box
+                  sx={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    marginTop: '3rem'
+                  }}
+                >
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <MobileTimePicker
+                      value={formOrder.estimation}
+                      onChange={(newTime) => handleTimeChange(newTime)} />
+                  </LocalizationProvider>
+                </Box>
+              </Box>
+              <Box
+                sx={{
+                  alignItems: 'center',
+                  display: 'flex',
+                  justifyContent: 'center'
+                }}
+              >
+                <Typography sx={{ textAlign: 'center' }}>
+                  Pesanan kamu akan disiapkan pada pukul <br />{' '}
+                  {formOrder.estimation.format('HH:mm')}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '1rem 1rem 1rem 1rem'
+                }}
+              >
+                <Button
+                  color="primary"
+                  fullWidth={true}
+                  variant="contained"
+                  onClick={handlePilihButtonClick}
+                >
+                  Pilih
+                </Button>
+              </Box>
+            </StyledBox>
+          </SwipeableDrawer>
+          <Modal
+            aria-describedby="modal-modal-description"
+            aria-labelledby="modal-modal-title"
+            open={openModal}
+            onClose={toggleOpenModalCheckout}
+          >
+            <Box sx={style}>
+              <Typography
+                component="h3"
+                id="modal-modal-title"
+                sx={{
+                  color: `${theme?.palette?.error}`,
+                  fontWeight: 'bold',
+                  marginBottom: '0.5rem',
+                  textAlign: 'center'
+                }}
+                variant="h3"
+              >
+                Udah yakin dengan pesananmu?
+              </Typography>
+              <Typography
+                id="modal-modal-description"
+                sx={{ marginBottom: '0.5rem', textAlign: 'center' }}
+                variant="body1"
+              >
+                Sebelum pesan, pastiin pesananmu udah bener-bener sesuai, ya!
+              </Typography>
+              <Box
+                gap={2}
+                sx={{ display: 'flex', justifyContent: 'space-between' }}
+              >
+                <Button
+                  color="primary"
+                  size="medium"
+                  sx={{ width: '100%' }}
+                  variant="outlined"
+                  onClick={toggleOpenModalCheckout}
+                >
+                  Cek Ulang
+                </Button>
+                <Button
+                  color="primary"
+                  size="medium"
+                  sx={{ width: '100%' }}
+                  variant="contained"
+                  onClick={handleConfirmOrder}
+                >
+                  Sesuai
+                </Button>
+              </Box>
             </Box>
-          </Box>
-          <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center' }}>
-            <Typography sx={{ textAlign: 'center' }}>Pesanan kamu akan disiapkan pada pukul <br /> {selectedTime.format('HH:mm')}</Typography>
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1rem 1rem 1rem' }}>
-            <Button
-              color="primary"
-              fullWidth={true}
-              variant="contained"
-              onClick={handlePilihButtonClick}
-            >
-              Pilih
-            </Button>
-          </Box>
-        </StyledBox>
-      </SwipeableDrawer>
-      <Modal
-        aria-describedby="modal-modal-description"
-        aria-labelledby="modal-modal-title"
-        open={openModal}
-        onClose={toggleOpenModalCheckout}
-      >
-        <Box sx={style}>
-          <Typography
-            component="h3"
-            id="modal-modal-title"
-            sx={{ color: `${theme?.palette?.error}`, fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'center' }}
-            variant="h3"
-          >
-            Udah yakin dengan pesananmu?
-          </Typography>
-          <Typography
-            id="modal-modal-description"
-            sx={{ marginBottom: '0.5rem', textAlign: 'center' }}
-            variant="body1"
-          >
-            Sebelum pesan, pastiin pesananmu udah bener-bener sesuai, ya!
-          </Typography>
-          <Box gap={2} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Button
-              color="primary"
-              size="medium"
-              sx={{ width: '100%' }}
-              variant="outlined"
-              onClick={toggleOpenModalCheckout}
-            >
-              Cek Ulang
-            </Button>
-            <Button
-              color="primary"
-              size="medium"
-              sx={{ width: '100%' }}
-              variant="contained"
-              onClick={handleConfirmCheckout}
-            >
-              Sesuai
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
+          </Modal>
+        </>
+      )
+        : <>
+              <div
+                style={{
+                  textAlign: 'center',
+                  marginTop: '2rem',
+                  padding: '5rem 5rem 0rem 5rem'
+                }}
+              >
+              <img
+                alt="Logo"
+                src={LogoBilo}
+                style={{ height: 'auto', width: '100%' }} />
+              </div>
+              <Typography sx={{ color: theme?.palette?.primary?.main, textAlign: 'center' }} variant="h5">
+                Keranjang kamu masih kosong...
+              </Typography>
+              <Typography sx={{ textAlign: 'center' }} variant="body1">
+                Yuk masukan minuman & makanan favoritmu kedalam keranjang!
+              </Typography>
+          </>}
     </Container>
   );
 };

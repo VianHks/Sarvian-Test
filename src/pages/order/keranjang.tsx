@@ -13,7 +13,8 @@ import {
   Container,
   Grid,
   TextField,
-  Typography
+  Typography,
+  useTheme
 } from '@mui/material';
 
 import type { PageComponent } from '@nxweb/react';
@@ -23,17 +24,21 @@ import { DEFAULT_LINES, OrderCommand } from '@models/order/reducers';
 import type { linesDataModel } from '@models/order/types';
 import { useCommand, useStore } from '@models/store';
 
+import LogoBilo from '@assets/images/logoBiloCheckout.svg';
+
 const SESSION_STORAGE_CHECKOUT = 'CheckoutId';
 
 const Keranjang: PageComponent = () => {
   const navigate = useNavigate();
   const { auth } = useAuth();
+  const theme = useTheme();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
   const [searchParams] = useSearchParams();
   const command = useCommand((cmd) => cmd);
   const action = searchParams.get('action');
   const checkoutId = searchParams.get('checkoutId');
-  const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '';
+  const checkoutIdFromStorage =
+    window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '';
 
   const [store, dispatch] = useStore((state) => state?.order);
   const [orders, setOrders] = useState<linesDataModel[]>(DEFAULT_LINES);
@@ -55,13 +60,16 @@ const Keranjang: PageComponent = () => {
   const createdTime = dateTime.toLocaleDateString('en-US', options);
 
   const handleCheckout = () => {
-    OrderCommand.postCreateOrder(
-      { checkoutId: checkoutId || '' },
-      token || ''
-    ).then((response) => {
-      window.sessionStorage.removeItem(SESSION_STORAGE_CHECKOUT);
-      navigate(`/order-in-progress/single-order?orderId=${response}`);
-    });
+    /*
+     * OrderCommand.postCreateOrder(
+     *   { checkoutId: checkoutId || '' },
+     *   token || ''
+     * ).then((response) => {
+     *   window.sessionStorage.removeItem(SESSION_STORAGE_CHECKOUT);
+     *   navigate(`/checkout-dinein?orderId=${response}`);
+     * });
+     */
+    navigate(`/checkout-dinein?checkoutId=${checkoutId}`);
   };
 
   const handleChildCheckboxChange =
@@ -84,9 +92,15 @@ const Keranjang: PageComponent = () => {
           token || ''
         )
           .then(() => {
+            OrderCommand.postCheckoutCustomerDetach(
+              { checkoutId: checkoutIdFromStorage },
+              token || ''
+            );
             dispatch(
               OrderCommand.getCart(checkoutIdFromStorage || '', token || '')
             );
+            window.sessionStorage.removeItem(SESSION_STORAGE_CHECKOUT);
+            navigate('/keranjang');
           })
           .catch((error) => {
             console.error('Gagal menghapus order:', error);
@@ -106,8 +120,15 @@ const Keranjang: PageComponent = () => {
   };
 
   useEffect(() => {
-    dispatch(OrderCommand.getCart(checkoutIdFromStorage || '', token || ''));
-  }, [dispatch, checkoutIdFromStorage, token]);
+    if (checkoutIdFromStorage) {
+      dispatch(
+        OrderCommand.getCart(
+          checkoutIdFromStorage || checkoutId || '',
+          token || ''
+        )
+      );
+    }
+  }, [dispatch, checkoutIdFromStorage, checkoutId, token]);
 
   useEffect(() => {
     if (store?.cart) {
@@ -117,9 +138,32 @@ const Keranjang: PageComponent = () => {
 
   return (
     <Container>
-      {orders.length === 0
-        ? <>Tidak Ada Pesanan Di Keranjang mu</>
-
+      {orders.length === 0 || !checkoutIdFromStorage
+        ? (
+        <>
+          <div
+            style={{
+              textAlign: 'center',
+              marginTop: '2rem',
+              padding: '5rem 5rem 0rem 5rem'
+            }}
+          >
+            <img
+              alt="Logo"
+              src={LogoBilo}
+              style={{ height: 'auto', width: '100%' }} />
+          </div>
+          <Typography
+            sx={{ color: theme?.palette?.primary?.main, textAlign: 'center' }}
+            variant="h5"
+          >
+            Keranjang kamu masih kosong...
+          </Typography>
+          <Typography sx={{ textAlign: 'center' }} variant="body1">
+            Yuk masukan minuman & makanan favoritmu kedalam keranjang!
+          </Typography>
+        </>
+        )
         : (
         <>
           <Card sx={{ marginBottom: '1rem', padding: '1rem' }}>

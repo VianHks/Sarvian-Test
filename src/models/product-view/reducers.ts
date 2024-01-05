@@ -90,6 +90,21 @@ const ProductViewsCommand = {
         return 'err';
       });
   },
+  putCheckout: (payload: unknown, token: string): Promise<string> => {
+    return apiFetch(token).put(`/foodbuyer/0.1/checkout`, payload)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .then((response: any) => {
+        const id: string = response?.data?.checkoutId;
+
+        if (response.status === 200) {
+          return id;
+        }
+
+        return 'err';
+      }).catch(() => {
+        return 'err';
+      });
+  },
   getCheckoutId: (payload: unknown, token: string): TAction<ProductViewsAction, void> => {
     return (dispatch: TDispatch<ProductViewsAction>) => {
       return apiFetch(token).post(`/foodbuyer/0.1/checkout`, payload).then((response) => {

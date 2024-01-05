@@ -51,6 +51,7 @@ const DEFAULT_DESCRIPTION: DescriptionDataModel = {
 interface FormData {
   channel: string
   deliveryMethodId: string
+  lineId: string
   price: string
   quantity: number
   userId: string
@@ -61,6 +62,7 @@ interface FormData {
 const DEFAULT_FORM_DATA: FormData = {
   channel: '',
   deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
+  lineId: '',
   price: '',
   quantity: 0,
   userId: '',
@@ -175,6 +177,7 @@ const ProductView = () => {
         const processedFormData = {
           channel: 'makan',
           deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
+          lineId: lines[variantIndex]?.id,
           price: lines[variantIndex]?.totalPrice?.gross?.amount.toString() || '',
           quantity: lines[variantIndex]?.quantity || 0,
           userId: 'VXNlcjozMTc4NjkwMDc=',
@@ -202,34 +205,56 @@ const ProductView = () => {
   }, [count, productPrice]);
 
   const handleAddToCart = () => {
-    const payload: Payload = {
-      after: '',
-      channel: 'makan',
-      deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
-      first: 100,
-      lines: [
-        {
-          metadata: [
-            {
-              key: 'note',
-              value: formData.value
-            }
-          ],
-          price: formData.price,
-          quantity: 1,
-          variantId: formData.variantId
-        }
-      ],
-      userId: 'VXNlcjozMTc4NjkwMDc='
-    };
+    if (checkoutIdFromStorage !== '') {
+      const payload = {
+        checkoutId: checkoutIdFromStorage,
+        lines: [
+          {
+            lineId: formData.lineId,
+            note: formData?.value,
+            price: formData.price,
+            quantity: formData.quantity
+          }
+        ]
+      };
 
-    command.productView.postCreateCheckout(payload, token || '')
-      .then((response) => {
-        if (response) {
-          window.sessionStorage.setItem(SESSION_STORAGE_CHECKOUT, JSON.stringify(response));
-          setTimeout(() => navigate(`/keranjang?checkoutId=${response}`), 1000);
-        }
-      });
+      command.productView.putCheckout(payload, token || '')
+        .then((response) => {
+          if (response) {
+            window.sessionStorage.setItem(SESSION_STORAGE_CHECKOUT, JSON.stringify(response));
+            setTimeout(() => navigate(`/keranjang?checkoutId=${response}`), 1000);
+          }
+        });
+    } else {
+      const payload: Payload = {
+        after: '',
+        channel: 'makan',
+        deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
+        first: 100,
+        lines: [
+          {
+            metadata: [
+              {
+                key: 'note',
+                value: formData.value
+              }
+            ],
+            price: formData.price,
+            quantity: formData.quantity,
+            variantId: formData.variantId
+          }
+        ],
+        userId: 'VXNlcjozMTc4NjkwMDc='
+      };
+
+      command.productView.postCreateCheckout(payload, token || '')
+        .then((response) => {
+          if (response) {
+            window.sessionStorage.setItem(SESSION_STORAGE_CHECKOUT, JSON.stringify(response));
+            setTimeout(() => navigate(`/keranjang?checkoutId=${response}`), 1000);
+          }
+        });
+    }
   };
 
   return (
