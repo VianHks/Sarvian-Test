@@ -1,21 +1,22 @@
 /* eslint-disable linebreak-style */
 import { Fragment, useEffect, useMemo, useState } from 'react';
+import type { MouseEvent, SyntheticEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import DiningRoundedIcon from '@mui/icons-material/DiningRounded';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
-import { Alert, Avatar, Box, Button, Card, Divider, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField, Toolbar, Typography } from '@mui/material';
-import { ClockNumberClassKey } from '@mui/x-date-pickers';
+import { Alert, Avatar, Box, Button, Card, Divider, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, Snackbar, TextField, Toolbar, Typography } from '@mui/material';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
 import { AccessTimeFilled, AddBoxFilled, ArrowBackFilled, IndeterminateCheckBoxFilled, LocationOnFilled, SearchOutlined, StarFilled } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
 
-import { routes } from '@config/routes';
 import { useAuth } from '@hooks/use-auth';
 import { ChannelCommand } from '@models/halaman-resto/reducers';
 import { RatingCommand } from '@models/rating/commands';
 import { useStore } from '@models/store';
 
+import CustomizedSnackbars from './alert';
 import FloatingShoppingButton from './floatingshopping-button';
 import Rating from './rating';
 
@@ -23,6 +24,7 @@ import Bakar from '@assets/images/Bakar.png';
 import ProfilFoto from '@assets/images/Orang.svg';
 import Pisan from '@assets/images/Pisan.png';
 
+import type { SnackbarCloseReason } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material/Select';
 
 // eslint-disable-next-line import/exports-last
@@ -37,13 +39,6 @@ export interface RestoItem {
 }
 
 // eslint-disable-next-line import/exports-last
-export interface MenuItem {
-  id: number
-  userName: string
-  rating: string
-  comment: string
-
-}
 
 // eslint-disable-next-line import/exports-last
 export const DUMMY_MENU_RECOMDATION = [
@@ -93,94 +88,6 @@ export const DUMMY_RESTO = [
   }
 
 ];
-interface MenuRekomendDataModel {
-  count: number
-  foto: string
-  harga: number
-  title: string
-  terjual: number
-  customized: boolean
-  stok: number
-}
-interface PaketHematDataModel {
-  count: number
-  foto: string
-  harga: number
-  title: string
-  terjual: number
-  customized: boolean
-  stok: number
-}
-
-const MENU_REKOMEND: MenuRekomendDataModel[] = [
-  {
-    count: 0,
-    foto: `${Pisan}`,
-    harga: 24000,
-    title: 'Ayam Goreng Pisan',
-    terjual: 4,
-    customized: true,
-    stok: 5
-  },
-  {
-    count: 0,
-    foto: `${Bakar}`,
-    harga: 22000,
-    title: 'Ayam Bakar',
-    terjual: 3,
-    customized: false,
-    stok: 3
-  }
-];
-const PAKET_HEMAT: PaketHematDataModel[] = [
-  {
-    count: 0,
-    foto: `${Pisan}`,
-    harga: 24000,
-    title: 'Ayam Goreng Pisan',
-    terjual: 4,
-    customized: true,
-    stok: 4
-  },
-  {
-    count: 0,
-    foto: `${Bakar}`,
-    harga: 22000,
-    title: 'Ayam Bakar',
-    terjual: 3,
-    customized: false,
-    stok: 3
-  },
-  {
-    count: 0,
-    foto: `${Bakar}`,
-    harga: 22000,
-    title: 'Ayam Bakar Pedes',
-    terjual: 7,
-    customized: false,
-    stok: 0
-  }
-];
-
-const DEFAULT_MENUREKOMEND: MenuRekomendDataModel = {
-
-  count: 0,
-  foto: '',
-  harga: 0,
-  title: '',
-  terjual: 0,
-  customized: false,
-  stok: 0
-};
-const DEFAULT_PAKETHEMAT: PaketHematDataModel = {
-  count: 0,
-  foto: '',
-  harga: 0,
-  title: '',
-  terjual: 0,
-  customized: false,
-  stok: 0
-};
 
 interface RestoSchedule {
   day: string
@@ -235,31 +142,25 @@ const DATA: PayloadDataModel =
   };
 
 const HalamanResto: PageComponent = () => {
-  interface MenuItem {
-    count: number
-    harga: number
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const snackbarSeverity: 'error' | 'info' | 'success' | 'warning' = 'error';
 
-  }
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
   const [store, dispatch] = useStore((state) => state);
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const navigate = useNavigate();
-  // Const [childChecked, setChildChecked] = useState<Record<string, []>>({});
-  const [orders, setOrders] = useState<MenuRekomendDataModel[]>([DEFAULT_MENUREKOMEND]);
-  const [ordersPaketHemat, setOrdersPaketHemat] = useState<PaketHematDataModel[]>([DEFAULT_PAKETHEMAT]);
-  const location = useLocation();
-  const [methode, setMethode] = useState('Pesan Antar');
-  const [filteredResto, setFilteredResto] = useState(DUMMY_RESTO);
+  const [isLoading, setIsLoading] = useState(false);
   const channelId = 'Q2hhbm5lbDo0';
   const daysOfWeek = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
   const currentDayIndex = new Date().getDay();
   const currentDay = daysOfWeek[currentDayIndex];
   const jadwalOperasional = JSON.parse(store?.halamanResto?.channelDetailOutput?.data?.channel?.metafields?.jadwal_operasional || '[]');
-  const jadwalDummy = JSON.parse('[{"day":"senin","open":"07:00","closed":"12:00","isOpen":true},{"day":"selasa","open":"07:00","closed":"12:00","isOpen":true},{"day":"rabu","open":"07:00","closed":"12:00","isOpen":true},{"day":"kamis","open":"07:00","closed":"12:00","isOpen":true},{"day":"jumat","open":"07:00","closed":"12:00","isOpen":false},{"day":"sabtu","open":"07:00","closed":"12:00","isOpen":true},{"day":"minggu","open":"07:00","closed":"12:00","isOpen":false}]');
+  const jadwalDummy = JSON.parse('[{"day":"senin","open":"07:00","closed":"12:00","isOpen":true},{"day":"selasa","open":"07:00","closed":"12:00","isOpen":true},{"day":"rabu","open":"07:00","closed":"12:00","isOpen":true},{"day":"kamis","open":"07:00","closed":"12:00","isOpen":true},{"day":"jumat","open":"07:00","closed":"12:00","isOpen":true},{"day":"sabtu","open":"07:00","closed":"12:00","isOpen":true},{"day":"minggu","open":"07:00","closed":"12:00","isOpen":false}]');
   const filteredJadwal = jadwalDummy.filter((resto: RestoSchedule) => {
-    return resto.day.toLowerCase() === currentDay && resto.isOpen;
+    return resto.day.toLowerCase() === currentDay;
   });
   const [colIds, setColIds] = useState<{ id: string, name: string }[]>([]);
   const [selectedValue, setSelectedValue] = useState<string>('');
@@ -268,22 +169,25 @@ const HalamanResto: PageComponent = () => {
     ?.filter((category) => category.products.totalCount > 0) || [];
 
   const [formData, setFormData] = useState(DATA);
-  const [lines, setLines] = useState<LinesModel[]>([DefaultLines]);
 
-  const calculateTotal = (selectedItems: MenuItem[]) => {
-    let amount = 0;
-    let items = 0;
+  const calculateTotalAmount = (lines: LinesModel[] | undefined): number => {
+    if (!lines) {
+      return 0;
+    }
 
-    selectedItems.forEach((item: MenuItem) => {
-      amount += item.count * item.harga;
-      items += item.count;
-    });
+    return lines.reduce((total, line) => {
+      const price = parseFloat(line.price) || 0;
 
-    setTotalAmount(amount);
-    setTotalItems(items);
+      const lineTotal = price * line.quantity;
+
+      console.log('cekprice', price);
+      console.log('ceklientotal', lineTotal);
+
+      return total + lineTotal;
+    }, 0);
   };
   const handleShoppingButtonClick = () => {
-    console.log('Tombol Belanja Diklik');
+    navigate('keranjang');
   };
 
   const handleIncrement = (id: string) => {
@@ -292,20 +196,20 @@ const HalamanResto: PageComponent = () => {
     setFormData((prevFormData) => {
       const updatedFormData = { ...prevFormData };
 
-      // Find the index based on the variantId
       const lineToUpdate = updatedFormData.lines.find((line) => line.variantId === id);
 
-      // Check if the index is valid and the lines array exists
       if (lineToUpdate) {
-        // Increment the quantity for the found line
         lineToUpdate.quantity = Math.max(lineToUpdate.quantity + 1, 0);
+        setTotalItems((prevTotalItems) => prevTotalItems + 1);
       }
+
+      const newTotalAmount = calculateTotalAmount(updatedFormData.lines);
+
+      setTotalAmount(newTotalAmount);
 
       return updatedFormData;
     });
   };
-
-  console.log('cekformdata', formData);
 
   const handleDecrement = (id: string) => {
     setFormData((prevFormData) => {
@@ -314,31 +218,18 @@ const HalamanResto: PageComponent = () => {
       if (updatedFormData.lines) {
         const lineToUpdate = updatedFormData.lines.find((line) => line.variantId === id);
 
-        if (lineToUpdate) {
+        if (lineToUpdate && lineToUpdate.quantity > 0) {
           lineToUpdate.quantity = Math.max(lineToUpdate.quantity - 1, 0);
+          setTotalItems((prevTotalItems) => Math.max(prevTotalItems - 1, 0));
         }
       }
 
+      const newTotalAmount = calculateTotalAmount(updatedFormData.lines);
+
+      setTotalAmount(newTotalAmount);
+
       return updatedFormData;
     });
-  };
-
-  const handleIncrementPaketHemat = (index: number) => {
-    const updatedOrders = [...ordersPaketHemat];
-
-    updatedOrders[index].count += 1;
-    setOrdersPaketHemat(updatedOrders);
-    calculateTotal([...orders, ...updatedOrders]);
-  };
-
-  const handleDecrementPaketHemat = (index: number) => {
-    if (ordersPaketHemat[index].count > 0) {
-      const updatedOrders = [...ordersPaketHemat];
-
-      updatedOrders[index].count -= 1;
-      setOrdersPaketHemat(updatedOrders);
-      calculateTotal([...orders, ...updatedOrders]);
-    }
   };
 
   const handleLihatSemuaClick = () => {
@@ -346,6 +237,7 @@ const HalamanResto: PageComponent = () => {
   };
 
   const handleLanjutPembayaranClick = () => {
+    setIsLoading(true);
     const filteredLines = formData.lines.filter((line) => line.quantity > 0);
 
     const param = {
@@ -359,9 +251,25 @@ const HalamanResto: PageComponent = () => {
     };
 
     console.log('cekparam', param);
-    dispatch(ChannelCommand.postCheckout(param, token || ''));
+    dispatch(ChannelCommand.postCheckout(param, token || ''))
+      .then(() => {
+        setIsLoading(false);
+        navigate('/keranjang');
+      })
+      .catch((error) => {
+        setIsLoading(false);
 
-    navigate('/keranjang');
+
+        if (error.response && error.response.status === 200) {
+          setSnackbarMessage('Terjadi kesalahan Jaringan saat melakukan checkout. Silakan coba lagi.');
+          setSnackbarOpen(true);
+        } else {
+          console.error('Error during checkout:', error);
+
+          setSnackbarMessage('Terjadi kesalahan saat melakukan checkout. Silakan coba lagi.');
+          setSnackbarOpen(true);
+        }
+      });
   };
 
   useEffect(() => {
@@ -420,10 +328,6 @@ const HalamanResto: PageComponent = () => {
     };
   }, [dispatch, token]);
 
-  const mapDataToIndex = <T extends { id: string }>(data: T[] | undefined, targetId: string): number => {
-    return data?.findIndex((obj) => obj.id === targetId) || -1;
-  };
-
   useEffect(() => {
     if (store?.halamanResto?.productByCollectionsOutput) {
       const linesUpdate = Array.from(
@@ -438,7 +342,7 @@ const HalamanResto: PageComponent = () => {
             ? store?.halamanResto?.productByCollectionsOutput?.data[index]?.variants[0].id || ''
             : '';
           const matchingProduct = store?.halamanResto?.productByCollectionsOutput?.data.find(
-            (product) => product.id === targetId
+            (product) => product.variants[0].id === targetId
           );
 
           const defaultPrice =
@@ -478,10 +382,14 @@ const HalamanResto: PageComponent = () => {
   };
 
   console.log('cekstore', store);
+  console.log('cekformdata', formData);
+  console.log('jadwal', filteredJadwal);
 
   return (
     <div>
+
     <Toolbar>
+
           <IconButton
             aria-label="back"
             color="default"
@@ -526,9 +434,17 @@ const HalamanResto: PageComponent = () => {
 
 {filteredJadwal.map((resto: RestoSchedule) => {
   const currentHour = new Date().getHours();
-  const [openHour, closeHour] = resto.open.split(' - ').map((time) => parseInt(time));
+
+  const [openHour] = (resto.open || '').split(' - ').map((time) => parseInt(time));
+  const [closeHour] = (resto.closed || '').split(' - ').map((time) => parseInt(time));
 
   const isOpen = currentHour >= openHour && currentHour <= closeHour;
+
+  console.log('cekjamOpen', openHour);
+
+  console.log('cekjamCurrent', currentHour);
+
+  console.log('cekjamTutup', closeHour);
 
   return (
    <div key={store?.halamanResto?.channelDetailOutput?.data?.channel?.id}>
@@ -763,7 +679,7 @@ const HalamanResto: PageComponent = () => {
                         </Typography>
                       </Grid>
                       <Grid item={true} xs={6}>
-                        <Typography sx={{ fontWeight: 'medium', textAlign: 'end' }} variant="body2">
+                        <Typography sx={{ fontWeight: 'medium', marginLeft: '3.5rem' }} variant="body2">
                           Terjual 4
                         </Typography>
                       </Grid>
@@ -863,6 +779,19 @@ const HalamanResto: PageComponent = () => {
             </Button>
             <FloatingShoppingButton onClick={handleShoppingButtonClick} />
     </Box>
+    <Grid container={true} justifyContent="center">
+        {isLoading
+          ? (
+            <Box sx={{ marginTop: '-30rem' }}>
+              <CircularProgress />
+            </Box>
+          )
+          : null}
+    </Grid>
+    <CustomizedSnackbars
+      message={snackbarMessage}
+      open={snackbarOpen}
+      onClose={() => setSnackbarOpen(false)} />
     </div>
   );
 };

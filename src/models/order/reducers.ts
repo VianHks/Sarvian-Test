@@ -205,19 +205,19 @@ const OrderReducer = (
 };
 
 export const OrderCommand = {
-  getOrderList: (token: string): TAction<OrderAction, void> => {
+  getOrderList: (params: unknown, token: string): TAction<OrderAction, void> => {
     return (dispatch: TDispatch<OrderAction>) => {
       return apiFetch(token)
-        .get('/foodbuyer/0.1/orders')
+        .post(`/foodbuyer/0.1/orders`, params)
         .then((response) => {
           if (response.status === 200) {
             if (response.data !== null) {
-              const orderList: OrderModel = {
+              const orderlist: OrderModel = {
                 orderListOutput: response.data as OrderList
               };
 
               dispatch({
-                data: orderList,
+                data: orderlist,
                 type: OrderActionType.OrderList
               });
             } else {

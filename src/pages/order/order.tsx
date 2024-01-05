@@ -151,6 +151,73 @@ const CustomTab = styled((props: StyledTabProps) => <Tab disableRipple={true} {.
   })
 );
 
+interface OrderItem {
+  billingAddress: {
+    city: string
+    cityArea: string
+    companyName: string
+    country: {
+      code: string
+      country: string
+    }
+    countryArea: string
+    firstName: string
+    id: string
+    lastName: string
+    phone: string
+    postalCode: string
+    streetAddress1: string
+    streetAddress2: string
+  }
+  created: string
+  id: string
+  lines: [
+    {
+      id: string
+      isShippingRequired: string
+      metafields: {
+        note: string
+      }
+      productName: string
+      quantity: string
+      quantityFulfilled: string
+      thumbnail: {
+        url: string
+      }
+      totalPrice: {
+        gross: {
+          amount: string
+          currency: string
+        }
+        net: {
+          amount: string
+          currency: string
+        }
+      }
+      unitPrice: {
+        gross: {
+          amount: string
+          currency: string
+        }
+        net: {
+          amount: string
+          currency: string
+        }
+      }
+    }
+  ]
+  number: string
+  paymentStatus: string
+  status: string
+  total: {
+    gross: {
+      amount: number
+      currency: string
+    }
+  }
+  userEmail: string
+}
+
 const Order: PageComponent = () => {
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
@@ -159,6 +226,12 @@ const Order: PageComponent = () => {
   const idOrder = 'T3JkZXI6NDNmNDQ4OTYtYzhmNS00NjQ1LWJlZjgtYzNjZjE0MjI3Y2Rk';
   const theme = useTheme();
   const [tabValue, setTabValue] = useState('Diproses');
+  // const [statusFilterUnConfirmed, setStatusFilterUnConfirmed] = useState('All');
+  // const [statusFilterFulfilled, setStatusFilterFulfilled] = useState('All');
+  // const [statusFilterCanceled, setStatusFilterCanceled] = useState('All');
+  // const [filteredDataUnConfirmed, setFilteredDataUnConfirmed] = useState<OrderItem[]>([]);
+  // const [filteredDataFulfilled, setFilteredDataFulfilled] = useState<OrderItem[]>([]);
+  // const [filteredDataCanceled, setFilteredDataCanceled] = useState<OrderItem[]>([]);
 
   const handleTabChange = (
     _: React.SyntheticEvent<Element, Event>,
@@ -170,22 +243,37 @@ const Order: PageComponent = () => {
   const handleLihatPesanana = (orderNumber: string) => {
     navigate(`/order-in-progress/single-order?id=${orderNumber}`);
   };
+  // const filterDataByStatus = (status: string) => {
+  //   const data = store?.orderListOutput?.data || [];
+  //   const filtered = data.filter((item) => item.status === status);
+
+  //   setFilteredData(filtered);
+  // };
 
   useEffect(() => {
     const param = {
       after: '',
-      customer: 'string',
+      customer: 'Holly Acosta',
       direction: 'DESC',
-      field: 'name',
-      first: 100,
-      paymentStatus: 'UNFULFILLED',
-      status: 'string'
+      field: 'NUMBER',
+      first: 15,
+      paymentStatus: 'FULLY_CHARGED',
+      status: 'UNCONFIRMED'
     };
 
-    dispatch(OrderCommand.getOrderDetail(idOrder, token || ''));
+    dispatch(OrderCommand.getOrderList(param, token || ''));
+  }, []);
+  useEffect(() => {
+
   }, []);
 
+  // useEffect(() => {
+  //   filterDataByStatus(statusFilterUnConfirmed);
+  //   filterDataByStatus(statusFilterFulFilled);
+  // }, [store?.orderListOutput?.data]);
+
   console.log('cekstore', store);
+
 
   return (
     <>
@@ -212,8 +300,8 @@ const Order: PageComponent = () => {
       </Box>
       <Container sx={{ paddingInline: '0.5rem' }}>
         <div>
-        {tabValue === 'Diproses' && store?.orderDetailOutput?.data?.order?.lines?.map((order) => {
-          const isUnfulfilled = store?.orderDetailOutput?.data?.order?.status === 'UNFULFILLED';
+        {tabValue === 'Diproses' && store?.orderListOutput?.data.map((order) => {
+          const isUnfulfilled = order.status === 'UNFULFILLED' || order.status === 'UNCONFIRMED';
 
           if (isUnfulfilled) {
             return (
@@ -223,7 +311,7 @@ const Order: PageComponent = () => {
                   <Typography color="black" variant="caption">No. Pesanan</Typography>
                 </Grid>
                 <Grid item={true} sx={{ textAlign: 'center' }} xs={4}>
-                  <Typography sx={{ color: 'black', fontWeight: 'medium' }} variant="caption">#{store?.orderDetailOutput?.data?.order?.lines[0].id}</Typography>
+                  <Typography sx={{ color: 'black', fontWeight: 'medium' }} variant="caption">#{order.id}</Typography>
                 </Grid>
                 <Grid item={true} sx={{ alignItems: 'end', textAlign: 'end', width: 'fit-content' }} xs={4}>
                   <Typography color="primary" sx={{ backgroundColor: '#E4F3FF', borderRadius: '4px', padding: '0.25rem 0.5rem' }} variant="caption">
@@ -243,16 +331,16 @@ const Order: PageComponent = () => {
                 >
                   <Avatar src={MieBaso} sx={{ height: '24px', width: '24px' }} />
                   <Typography color="black" fontWeight="bold" variant="body1">
-                    {store?.orderDetailOutput?.data?.order?.channel?.name}
+                    {order?.lines[0]?.productName}
                   </Typography>
                 </Box>
                 <Box sx={{ textAlign: 'end' }}>
                   <Typography color="black" variant="caption">2 Aug 2023</Typography>
                 </Box>
               </Box>
-              {store?.orderDetailOutput?.data?.order?.lines?.map((obj) => {
+              {order?.lines?.map((obj) => {
                 return (
-                  <div key={obj.productName}>
+                  <div key={obj.id}>
                     <Grid
                       container={true}
                       spacing={3}
@@ -307,7 +395,7 @@ const Order: PageComponent = () => {
                     <Box sx={{ marginBottom: '0.75rem' }}>
                       <TextField
                         fullWidth={true}
-                        placeholder={obj.metadata[0].value}
+                        placeholder={obj.metafields?.note}
                         size="small"
                         variant="outlined" />
                     </Box>

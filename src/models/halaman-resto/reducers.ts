@@ -333,10 +333,10 @@ export const ChannelCommand = {
   postCheckout: (params: unknown, token: string): TAction<HalamanRestoAction, void> => {
     return (dispatch: TDispatch<HalamanRestoAction>) => {
       return apiFetch(token)
-        .post(`/foodbuyer/0.1/checkout`, params)
+        .post(`/foodbuyer/0.1/checkasdout`, params)
         .then((response) => {
           if (response.status === 200) {
-            if (response.data !== null) {
+            if (response.data && Object.keys(response.data).length > 0) {
               console.log('cekrespPost', response.data);
               const checkout: HalamanRestoModel = {
                 checkoutOutput: response.data as CheckoutDataModel
@@ -353,6 +353,9 @@ export const ChannelCommand = {
               });
             }
           }
+        })
+        .catch((error) => {
+          console.error('Error during checkout:', error);
         });
     };
   }
