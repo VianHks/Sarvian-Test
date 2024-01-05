@@ -3,7 +3,7 @@ import type { TAction, TDispatch } from '@models/types';
 
 import { HomeActionType } from './types.js';
 
-import type { HomeAction, HomeModel, HomeRestoListDataModel } from './types.js';
+import type { HomeAction, HomeModel, HomeRestoListDataModel, SearchResultDataModel } from './types.js';
 
 const DEFAULT_HOME_MENU = {
   data: {
@@ -13,6 +13,13 @@ const DEFAULT_HOME_MENU = {
 
 const HomeMenuDefault: HomeModel = {
   HomeRestoOutput: DEFAULT_HOME_MENU
+};
+
+const searchResultDefault: HomeModel = {
+  searchResultOutput: {
+    data: [],
+    totalCount: 0
+  }
 };
 
 const HomeReducer = (
@@ -30,6 +37,8 @@ const HomeReducer = (
       return { ...state, ...action.value };
     case HomeActionType.MakananClear:
       return {};
+    case HomeActionType.SearchResultLoad:
+      return { ...state, ...action.data };
 
     default:
       return state;
@@ -54,6 +63,29 @@ export const homeCommands = {
             dispatch({
               data: HomeMenuDefault,
               type: HomeActionType.HomeRestoListLoad
+            });
+          }
+        }
+      });
+    };
+  },
+  searchResult: (params: unknown, token: string): TAction<HomeAction, void> => {
+    return (dispatch: TDispatch<HomeAction>) => {
+      return apiFetch(token).post(`/foodbuyer/0.1/products`, params).then((response) => {
+        if (response.status === 200) {
+          if (response.data !== null) {
+            const searchResult: HomeModel = {
+              searchResultOutput: (response.data as SearchResultDataModel)
+            };
+
+            dispatch({
+              data: searchResult,
+              type: HomeActionType.SearchResultLoad
+            });
+          } else {
+            dispatch({
+              data: searchResultDefault,
+              type: HomeActionType.SearchResultLoad
             });
           }
         }

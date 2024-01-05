@@ -207,69 +207,6 @@ export const DUMMY_RESTO = [
   }
 ];
 
-const DUMMY_FOODS = [
-  {
-    id: '0',
-    photo: `${Minuman}`,
-    title: 'Minuman'
-  },
-  {
-    id: '1',
-    photo: `${Nasi}`,
-    title: 'Aneka Nasi'
-  },
-  {
-    id: '2',
-    photo: `${Roti}`,
-    title: 'Roti'
-  },
-  {
-    id: '3',
-    photo: `${Jajanan}`,
-    title: 'Jajanan'
-  },
-  {
-    id: '4',
-    photo: `${Kopi}`,
-    title: 'Kopi'
-  },
-  {
-    id: '5',
-    photo: `${MieBaso}`,
-    title: 'Mie & Bakso'
-  },
-  {
-    id: '6',
-    photo: `${Dessert}`,
-    title: 'Desert'
-  },
-  {
-    id: '7',
-    photo: `${Sunda}`,
-    title: 'Sunda'
-  },
-  {
-    id: '8',
-    photo: `${Chinese}`,
-    title: 'Chinese'
-  },
-  {
-    id: '9',
-    photo: `${Padang}`,
-    title: 'Padang'
-  },
-  {
-    id: '10',
-    photo: `${Sate}`,
-    title: 'Sate'
-  },
-  {
-    id: '11',
-    photo: `${Bubur}`,
-    title: 'Bubur'
-  }
-];
-
 const Home: PageComponent = () => {
   const navigate = useNavigate();
   const { auth } = useAuth();
@@ -404,7 +341,7 @@ const Home: PageComponent = () => {
         coordinate2.longitude
       );
 
-      return { location, distance };
+      return { distance, location };
     });
   };
 
@@ -443,14 +380,12 @@ const Home: PageComponent = () => {
   const operationalHour = getOpenAndClosedValues(sortedDataMenu, thisDay);
 
   const handleSearch = () => {
-    navigate(`/beranda/search-result?query=${searchValue}`);
+    navigate(`/pencarian`);
   };
 
   const handleCardToRestoClick = () => {
     navigate('/page-resto');
   };
-
-  console.log('sortedDataMenu', sortedDataMenu);
 
   return (
     <Box sx={{ margin: '1rem 1.5rem' }}>
@@ -478,7 +413,7 @@ const Home: PageComponent = () => {
             </InputAdornment>
           ),
           startAdornment: (
-            <InputAdornment position="start" onClick={handleSearch}>
+            <InputAdornment position="start">
               <SearchFilled />
             </InputAdornment>
           )
@@ -493,7 +428,7 @@ const Home: PageComponent = () => {
         }}
         value={searchValue}
         variant="outlined"
-        onChange={(e) => setSearchValue(e.target.value)} />
+        onClick={handleSearch} />
       <Grid container={true} spacing={1} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: shipmentMethode === 'Pesan Antar' ? '1rem' : '2rem' }}>
         <Grid item={true}>
           <Chip color={shipmentMethode === 'Pesan Antar' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={pesanAntarIcon} />} label="Pesan Antar" sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} onClick={() => handleShipmentMethodChange('Pesan Antar')} />

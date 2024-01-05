@@ -57,11 +57,63 @@ interface RestoList {
   verified: boolean
 }
 
+interface SearchResultChannelListingsDataModel {
+  availableForPurchase: string
+  channel: {
+    currencyCode: string
+    id: string
+    metafields: {
+      address: string
+      badgeVerification: string
+      coordinate: string
+      delivery: string
+      dineIn: string
+      hashtag: string
+      isHalal: string
+      media: string
+      operationalTime: string
+      pickUp: string
+      preparationTime: string
+      rating: string
+      verified: string
+    }
+    name: string
+  }
+  isAvailableForPurchase: true
+  isPublished: true
+  publicationDate: string
+  visibleInListings: true
+}
+
+// eslint-disable-next-line import/exports-last
+export interface SearchResultDataDataModel {
+  channelListings: SearchResultChannelListingsDataModel[]
+  description: string
+  id: string
+  name: string
+  productType: {
+    hasVariants: true
+    id: string
+    name: string
+  }
+  thumbnail: {
+    url: string
+  }
+  updatedAt: string
+}
+
+// eslint-disable-next-line import/exports-last
+export interface SearchResultDataModel {
+  data: SearchResultDataDataModel[]
+  totalCount: 0
+}
+
 interface HomeModel {
   berandaRestoListOutput?: RestoList[]
   HomeRestoOutput?: HomeRestoListDataModel
   makananOutput?: Makanan[]
   menuBerandaOutput?: MenuBeranda[]
+  searchResultOutput?: SearchResultDataModel
 }
 
 enum HomeActionType {
@@ -70,8 +122,8 @@ enum HomeActionType {
   MenuBerandaLoad = 'menuberanda-load',
   MenuBerandaClear = 'menuberanda-clear',
   MakananLoad = 'makanan-load',
-  MakananClear = 'makanan-clear'
-
+  MakananClear = 'makanan-clear',
+  SearchResultLoad = 'searchResult-load'
 }
 
   type HomeAction = {
@@ -87,6 +139,9 @@ enum HomeActionType {
   } | {
     type: HomeActionType.MenuBerandaLoad
     value?: HomeModel
+  } | {
+    type: HomeActionType.SearchResultLoad
+    data?: HomeModel
   };
 
 export { HomeActionType };
