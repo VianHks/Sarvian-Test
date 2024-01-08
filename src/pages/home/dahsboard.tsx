@@ -7,8 +7,9 @@ import { AccessTimeFilled, ExpandMoreFilled, FilterAltFilled, LocationOnFilled, 
 import type { PageComponent } from '@nxweb/react';
 
 import { useAuth } from '@hooks/use-auth';
-import { berandaCommand } from '@models/beranda/commands';
-import { useStore } from '@models/store';
+import { homeCommand } from '@models/home/commands';
+import type { ChannelsDataModel } from '@models/home/types';
+import { useCommand, useStore } from '@models/store';
 import FloatingShoppingButton from '@pages/halaman-resto/floatingshopping-button';
 import type { FoodsDataModel, FoodsListDataModel } from '@pages/personalized-recomendation';
 import { DEFAULT_FOODS_LIST } from '@pages/personalized-recomendation';
@@ -206,143 +207,180 @@ export const DUMMY_RESTO = [
   }
 ];
 
-const DUMMY_FOODS = [
-  {
-    id: '0',
-    photo: `${Minuman}`,
-    title: 'Minuman'
-  },
-  {
-    id: '1',
-    photo: `${Nasi}`,
-    title: 'Aneka Nasi'
-  },
-  {
-    id: '2',
-    photo: `${Roti}`,
-    title: 'Roti'
-  },
-  {
-    id: '3',
-    photo: `${Jajanan}`,
-    title: 'Jajanan'
-  },
-  {
-    id: '4',
-    photo: `${Kopi}`,
-    title: 'Kopi'
-  },
-  {
-    id: '5',
-    photo: `${MieBaso}`,
-    title: 'Mie & Bakso'
-  },
-  {
-    id: '6',
-    photo: `${Dessert}`,
-    title: 'Desert'
-  },
-  {
-    id: '7',
-    photo: `${Sunda}`,
-    title: 'Sunda'
-  },
-  {
-    id: '8',
-    photo: `${Chinese}`,
-    title: 'Chinese'
-  },
-  {
-    id: '9',
-    photo: `${Padang}`,
-    title: 'Padang'
-  },
-  {
-    id: '10',
-    photo: `${Sate}`,
-    title: 'Sate'
-  },
-  {
-    id: '11',
-    photo: `${Bubur}`,
-    title: 'Bubur'
-  }
-];
-
 const Home: PageComponent = () => {
   const navigate = useNavigate();
-  const theme = useTheme();
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
-  const [store, dispatch] = useStore((state) => state?.beranda);
-  const [methode, setMethode] = useState('Pesan Antar');
-  const [filteredResto, setFilteredResto] = useState(store?.berandaRestoListOutput);
+  const command = useCommand((cmd) => cmd);
+
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const daysOfWeek = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const thisDay = daysOfWeek[dayOfWeek].toLowerCase();
+
+  const [store, dispatch] = useStore((state) => state?.home);
+  const [shipmentMethode, setShipmentMethode] = useState('Pick Up');
   const [searchValue, setSearchValue] = useState('');
-  const [foodsList, setFoodsList] = useState<FoodsListDataModel>(DEFAULT_FOODS_LIST);
+  const [deliveryData, setDeliveryData] = useState<ChannelsDataModel[]>([]);
+  const [pickUpData, setPickUpData] = useState<ChannelsDataModel[]>([]);
+  const [dineInData, setDineInData] = useState<ChannelsDataModel[]>([]);
+  const [dataMenu, setDataMenu] = useState(pickUpData);
 
-  const filterResto = (method: string) => {
-    const filtered = store?.berandaRestoListOutput?.filter((resto) => {
-      return resto.orderMethode.toLowerCase().includes(method.toLowerCase());
-    });
-
-    setFilteredResto(filtered);
-  };
-
-  const handleFoodItemClick = (clickedItem: FoodsDataModel, mealType: string) => {
-    setFoodsList((prevFoodsList) => {
-      const updatedFoodsList = { ...prevFoodsList };
-
-      const isItemAlreadySelected = updatedFoodsList[mealType].some((item) => {
-        return item.id === clickedItem.id;
-      });
-
-      if (isItemAlreadySelected) {
-        updatedFoodsList[mealType] = updatedFoodsList[mealType].filter(
-          (item) => item.id !== clickedItem.id
-        );
-      } else {
-        updatedFoodsList[mealType] = [...updatedFoodsList[mealType], clickedItem];
-      }
-
-      return updatedFoodsList;
-    });
-  };
+  const tokrumCoordinate = '-6.878979254712864, 107.60084527975108';
 
   useEffect(() => {
     if (token) {
-      dispatch(berandaCommand.menuBerandaLoad(token))
-
-        .catch((err: unknown) => {
-          console.error(err);
-        });
-      dispatch(berandaCommand.makananLoad(token))
-
-        .catch((err: unknown) => {
-          console.error(err);
-        });
-      dispatch(berandaCommand.restoListLoad(token))
-
-        .catch((err: unknown) => {
-          console.error(err);
-        });
-
-      return () => {
-        dispatch(berandaCommand.menuBerandaClear());
-      };
+      dispatch(
+        command.home.getHomeMenu(token || '')
+      );
     }
+  }, [dispatch]);
 
-    filterResto(methode);
-  }, [methode]);
+  useEffect(() => {
+    if (store?.HomeRestoOutput?.data?.channels) {
+      const deliveryChannels: ChannelsDataModel[] = store?.HomeRestoOutput?.data?.channels.filter((channel) => channel.metafields.delivery === 'true');
+      const pickUpChannels: ChannelsDataModel[] = store?.HomeRestoOutput?.data?.channels.filter((channel) => channel.metafields.pickUp === 'true');
+      const dineInChannels: ChannelsDataModel[] = store?.HomeRestoOutput?.data?.channels.filter((channel) => channel.metafields.dineIn === 'true');
 
-  console.log('cekstore', store);
+      setDeliveryData((prevDeliveryData) => {
+        const uniqueDeliveryData = Array.from(new Set([...prevDeliveryData, ...deliveryChannels].map((item) => item.id)))
+          .map((id) => deliveryChannels.find((item) => item.id === id))
+          .filter(Boolean) as ChannelsDataModel[];
 
-  const handleMethode = (newValue: string) => {
-    setMethode(newValue);
-    filterResto(newValue);
+        return uniqueDeliveryData;
+      });
+
+      setPickUpData((prevPickUpChannels) => {
+        const uniquePickUpData = Array.from(new Set([...prevPickUpChannels, ...pickUpChannels].map((item) => item.id)))
+          .map((id) => pickUpChannels.find((item) => item.id === id))
+          .filter(Boolean) as ChannelsDataModel[];
+
+        return uniquePickUpData;
+      });
+
+      setDineInData((prevDineInData) => {
+        const uniqueDineInData = Array.from(new Set([...prevDineInData, ...dineInChannels].map((item) => item.id)))
+          .map((id) => dineInChannels.find((item) => item.id === id))
+          .filter(Boolean) as ChannelsDataModel[];
+
+        return uniqueDineInData;
+      });
+    }
+  }, [store]);
+
+  useEffect(() => {
+    if (pickUpData) {
+      setDataMenu(pickUpData);
+    }
+  }, [pickUpData]);
+
+  const handleShipmentMethodChange = (method: string) => {
+    setShipmentMethode(method);
+
+    switch (method) {
+      case 'Pesan Antar':
+        setDataMenu([...deliveryData]);
+        break;
+      case 'Pick Up':
+        setDataMenu([...pickUpData]);
+        break;
+      case 'Dine In':
+        setDataMenu([...dineInData]);
+        break;
+
+      default:
+        setDataMenu([]);
+        break;
+    }
   };
 
+  const deg2rad = (deg: number) => {
+    return deg * (Math.PI / 180);
+  };
+
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371;
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distance = R * c;
+
+    return distance;
+  };
+
+  const tokrumCoords = tokrumCoordinate.split(',').map((coord) => parseFloat(coord.trim()));
+  const coordinate1 = { latitude: tokrumCoords[0], longitude: tokrumCoords[1] };
+
+  dataMenu.forEach((location) => {
+    const coords = location.metafields.coordinate.split(',').map((coord) => parseFloat(coord.trim()));
+    const coordinate2 = { latitude: coords[0], longitude: coords[1] };
+
+    const distance = calculateDistance(
+      coordinate1.latitude,
+      coordinate1.longitude,
+      coordinate2.latitude,
+      coordinate2.longitude
+    );
+  });
+
+  const calculateDistances = () => {
+    return dataMenu.map((location) => {
+      const coords = location.metafields.coordinate.split(',').map((coord) => parseFloat(coord.trim()));
+      const coordinate2 = { latitude: coords[0], longitude: coords[1] };
+
+      const distance = calculateDistance(
+        coordinate1.latitude,
+        coordinate1.longitude,
+        coordinate2.latitude,
+        coordinate2.longitude
+      );
+
+      return { distance, location };
+    });
+  };
+
+  const sortedDataMenu = useMemo(() => {
+    const distances = calculateDistances();
+
+    return [...dataMenu].sort((a, b) => {
+      const distanceA = distances.find((item) => item.location.id === a.id)?.distance || 0;
+      const distanceB = distances.find((item) => item.location.id === b.id)?.distance || 0;
+
+      return distanceA - distanceB;
+    });
+  }, [dataMenu]);
+
+  const getOpenAndClosedValues = (data: any, day: string) => {
+    const openingHours = [];
+
+    for (const restaurant of data) {
+      const operationalHours = JSON.parse(restaurant.metafields.operationalHour);
+
+      for (const schedule of operationalHours) {
+        if (schedule.day.toLowerCase() === day.toLowerCase()) {
+          openingHours.push({
+            closed: schedule.closed,
+            open: schedule.open,
+            restaurantName: restaurant.name
+          });
+          break;
+        }
+      }
+    }
+
+    return openingHours;
+  };
+
+  const operationalHour = getOpenAndClosedValues(sortedDataMenu, thisDay);
+
   const handleSearch = () => {
-    navigate(`/beranda/search-result?query=${searchValue}`);
+    navigate(`/pencarian`);
   };
 
   const handleCardToRestoClick = () => {
@@ -375,7 +413,7 @@ const Home: PageComponent = () => {
             </InputAdornment>
           ),
           startAdornment: (
-            <InputAdornment position="start" onClick={handleSearch}>
+            <InputAdornment position="start">
               <SearchFilled />
             </InputAdornment>
           )
@@ -390,19 +428,19 @@ const Home: PageComponent = () => {
         }}
         value={searchValue}
         variant="outlined"
-        onChange={(e) => setSearchValue(e.target.value)} />
-      <Grid container={true} spacing={1} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: methode === 'Pesan Antar' ? '1rem' : '2rem' }}>
+        onClick={handleSearch} />
+      <Grid container={true} spacing={1} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: shipmentMethode === 'Pesan Antar' ? '1rem' : '2rem' }}>
         <Grid item={true}>
-          <Chip color={methode === 'Pesan Antar' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={pesanAntarIcon} />} label="Pesan Antar" sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} onClick={() => handleMethode('Pesan Antar')} />
+          <Chip color={shipmentMethode === 'Pesan Antar' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={pesanAntarIcon} />} label="Pesan Antar" sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} onClick={() => handleShipmentMethodChange('Pesan Antar')} />
         </Grid>
         <Grid item={true}>
-          <Chip color={methode === 'Pick Up' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={pickUpIcon} />} label="Pick Up" sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} onClick={() => handleMethode('Pick Up')} />
+          <Chip color={shipmentMethode === 'Pick Up' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={pickUpIcon} />} label="Pick Up" sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} onClick={() => handleShipmentMethodChange('Pick Up')} />
         </Grid>
         <Grid item={true}>
-          <Chip color={methode === 'Dine In' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={dineInIcon} />} label="Dine In" sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} onClick={() => handleMethode('Dine In')} />
+          <Chip color={shipmentMethode === 'Dine In' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={dineInIcon} />} label="Dine In" sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} onClick={() => handleShipmentMethodChange('Dine In')} />
         </Grid>
       </Grid>
-      {methode === 'Pesan Antar'
+      {shipmentMethode === 'Pesan Antar'
         ? <Grid container={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
           {CARD_PESAN_ANTAR.map((obj) => {
             return (
@@ -491,12 +529,12 @@ const Home: PageComponent = () => {
       </Card>
       <Card sx={{ backgroundColor: 'transparent', borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '-1rem', marginInline: '-1.5rem', padding: '1rem 1.5rem' }}>
         <Box gap={1} sx={{ display: 'flex', marginBottom: '1rem' }}>
-          <img alt="test" src={methode === 'Pick Up' ? pickUpIcon : methode === 'Dine In' ? dineInIcon : jajananLokalIcon} />
+          <img alt="test" src={shipmentMethode === 'Pick Up' ? pickUpIcon : shipmentMethode === 'Dine In' ? dineInIcon : jajananLokalIcon} />
           <Typography color="neutral-90" fontWeight="bold" variant="h5">
-            {methode === 'Pesan Antar' ? 'Eksplor Jajanan Lokal' : methode === 'Dine In' ? 'Dine-In di Resto' : 'Resto yang bisa Pickup'}
+            {shipmentMethode === 'Pesan Antar' ? 'Eksplor Jajanan Lokal' : shipmentMethode === 'Dine In' ? 'Dine-In di Resto' : 'Resto yang bisa Pickup'}
           </Typography>
         </Box>
-        {methode === 'Pesan Antar'
+        {/* {shipmentMethode === 'Pesan Antar'
           ? <Box sx={{ overflowX: 'auto' }}>
             <Grid container={true} sx={{ width: '28.75rem' }}>
               <Grid item={true} sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -562,9 +600,9 @@ const Home: PageComponent = () => {
               </Grid>
             </Grid>
             </Box>
-          : null}
+          : null} */}
       </Card>
-      {methode !== 'Pesan Antar' && filteredResto?.map((resto) => (
+      {shipmentMethode !== 'Pesan Antar' && sortedDataMenu.map((resto, index) => (
         <Card key={resto.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem' }}>
           <Grid container={true} spacing={2}>
             <Grid item={true} xs={4}>
@@ -580,50 +618,54 @@ const Home: PageComponent = () => {
               >
                 <img
                   alt="test"
-                  src={restoImage}
+                  src={resto.metafields.media}
                   style={{ maxHeight: '100%', maxWidth: '100%' }} />
-                {resto.verified
-                  ? <img
-                      alt="Verified"
-                      src={verifyIcon}
-                      style={{
-                        maxHeight: '1.5rem',
-                        maxWidth: '1.5rem',
-                        position: 'absolute',
-                        right: '5px',
-                        top: '5px'
-                      }} />
-                  : null}
+                {resto.metafields.verified === 'true' &&
+                  <img
+                    alt="Verified"
+                    src={verifyIcon}
+                    style={{
+                      maxHeight: '1.5rem',
+                      maxWidth: '1.5rem',
+                      position: 'absolute',
+                      right: '5px',
+                      top: '5px'
+                    }} />}
               </div>
             </Grid>
             <Grid item={true} xs={8}>
-              {resto.verified
+              {resto.metafields.verified === 'true'
                 ? <Typography color="neutral-70" sx={{ marginBottom: '0.125' }} variant="body2">
                   Verified by TokoRumahan
                   </Typography>
                 : null}
               <Typography color="neutral-90" fontWeight="bold" sx={{ marginBottom: '0.125' }} variant="h6">
-                {resto.restoName}
+                {resto.name}
               </Typography>
               <Box gap={1} sx={{ display: 'flex' }}>
                 <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
                   <StarFilled size={10} style={{ color: 'yellow' }} />
                   <Typography color="neutral-90" variant="caption">
-                    {resto.rating}
+                    {resto.metafields.rating}
                   </Typography>
                 </Box>
                 <Divider flexItem={true} orientation="vertical" />
                 <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
                   <LocationOnFilled size={10} style={{ color: 'red' }} />
                   <Typography color="neutral-90" variant="caption">
-                    {resto.location}
+                  {calculateDistance(
+                    coordinate1.latitude,
+                    coordinate1.longitude,
+                    parseFloat(resto.metafields.coordinate.split(',')[0]),
+                    parseFloat(resto.metafields.coordinate.split(',')[1])
+                  ).toFixed(2)} km
                   </Typography>
                 </Box>
                 <Divider flexItem={true} orientation="vertical" />
                 <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
                   <AccessTimeFilled size={10} />
                   <Typography color="neutral-90" variant="caption">
-                    {resto.open}
+                    {operationalHour[index].open} - {operationalHour[index].closed}
                   </Typography>
                 </Box>
               </Box>
@@ -631,10 +673,10 @@ const Home: PageComponent = () => {
           </Grid>
         </Card>
       ))}
-      {/* {methode === 'Pesan Antar' &&
+      {/* {shipmentMethode === 'Pesan Antar' &&
         <Box>
           <Grid container={true} spacing={2} sx={{ marginTop: '1.5rem' }}>
-            {store?.makananOutput?.map((obj: FoodsDataModel) => {
+            {store?.HomeRestoOutput?.map((obj: FoodsDataModel) => {
               const isItemSelected = foodsList.breakfast.some(
                 (item) => Number(item.id) === Number(obj.id)
               );
@@ -688,7 +730,7 @@ const Home: PageComponent = () => {
             })}
           </Grid>
         </Box>} */}
-      {/* <FloatingShoppingButton onClick={() => navigate('/order')} /> */}
+      <FloatingShoppingButton onClick={() => navigate('/order')} />
     </Box>
   );
 };

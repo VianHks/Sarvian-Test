@@ -153,7 +153,7 @@ const ProductView = () => {
         setFormData({
           ...formData,
           channel: channel || 'makan',
-          userId: 'VXNlcjozMTc4NjkwMDc=',
+          userId: 'VXNlcjoyMDUwMjQwNjE5',
           variantId: variantId || ''
         });
       }
@@ -161,7 +161,7 @@ const ProductView = () => {
       setFormData({
         ...formData,
         channel: channel || 'makan',
-        userId: 'VXNlcjozMTc4NjkwMDc=',
+        userId: 'VXNlcjoyMDUwMjQwNjE5',
         variantId: variantId || 'UHJvZHVjdFZhcmlhbnQ6NDEy'
       });
 
@@ -182,7 +182,7 @@ const ProductView = () => {
           lineId: lines[variantIndex]?.id,
           price: lines[variantIndex]?.totalPrice?.gross?.amount.toString() || '',
           quantity: lines[variantIndex]?.quantity || 0,
-          userId: 'VXNlcjozMTc4NjkwMDc=',
+          userId: 'VXNlcjoyMDUwMjQwNjE5',
           value: lines[variantIndex]?.metafields?.note || '',
           variantId: variantId || ''
         };
@@ -251,7 +251,7 @@ const ProductView = () => {
             variantId: formData.variantId
           }
         ],
-        userId: 'VXNlcjozMTc4NjkwMDc='
+        userId: 'VXNlcjoyMDUwMjQwNjE5'
       };
 
       command.productView.postCreateCheckout(payload, token || '')

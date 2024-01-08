@@ -257,7 +257,7 @@ const DEFAULT_FORM_ORDER: FormOrderDataModel = {
   checkoutId: '',
   estimation: dayjs(),
   note: '',
-  orderType: 'Dine In',
+  orderType: 'dineIn',
   transactionReference: ''
 };
 
@@ -385,15 +385,14 @@ const Checkout: PageComponent = (props: Props) => {
     setIsLoad(true);
     const payloadOrder = {
       buyerName: `${checkoutDetails?.user?.firstName} ${checkoutDetails?.user?.lastName}`,
-      channel: 'makanan',
+      channel: 'makan',
       checkoutId: checkoutIdFromStorage,
-      customerId: store?.cart?.data?.checkout?.user?.id,
+      customerId: 'tokrum:b5bbc271-1cc2-4cc9-9b07-8f0dd92966e1',
       estimation: formOrder.estimation.format('HH:mm'),
       note: formOrder.note,
       orderType: formOrder.orderType,
       transactionReference: ''
     };
-
     if (store?.checkoutDetails?.data?.checkout !== checkoutDetails) {
       const payload = {
         checkoutId: checkoutIdFromStorage,
@@ -541,7 +540,7 @@ const Checkout: PageComponent = (props: Props) => {
                   sx={{ fontWeight: 'bold' }}
                   variant="body1"
                 >
-                  {formOrder.orderType}
+                  {formOrder.orderType === 'dineIn' ? 'Dine In' : 'Pick Up'}
                 </Typography>
                 <ChevronRightFilled
                   color={theme.palette.primary.main}
@@ -1006,7 +1005,7 @@ const Checkout: PageComponent = (props: Props) => {
                         marginBottom: '0.5rem'
                       }}
                       variant="text"
-                      onClick={() => handleOrderType(obj.text)}
+                      onClick={() => handleOrderType(obj.value)}
                     >
                       <img alt={obj.text} src={obj.icon} />
                       <Typography>{obj.text}</Typography>
