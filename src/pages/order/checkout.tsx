@@ -11,12 +11,14 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Alert,
   Avatar,
   Box,
   Button,
   Container,
   IconButton,
   Modal,
+  Snackbar,
   styled,
   SwipeableDrawer,
   TextField,
@@ -260,6 +262,7 @@ const DEFAULT_FORM_ORDER: FormOrderDataModel = {
 };
 
 const SESSION_STORAGE_CHECKOUT = 'CheckoutId';
+const SESSION_STORAGE_ORDER = 'orderId';
 
 const Checkout: PageComponent = (props: Props) => {
   const navigate = useNavigate();
@@ -268,20 +271,21 @@ const Checkout: PageComponent = (props: Props) => {
   const theme = useTheme();
   const { windowProps } = props;
   const [searchParams] = useSearchParams();
-  const checkoutId = searchParams.get('checkoutId');
   const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '';
   const command = useCommand((cmd) => cmd);
 
   const [store, dispatch] = useStore((state) => state?.order);
-  const [checkoutDetails, setCheckoutDetails] =
-    useState<ChekoutDetailDataModel>(DEFAULT_CHECKOUT_DETAILS);
-  const [formOrder, setFormOrder] =
-    useState<FormOrderDataModel>(DEFAULT_FORM_ORDER);
+  const [checkoutDetails, setCheckoutDetails] = useState<ChekoutDetailDataModel>(DEFAULT_CHECKOUT_DETAILS);
+  const [formOrder, setFormOrder] = useState<FormOrderDataModel>(DEFAULT_FORM_ORDER);
   const [total, setTotal] = useState(0);
+
+  const [isLoad, setIsLoad] = useState(false);
+  const [alert, setAlert] = useState(false);
 
   const [open, setOpen] = useState(false),
     [openTime, setOpenTime] = useState(false),
-    [openModal, setOpenModal] = useState(false);
+    [openModal, setOpenModal] = useState(false),
+    [openChangeResto, setOpenChangeResto] = useState(false);
 
   const container =
     windowProps !== undefined ? () => windowProps().document.body : undefined;
@@ -308,44 +312,8 @@ const Checkout: PageComponent = (props: Props) => {
     setOpenModal(!openModal);
   };
 
-  const handleConfirmOrder = () => {
-    setOpenModal(!openModal);
-    const payloadOrder = {
-      buyerName: `${checkoutDetails?.user?.firstName} ${checkoutDetails?.user?.lastName}`,
-      channel: 'makanan',
-      checkoutId: checkoutIdFromStorage,
-      estimation: formOrder.estimation.format('HH:mm'),
-      note: formOrder.note,
-      orderType: formOrder.orderType,
-      transactionReference: ''
-    };
-
-    if (store?.checkoutDetails?.data?.checkout !== checkoutDetails) {
-      const payload = {
-        checkoutId: checkoutIdFromStorage,
-        lines: checkoutDetails?.lines.map((item) => ({
-          lineId: item?.id,
-          note: item?.metafields?.note,
-          price: item?.variant?.pricing?.price?.gross?.amount.toString(),
-          quantity: item?.quantity
-        }))
-      };
-
-      command.productView.putCheckout(payload, token || '')
-        .then(() => {
-          OrderCommand.postCreateOrder(payloadOrder, token || '').then(
-            (res) => {
-              window?.sessionStorage?.removeItem(SESSION_STORAGE_CHECKOUT);
-              navigate(`/order-in-progress/single-order?orderId=${res}`);
-            }
-          );
-        });
-    } else {
-      OrderCommand.postCreateOrder(payloadOrder, token || '').then((res) => {
-        window?.sessionStorage?.removeItem(SESSION_STORAGE_CHECKOUT);
-        navigate(`/order-in-progress/single-order?orderId=${res}`);
-      });
-    }
+  const toggleOpenChangeResto = () => {
+    setOpenChangeResto(!openChangeResto);
   };
 
   const handleIncrement = (index: number) => {
@@ -401,6 +369,73 @@ const Checkout: PageComponent = (props: Props) => {
     setOpenTime(false);
   };
 
+  const handleConfirmChangeResto = () => {
+    setOpenChangeResto(!openChangeResto);
+    OrderCommand.postCheckoutCustomerDetach(
+      { checkoutId: checkoutIdFromStorage },
+      token || ''
+    ).then(() => {
+      window.sessionStorage.removeItem(SESSION_STORAGE_CHECKOUT);
+      navigate('/beranda');
+    });
+  };
+
+  const handleConfirmOrder = () => {
+    setOpenModal(!openModal);
+    setIsLoad(true);
+    const payloadOrder = {
+      buyerName: `${checkoutDetails?.user?.firstName} ${checkoutDetails?.user?.lastName}`,
+      channel: 'makanan',
+      checkoutId: checkoutIdFromStorage,
+      customerId: store?.cart?.data?.checkout?.user?.id,
+      estimation: formOrder.estimation.format('HH:mm'),
+      note: formOrder.note,
+      orderType: formOrder.orderType,
+      transactionReference: ''
+    };
+
+    if (store?.checkoutDetails?.data?.checkout !== checkoutDetails) {
+      const payload = {
+        checkoutId: checkoutIdFromStorage,
+        lines: checkoutDetails?.lines.map((item) => ({
+          lineId: item?.id,
+          note: item?.metafields?.note,
+          price: item?.variant?.pricing?.price?.gross?.amount.toString(),
+          quantity: item?.quantity
+        }))
+      };
+
+      command.productView.putCheckout(payload, token || '')
+        .then((resp) => {
+          if (resp !== 'err') {
+            OrderCommand.postCreateOrder(payloadOrder, token || '').then(
+              (res) => {
+                window?.sessionStorage?.removeItem(SESSION_STORAGE_CHECKOUT);
+                window?.sessionStorage?.setItem(SESSION_STORAGE_ORDER, JSON.stringify(res));
+                navigate(`/order-in-progress/single-order?orderId=${res}`);
+                setIsLoad(false);
+              }
+            );
+          } else {
+            setIsLoad(false);
+            setAlert(true);
+          }
+        });
+    } else {
+      OrderCommand.postCreateOrder(payloadOrder, token || '').then((res) => {
+        if (res !== 'err') {
+          window?.sessionStorage?.removeItem(SESSION_STORAGE_CHECKOUT);
+          window?.sessionStorage?.setItem(SESSION_STORAGE_ORDER, JSON.stringify(res));
+          navigate(`/order-in-progress/single-order?orderId=${res}`);
+          setIsLoad(false);
+        } else {
+          setIsLoad(false);
+          setAlert(true);
+        }
+      });
+    }
+  };
+
   useEffect(() => {
     if (checkoutIdFromStorage) {
       dispatch(OrderCommand.getCheckoutDetails(checkoutIdFromStorage || '', token || ''));
@@ -423,6 +458,11 @@ const Checkout: PageComponent = (props: Props) => {
 
   return (
     <Container>
+      <Snackbar autoHideDuration={3000} open={alert} sx={{ left: 'auto', position: 'relative', right: 'auto' }}>
+        <Alert severity="error" sx={{ width: '100%' }} onClose={() => setAlert(false)}>
+          Gagal Membuat Order
+        </Alert>
+      </Snackbar>
       {checkoutIdFromStorage ? (
         <>
           <Typography
@@ -592,6 +632,7 @@ const Checkout: PageComponent = (props: Props) => {
                     fullWidth={true}
                     size="small"
                     variant="outlined"
+                    onClick={toggleOpenChangeResto}
                   >
                     Ganti Resto
                   </Button>
@@ -1144,6 +1185,59 @@ const Checkout: PageComponent = (props: Props) => {
                   onClick={handleConfirmOrder}
                 >
                   Sesuai
+                </Button>
+              </Box>
+            </Box>
+          </Modal>
+
+          <Modal
+            aria-describedby="modal-modal-description"
+            aria-labelledby="modal-modal-title"
+            open={openChangeResto}
+            onClose={toggleOpenChangeResto}
+          >
+            <Box sx={style}>
+              <Typography
+                component="h3"
+                id="modal-modal-title"
+                sx={{
+                  color: `${theme?.palette?.error}`,
+                  fontWeight: 'bold',
+                  marginBottom: '0.5rem',
+                  textAlign: 'center'
+                }}
+                variant="h3"
+              >
+                Yakin ingin mengganti resto?
+              </Typography>
+              <Typography
+                id="modal-modal-description"
+                sx={{ marginBottom: '0.5rem', textAlign: 'center' }}
+                variant="body1"
+              >
+                Setelah ganti resto, pesananmu dalam keranjang akan hilang semua
+              </Typography>
+              <Box
+                gap={2}
+                sx={{ display: 'flex', justifyContent: 'space-between' }}
+              >
+                <Button
+                  color="primary"
+                  size="medium"
+                  sx={{ width: '100%' }}
+                  variant="outlined"
+                  onClick={toggleOpenChangeResto}
+                >
+                  Batalkan
+                </Button>
+                <Button
+                  color="primary"
+                  size="medium"
+                  sx={{ width: '100%' }}
+                  variant="contained"
+                  onClick={handleConfirmChangeResto}
+                >
+                  Ya
                 </Button>
               </Box>
             </Box>

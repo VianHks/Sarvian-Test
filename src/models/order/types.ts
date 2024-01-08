@@ -144,6 +144,18 @@ interface CartDataModel {
           currency: string
         }
       }
+      user: {
+        addresses: {
+          city: string
+          countryArea: string
+          id: string
+          postalCode: number
+          streetAddress1: string
+        }[]
+        firstName: string
+        id: string
+        lastName: string
+      }
     }
   }
 }
@@ -206,6 +218,7 @@ interface OrderDataModel {
     driver: string
     estimation: string
     is_ready: string
+    note: string
     order_type: string
     seller: string
   }

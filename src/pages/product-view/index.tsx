@@ -23,6 +23,7 @@ import { OrderCommand } from '@models/order/reducers';
 import { useCommand, useStore } from '@models/store';
 
 import SwipeableTextMobileStepper from './slider';
+import { Loader } from '@nxweb/icons/tabler';
 
 interface DescriptionDataModel {
   blocks: [
@@ -108,6 +109,7 @@ const ProductView = () => {
   const productPrice = useMemo(() => store?.productView?.productDetails?.data?.product.variants[0]?.channelListings[0]?.price?.amount, [store]);
   const [total, setTotal] = useState(0);
 
+  const [isLoad, setIsLoad] = useState(false);
   const [count, setCount] = useState(0);
   const calculateTotalPrice = (count: number, productPrice: number): string => {
     const totalPrice = (count * productPrice).toString();
@@ -205,6 +207,8 @@ const ProductView = () => {
   }, [count, productPrice]);
 
   const handleAddToCart = () => {
+    setIsLoad(true);
+
     if (checkoutIdFromStorage !== '') {
       const payload = {
         checkoutId: checkoutIdFromStorage,
@@ -222,7 +226,10 @@ const ProductView = () => {
         .then((response) => {
           if (response) {
             window.sessionStorage.setItem(SESSION_STORAGE_CHECKOUT, JSON.stringify(response));
-            setTimeout(() => navigate(`/keranjang?checkoutId=${response}`), 1000);
+            setTimeout(() => {
+              setIsLoad(false);
+              navigate(`/keranjang`);
+            }, 1000);
           }
         });
     } else {
@@ -251,7 +258,11 @@ const ProductView = () => {
         .then((response) => {
           if (response) {
             window.sessionStorage.setItem(SESSION_STORAGE_CHECKOUT, JSON.stringify(response));
-            setTimeout(() => navigate(`/keranjang?checkoutId=${response}`), 1000);
+            setIsLoad(false);
+            setTimeout(() => {
+              setIsLoad(false);
+              navigate(`/keranjang`);
+            }, 1000);
           }
         });
     }
@@ -395,12 +406,13 @@ const ProductView = () => {
           <Box sx={{ bottom: 0, left: 0, padding: '1rem 1.5rem', position: 'fixed', right: 0, width: '100%' }}>
             <Button
               color="primary"
+              disabled={isLoad === true}
               fullWidth={true}
               size="medium"
               variant="contained"
               onClick={handleAddToCart}
             >
-              Tambah Keranjang
+              {isLoad === true ? <Loader /> : 'Tambah Keranjang' }
             </Button>
           </Box>
         </Box>

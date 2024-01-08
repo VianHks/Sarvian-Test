@@ -36,6 +36,8 @@ const DUMMY_MENU = [
   { id: 3, category_name: 'Paket Komplit', active: true, category_description: 'Paket Komplit' }
 ];
 
+const SESSION_STORAGE_CHECKOUT = 'CheckoutId';
+
 const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, readonly action?: ActionType }) => {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -44,6 +46,7 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const action = searchParams.get('action');
+  const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '';
   let dynamicIcon = null;
   let dynamicHandler: React.ReactNode = null;
 
@@ -99,6 +102,7 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
         <div>
           <Button
             color="primary"
+            disabled={!checkoutIdFromStorage}
             variant="text"
             onClick={() => navigate(action === 'edit' ? '/keranjang' : '/keranjang?action=edit')}
           >

@@ -21,6 +21,12 @@ const DEFAULT_CART = {
           amount: 0,
           currency: ''
         }
+      },
+      user: {
+        addresses: [],
+        firstName: '',
+        id: '',
+        lastName: ''
       }
     }
   }
@@ -116,6 +122,7 @@ const DEFAULT_ORDER_DETAILS = {
         driver: '',
         estimation: '',
         is_ready: '',
+        note: '',
         order_type: '',
         seller: ''
       },
@@ -171,13 +178,24 @@ const OrderCommand = {
       },
       body: JSON.stringify({ checkoutId, linesIds })
     })
-      .then((response) => {
-        if (response.status === 200) {
+      .then((response: Response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        return response.json();
+      })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .then((data: any) => {
+        const id: string = data?.checkoutId;
+
+        if (id) {
           return 'ok';
         }
 
         return 'err';
-      }).catch(() => {
+      })
+      .catch(() => {
         return 'err';
       });
   },
@@ -249,6 +267,21 @@ const OrderCommand = {
         }
       });
     };
+  },
+  postCancelOrder: (payload: unknown, token: string): Promise<string> => {
+    return apiFetch(token).post(`/foodbuyer/0.1/order/cancel`, payload)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .then((response: any) => {
+        const id: string = response?.data?.orderId;
+
+        if (response.status === 200) {
+          return id;
+        }
+
+        return 'err';
+      }).catch(() => {
+        return 'err';
+      });
   },
   postCheckoutCustomerDetach: (payload: unknown, token: string): Promise<string> => {
     return apiFetch(token).post(`/foodbuyer/0.1/checkout/detach`, payload)

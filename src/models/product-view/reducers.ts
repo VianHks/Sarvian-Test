@@ -97,7 +97,11 @@ const ProductViewsCommand = {
         const id: string = response?.data?.checkoutId;
 
         if (response.status === 200) {
-          return id;
+          if (id) {
+            return 'ok';
+          }
+
+          return 'err';
         }
 
         return 'err';

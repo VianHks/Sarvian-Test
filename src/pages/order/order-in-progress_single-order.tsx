@@ -14,7 +14,6 @@ import {
   Button,
   Container,
   Divider,
-  IconButton,
   Modal,
   Step,
   StepContent,
@@ -25,7 +24,7 @@ import {
   useTheme
 } from '@mui/material';
 
-import { KeyboardArrowDownFilled, MessageFilled, PhoneFilled, QRCodeFilled } from '@nxweb/icons/material';
+import { KeyboardArrowDownFilled, QRCodeFilled } from '@nxweb/icons/material';
 import { Check } from '@nxweb/icons/tabler';
 import type { PageComponent } from '@nxweb/react';
 
@@ -36,17 +35,13 @@ import {
   Typography
 } from '@components/material.js';
 import { useAuth } from '@hooks/use-auth';
-import { checkoutCommand } from '@models/checkout/commands';
-import { orderCommand } from '@models/order/commands';
+import { OrderCommand } from '@models/order/reducers';
+import type { OrderDataModel } from '@models/order/types';
 import { useStore } from '@models/store';
 
-import Bakar from '@assets/images/Bakar.png';
 import QR from '@assets/images/Dummy_QR.svg';
-import map from '@assets/images/Map.svg';
 import MieBaso from '@assets/images/MieBaso.png';
-import Pisan from '@assets/images/Pisan.png';
 
-import type { OrderDataModel } from './order';
 import type { StepIconProps } from '@mui/material';
 
 const style = {
@@ -60,44 +55,6 @@ const style = {
   transform: 'translate(-50%, -50%)',
   width: 300
 };
-
-interface PesananDataModel {
-  count: number
-  detail: string
-  foto: string
-  harga: number
-  title: string
-}
-
-const DUMMY_PESANAN: PesananDataModel[] = [
-  {
-    count: 1,
-    detail: 'Nasi di pisah',
-    foto: `${Pisan}`,
-    harga: 100000,
-    title: 'Ayam Goreng Pisan'
-  },
-  {
-    count: 1,
-    detail: 'Catatan menu',
-    foto: `${Bakar}`,
-    harga: 50000,
-    title: 'Ayam Bakar'
-  }
-];
-
-const Steps = [
-  {
-    active: 1,
-    description: `Gg. Bahagia Selalu`,
-    label: 'Alamat Resto'
-  },
-  {
-    active: 2,
-    description: `Gg. Bahagia Selalu`,
-    label: 'Lokasi Kamu'
-  }
-];
 
 const QontoStepIconRoot = styled('div')<{ ownerState: { active?: boolean } }>(
   ({ theme, ownerState }) => ({
@@ -135,158 +92,66 @@ const QontoStepIcon = (props: StepIconProps) => {
 
 QontoStepIcon.displayName = 'Orders';
 
+const DEFAULT_ORDER_DETAILS = {
+  channel: {
+    id: '',
+    isActive: false,
+    metadata: [],
+    name: '',
+    slug: ''
+  },
+  deliveryMethod: {
+    __typename: '',
+    id: '',
+    name: ''
+  },
+  id: '',
+  isPaid: false,
+  lines: [],
+  metafields: {
+    buyer: '',
+    conversation_id_buyer: '',
+    conversation_id_driver: '',
+    conversation_id_seller: '',
+    driver: '',
+    estimation: '',
+    is_ready: '',
+    note: '',
+    order_type: '',
+    seller: ''
+  },
+  number: '',
+  paymentStatus: '',
+  status: '',
+  user: {
+    addresses: [],
+    email: '',
+    firstName: '',
+    id: '',
+    lastName: ''
+  },
+  userEmail: ''
+};
+
+const SESSION_STORAGE_ORDER = 'orderId';
+
 const Orders: PageComponent = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const [searchParams] = useSearchParams();
-  const id = searchParams.get('id');
+  const orderId = searchParams.get('orderId');
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
+
   const [store, dispatch] = useStore((state) => state);
-  const [totalPembayaran, setTotalPembayaran] = useState(0);
-  const [biayaLayanan, setBiayaLayanan] = useState(2000);
-  const [biayaFasilitas, setBiayaFasilitas] = useState(600);
-  const [biayaParkir, setBiayaParkir] = useState(2000);
-  const [biayaOngkir, setBiayaOngkir] = useState(2000);
-  const [detailOrder, setDetailOrder] = useState<OrderDataModel[]>([]);
+  const [detailOrder, setDetailOrder] = useState<OrderDataModel>(DEFAULT_ORDER_DETAILS);
   const [openModal, setOpenModal] = useState(false);
   const [openQR, setOpenQR] = useState(false);
-  const [timerIdResto, setTimerIdResto] = useState<NodeJS.Timeout | null>(null);
-  const [timerIdDriver, setTimerIdDriver] = useState<NodeJS.Timeout | null>(null);
   const [restoCountdown, setRestoCountdown] = useState(120);
   const [driverCountdown, setDriverCountdown] = useState(120);
   const [orderApproved, setOrderApproved] = useState(false);
   const [openModalRestoCanceled, setOpenModalRestoCanceled] = useState(false);
-  const [searchDriver, setSearchDriver] = useState(3);
-  const [isDriverFound, setIsDriverFound] = useState(false);
   const [isDriverOnTheWay, setIsDriverOnTheWay] = useState(false);
-
-  useEffect(() => {
-    if (token) {
-      dispatch(orderCommand.orderLoad(token))
-
-        .catch((err: unknown) => {
-          console.error(err);
-        });
-      dispatch(checkoutCommand.loadCheckoutMenu(token))
-
-        .catch((err: unknown) => {
-          console.error(err);
-        });
-      dispatch(checkoutCommand.loadDana(token))
-
-        .catch((err: unknown) => {
-          console.error(err);
-        });
-
-      return () => {
-        dispatch(orderCommand.orderClear());
-      };
-    }
-
-    if (id) {
-      const selectedOrder = store?.order?.orderOutput?.find((order) => order.NO_ORDER === parseInt(id, 10));
-
-      if (selectedOrder) {
-        setDetailOrder([selectedOrder]);
-      } else {
-        setDetailOrder([]);
-      }
-    } else {
-      setDetailOrder([]);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    if (store?.checkout?.checkoutMenuOutput) {
-      const calculatedTotalMenu = store.checkout.checkoutMenuOutput.reduce(
-        (total, menu) => total + menu.harga * menu.count,
-        0
-      );
-
-      let calculatedTotalPembayaran = calculatedTotalMenu + biayaLayanan + biayaFasilitas;
-
-      if (detailOrder[0]?.DELIVERY_STATUS === 'Delivery Order') {
-        // Add biayaParkir and biayaOngkir for Delivery Order
-        calculatedTotalPembayaran += biayaParkir + biayaOngkir;
-      }
-
-      setTotalPembayaran(calculatedTotalPembayaran);
-    }
-  }, [store, biayaFasilitas, biayaLayanan, biayaParkir, biayaOngkir]);
-
-  const startCountdownResto = () => {
-    setRestoCountdown(15);
-    const id = setInterval(() => {
-      setRestoCountdown((prevCountdown) => {
-        if (prevCountdown === 0) {
-          if (timerIdResto) {
-            clearInterval(timerIdResto);
-          }
-
-          return 0;
-        }
-
-        return prevCountdown - 1;
-      });
-    }, 1000);
-
-    if (timerIdResto) {
-      clearInterval(timerIdResto);
-    }
-
-    setTimerIdResto(id);
-    setOpenModalRestoCanceled(true);
-  };
-
-  const stopCountdownResto = () => {
-    if (timerIdResto) {
-      clearInterval(timerIdResto);
-      setTimerIdResto(null);
-    }
-  };
-
-  const startCountdownDriver = () => {
-    setDriverCountdown(20);
-    const id = setInterval(() => {
-      setDriverCountdown((prevCountdown) => {
-        if (prevCountdown === 0) {
-          if (timerIdDriver) {
-            clearInterval(timerIdDriver);
-          }
-
-          return 0;
-        }
-
-        return prevCountdown - 1;
-      });
-    }, 1000);
-
-    if (timerIdDriver) {
-      clearInterval(timerIdDriver);
-    }
-
-    setTimerIdDriver(id);
-  };
-
-  const stopCountdownDriver = () => {
-    if (timerIdDriver) {
-      clearInterval(timerIdDriver);
-      setTimerIdDriver(null);
-    }
-  };
-
-  console.log('cekstore', detailOrder);
-
-  useEffect(() => {
-    startCountdownResto();
-    startCountdownDriver();
-
-    return () => {
-      stopCountdownResto();
-      stopCountdownDriver();
-    };
-  }, []);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -302,7 +167,10 @@ const Orders: PageComponent = () => {
   };
 
   const handleConfirmBatal = () => {
-    navigate('./lanjut');
+    OrderCommand.postCancelOrder({ orderId: orderId || '' }, token || '').then(() => {
+      navigate('/beranda');
+      window?.sessionStorage?.removeItem(SESSION_STORAGE_ORDER);
+    });
   };
 
   const toggleOpenModalQR = () => {
@@ -313,13 +181,24 @@ const Orders: PageComponent = () => {
     setOpenModalRestoCanceled(!openModalRestoCanceled);
   };
 
-  console.log('cekordr', store?.order?.orderOutput?.[0].DELIVERY_STATUS);
+  useEffect(() => {
+    dispatch(
+      OrderCommand.getOrderDetails(orderId || '', token || '')
+    );
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (store?.order?.orderDetails?.data?.order) {
+      setDetailOrder(store?.order?.orderDetails?.data?.order);
+    }
+  }, [store?.order?.orderDetails?.data]);
 
   return (
     <Container sx={{ marginBottom: '-5.5rem', marginTop: '-0.25rem' }}>
-      {store?.order?.orderOutput?.[0]?.DELIVERY_STATUS === 'Delivery Order' && isDriverOnTheWay === true
+      {/* DELIVERY SCENARIO */}
+      {/* {detailOrder?.metafields?.order_type === 'delivery' && isDriverOnTheWay === true
         ? <img alt="map" src={map} style={{ height: '400px', marginInline: '-1rem', marginTop: '-1.2rem', width: '360px' }} />
-        : null}
+        : null} */}
       <Grid container={true} spacing={2}>
         <Grid
           item={true}
@@ -339,15 +218,16 @@ const Orders: PageComponent = () => {
               sx={{ fontWeight: 'bold', textAlign: 'start' }}
               variant="h6"
             >
-              Resto Bunda Gila
+              {detailOrder?.channel?.name}
             </Typography>
             <Typography color={theme.palette.grey[900]} variant="body2">
-              Menunggu konfirmasi resto
+              Menunggu konfirmasi resto(hardcode)
             </Typography>
           </Box>
         </Grid>
         <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', paddingTop: '0rem!important' }} xs={orderApproved ? 4 : 2}>
-          {orderApproved
+          {/* ORDER APPROVED */}
+          {/* {orderApproved
             ? <Box gap={2} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'end' }}>
               <Avatar sx={{ backgroundColor: theme.palette.primary.main, height: '32px', width: '32px' }}>
                 <IconButton aria-label="call">
@@ -364,11 +244,17 @@ const Orders: PageComponent = () => {
               <Typography color={theme.palette.grey[900]} variant="caption">
                 {formatTime(restoCountdown)}
               </Typography>
-              </Box>}
+              </Box>} */}
+          <Box>
+            <Typography color={theme.palette.grey[900]} variant="caption">
+              {formatTime(restoCountdown)}
+            </Typography>
+          </Box>
         </Grid>
       </Grid>
       <hr />
-      {store?.order?.orderOutput?.[0]?.DELIVERY_STATUS === 'Delivery Order'
+      {/* DELIVERY SCENARIO */}
+      {/* {detailOrder?.metafields?.order_type === 'delivery'
         ? <Grid container={true} spacing={2}>
           <Grid
             item={true}
@@ -409,8 +295,8 @@ const Orders: PageComponent = () => {
                 </Box>}
           </Grid>
           </Grid>
-        : null}
-      {detailOrder[0]?.DELIVERY_STATUS === 'Pickup' && orderApproved
+        : null} */}
+      {detailOrder?.metafields?.order_type === 'pickUp' && orderApproved
         ? <>
           <Box marginBlock="1rem">
             <Alert severity="info" sx={{ alignItems: 'center', backgroundColor: '#D5ECFE', display: 'flex' }} variant="filled">
@@ -450,7 +336,7 @@ const Orders: PageComponent = () => {
             </CardContent>
           </Card>
           </>
-        : detailOrder[0]?.DELIVERY_STATUS === 'Delivery Order' && orderApproved && isDriverOnTheWay
+        : detailOrder?.metafields?.order_type === 'delivery' && orderApproved && isDriverOnTheWay
           ? <>
             <Box marginBlock="1rem">
               <Alert severity="info" sx={{ alignItems: 'center', backgroundColor: '#D5ECFE', display: 'flex' }} variant="filled">
@@ -494,7 +380,7 @@ const Orders: PageComponent = () => {
       <Typography color={theme.palette.grey[900]} fontWeight="bold" marginBlock="1rem" variant="h5">
         Pesanan Kamu
       </Typography>
-      <Accordion sx={{ borderRadius: '0.5rem', marginBottom: '1rem' }}>
+      <Accordion expanded={true} sx={{ borderRadius: '0.5rem', marginBottom: '1rem' }}>
         <AccordionSummary
           aria-controls="panel1a-content"
           expandIcon={<KeyboardArrowDownFilled />}
@@ -511,15 +397,15 @@ const Orders: PageComponent = () => {
           >
             <Avatar src={MieBaso} sx={{ height: '24px', width: '24px' }} />
             <Typography color={theme.palette.grey[900]} fontWeight="bold" variant="body1">
-              Resto Bunda Gila
+              {detailOrder?.channel?.name}
             </Typography>
           </Box>
         </AccordionSummary>
         <Divider />
         <AccordionDetails>
-          {store?.checkout?.checkoutMenuOutput?.map((obj) => {
+          {detailOrder?.lines.map((obj) => {
             return (
-              <div key={obj.title} style={{ marginBottom: '1rem' }}>
+              <div key={obj.id} style={{ marginBottom: '1rem' }}>
                 <Grid
                   container={true}
                   spacing={2}
@@ -541,8 +427,8 @@ const Orders: PageComponent = () => {
                       }}
                     >
                       <img
-                        alt={obj.title}
-                        src={obj.foto}
+                        alt={obj.productName}
+                        src={obj.thumbnail?.url}
                         style={{ maxHeight: '100%', maxWidth: '100%' }} />
                     </div>
                   </Grid>
@@ -568,7 +454,7 @@ const Orders: PageComponent = () => {
                         sx={{ fontWeight: 'bold', textAlign: 'start' }}
                         variant="body2"
                       >
-                        {obj.title}
+                        {obj.productName}
                       </Typography>
                     </Box>
                     <Box
@@ -583,7 +469,7 @@ const Orders: PageComponent = () => {
                         sx={{ fontWeight: 'bold', textAlign: 'start' }}
                         variant="body2"
                       >
-                        Rp. {obj.harga.toLocaleString('id-ID')}
+                        Rp. {obj.unitPrice?.gross?.amount.toLocaleString('id-ID')}
                       </Typography>
                       <Box sx={{ textAlign: 'center' }}>
                         <Typography
@@ -594,7 +480,7 @@ const Orders: PageComponent = () => {
                           }}
                           variant="body2"
                         >
-                          {obj.count} Item
+                          {obj.quantity} Item
                         </Typography>
                       </Box>
                     </Box>
@@ -606,7 +492,7 @@ const Orders: PageComponent = () => {
                     fullWidth={true}
                     id="detail"
                     size="small"
-                    value={obj.detail}
+                    value={obj.metadata[0].value}
                     variant="outlined" />
                 </Box>
               </div>
@@ -625,12 +511,13 @@ const Orders: PageComponent = () => {
               fullWidth={true}
               id="detail"
               size="small"
-              value="Jangan terlalu Gosong"
+              value={detailOrder?.metafields?.note}
               variant="outlined" />
           </Box>
         </AccordionDetails>
       </Accordion>
-      <Typography
+      {/* DELIVERY SCENARIO */}
+      {/* <Typography
         color={theme.palette.grey[900]}
         sx={{ fontWeight: 'bold', marginBottom: '0.5rem', marginTop: '1rem' }}
         variant="h5"
@@ -640,19 +527,25 @@ const Orders: PageComponent = () => {
       <Card sx={{ marginBottom: '1rem' }}>
         <CardContent sx={{ padding: '1rem 1rem 1rem 1rem!important' }}>
           <Stepper orientation="vertical">
-            {Steps.map((step) => (
-              <Step active={true} key={step.label}>
-                <StepLabel StepIconComponent={QontoStepIcon} sx={{ marginLeft: '0.5rem' }}>
-                  <Typography color={theme.palette.grey[900]} fontWeight="bold">{step.label}</Typography>
-                </StepLabel>
-                <StepContent>
-                  <Typography color={theme.palette.grey[900]}>{step.description}</Typography>
-                </StepContent>
-              </Step>
-            ))}
+            <Step active={true}>
+              <StepLabel StepIconComponent={QontoStepIcon} sx={{ marginLeft: '0.5rem' }}>
+                <Typography color={theme.palette.grey[900]} fontWeight="bold">Lokasi Kamu</Typography>
+              </StepLabel>
+              <StepContent>
+                <Typography color={theme.palette.grey[900]}>{detailOrder?.user?.addresses[0]?.streetAddress1}</Typography>
+              </StepContent>
+            </Step>
+            <Step active={true}>
+              <StepLabel StepIconComponent={QontoStepIcon} sx={{ marginLeft: '0.5rem' }}>
+                <Typography color={theme.palette.grey[900]} fontWeight="bold">{detailOrder?.channel?.name}</Typography>
+              </StepLabel>
+              <StepContent>
+                <Typography color={theme.palette.grey[900]}>{detailOrder?.channel?.metadata.find((item) => item.key === 'address')?.value}</Typography>
+              </StepContent>
+            </Step>
           </Stepper>
         </CardContent>
-      </Card>
+      </Card> */}
       <Typography color={theme.palette.grey[900]} fontWeight="Bold" marginBottom="1rem" variant="h5">
         Metode Pembayaran
       </Typography>
@@ -684,7 +577,7 @@ const Orders: PageComponent = () => {
             sx={{ fontWeight: 'bold' }}
             variant="h5"
           >
-            Rp. {store?.checkout?.danaOutput?.[0]?.jumlah.toLocaleString('id-ID')}
+            Rp. {detailOrder?.lines[0]?.totalPrice?.gross?.amount?.toLocaleString('id-ID')}
           </Typography>
         </Box>
       </Box>
@@ -715,7 +608,7 @@ const Orders: PageComponent = () => {
               }}
               variant="body2"
             >
-              Rp. {totalPembayaran.toLocaleString('id-ID')}
+              Rp. {detailOrder?.lines[0]?.totalPrice?.gross?.amount?.toLocaleString('id-ID')}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -735,10 +628,11 @@ const Orders: PageComponent = () => {
               }}
               variant="body2"
             >
-              Rp. {biayaLayanan.toLocaleString('id-ID')}
+              Rp. -
             </Typography>
           </Box>
-          {detailOrder[0]?.DELIVERY_STATUS === 'Delivery Order'
+          {/* DELIVERY SCENARIO */}
+          {/* {detailOrder[0]?.DELIVERY_STATUS === 'Delivery Order'
             ? <>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography
@@ -757,7 +651,7 @@ const Orders: PageComponent = () => {
                   }}
                   variant="body2"
                 >
-                  Rp. {biayaParkir.toLocaleString('id-ID')}
+                  Rp. -
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -777,11 +671,11 @@ const Orders: PageComponent = () => {
                   }}
                   variant="body2"
                 >
-                  Rp. 2.000
+                  Rp. -
                 </Typography>
               </Box>
               </>
-            : null}
+            : null} */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography
               color={theme.palette.grey[900]}
@@ -799,7 +693,7 @@ const Orders: PageComponent = () => {
               }}
               variant="body2"
             >
-              Rp. {biayaFasilitas.toLocaleString('id-ID')}
+              Rp. -
             </Typography>
           </Box>
         </CardContent>
@@ -857,7 +751,8 @@ const Orders: PageComponent = () => {
           </Box>
         </Box>
       </Modal>
-      {restoCountdown === 0 && detailOrder[0]?.DELIVERY_STATUS === 'Delivery Order'
+      {/* DELIVERY SCENARIO */}
+      {/* {restoCountdown === 0 && detailOrder?.metafields?.order_type === 'Delivery Order'
         ? <Modal
             aria-describedby="modal-modal-description"
             aria-labelledby="modal-modal-title"
@@ -903,7 +798,7 @@ const Orders: PageComponent = () => {
           </Box>
           </Modal>
         : null}
-      {driverCountdown === 0 && detailOrder[0]?.DELIVERY_STATUS === 'Delivery Order'
+      {driverCountdown === 0 && detailOrder?.metafields?.order_type === 'Delivery Order'
         ? <Modal
             aria-describedby="modal-modal-description"
             aria-labelledby="modal-modal-title"
@@ -948,7 +843,7 @@ const Orders: PageComponent = () => {
             </Box>
           </Box>
           </Modal>
-        : null}
+        : null} */}
       <Modal
         aria-describedby="modal-modal-description"
         aria-labelledby="modal-modal-title"
