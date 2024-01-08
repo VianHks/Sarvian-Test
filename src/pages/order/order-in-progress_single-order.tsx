@@ -429,7 +429,7 @@ const Orders: PageComponent = () => {
                       <img
                         alt={obj.productName}
                         src={obj.thumbnail?.url}
-                        style={{ maxHeight: '100%', maxWidth: '100%' }} />
+                        style={{ borderRadius: '8px', maxHeight: '100%', maxWidth: '100%' }} />
                     </div>
                   </Grid>
                   <Grid
