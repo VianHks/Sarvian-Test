@@ -112,8 +112,6 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
       break;
   }
 
-  console.log('cekpage', pageId);
-
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static" sx={{ background: pageId === 'searchresult' ? '#D5ECFE' : 'white', elevation: 0 }}>

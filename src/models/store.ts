@@ -5,13 +5,13 @@ import {
   createCommandHook, createDispatchHook, createStoreHook, createStoreProvider
 } from '@nxweb/react';
 
-import { berandaCommand } from './beranda/commands.js';
-import { BerandaReducer } from './beranda/reducers.js';
 import { checkoutCommand } from './checkout/commands.js';
 import { CheckoutReducer } from './checkout/reducers.js';
 import { FAQReducer } from './faq/reducers.js';
 import { halamanRestoCommand } from './halaman-resto/commands.js';
 import { HalamanRestoReducer } from './halaman-resto/reducers.js';
+import { homeCommand } from './home/commands.js';
+import { homeCommands, HomeReducer } from './home/reducers.js';
 import { orderCommand } from './order/commands.js';
 import { OrderReducer } from './order/reducers.js';
 import { personalizedRecCommand } from './personalized-recomendation/commands.js';
@@ -25,14 +25,15 @@ import type { RootAction, RootModel } from './types.js';
 
 // ** Init reducers
 const rootReducer = combineReducers({
-  faq: FAQReducer,
-  products: productsReducer,
-  productView: ProductViewReducer,
-  halamanResto: HalamanRestoReducer,
+  beranda: HomeReducer,
   checkout: CheckoutReducer,
+  faq: FAQReducer,
+  halamanResto: HalamanRestoReducer,
+  home: HomeReducer,
+  order: OrderReducer,
   personalizedRec: PersonalizedRecReducer,
-  beranda: BerandaReducer,
-  order: OrderReducer
+  products: productsReducer,
+  productView: ProductViewReducer
 });
 
 // ** Init models
@@ -40,13 +41,14 @@ const rootModel: RootModel = {};
 
 // ** Init commands
 const rootCommand = {
-  products: productsCommand,
-  productView: productviewCommand,
-  halamanResto: halamanRestoCommand,
+  beranda: homeCommand,
   checkout: checkoutCommand,
+  halamanResto: halamanRestoCommand,
+  home: homeCommands,
+  order: orderCommand,
   personalizedRec: personalizedRecCommand,
-  beranda: berandaCommand,
-  order: orderCommand
+  products: productsCommand,
+  productView: productviewCommand
 };
 
 // ** Create store
