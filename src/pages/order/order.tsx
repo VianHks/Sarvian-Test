@@ -226,12 +226,14 @@ const Order: PageComponent = () => {
   const idOrder = 'T3JkZXI6NDNmNDQ4OTYtYzhmNS00NjQ1LWJlZjgtYzNjZjE0MjI3Y2Rk';
   const theme = useTheme();
   const [tabValue, setTabValue] = useState('Diproses');
-  // const [statusFilterUnConfirmed, setStatusFilterUnConfirmed] = useState('All');
-  // const [statusFilterFulfilled, setStatusFilterFulfilled] = useState('All');
-  // const [statusFilterCanceled, setStatusFilterCanceled] = useState('All');
-  // const [filteredDataUnConfirmed, setFilteredDataUnConfirmed] = useState<OrderItem[]>([]);
-  // const [filteredDataFulfilled, setFilteredDataFulfilled] = useState<OrderItem[]>([]);
-  // const [filteredDataCanceled, setFilteredDataCanceled] = useState<OrderItem[]>([]);
+  /*
+   * Const [statusFilterUnConfirmed, setStatusFilterUnConfirmed] = useState('All');
+   * const [statusFilterFulfilled, setStatusFilterFulfilled] = useState('All');
+   * const [statusFilterCanceled, setStatusFilterCanceled] = useState('All');
+   * const [filteredDataUnConfirmed, setFilteredDataUnConfirmed] = useState<OrderItem[]>([]);
+   * const [filteredDataFulfilled, setFilteredDataFulfilled] = useState<OrderItem[]>([]);
+   * const [filteredDataCanceled, setFilteredDataCanceled] = useState<OrderItem[]>([]);
+   */
 
   const handleTabChange = (
     _: React.SyntheticEvent<Element, Event>,
@@ -243,12 +245,16 @@ const Order: PageComponent = () => {
   const handleLihatPesanana = (orderNumber: string) => {
     navigate(`/order-in-progress/single-order?id=${orderNumber}`);
   };
-  // const filterDataByStatus = (status: string) => {
-  //   const data = store?.orderListOutput?.data || [];
-  //   const filtered = data.filter((item) => item.status === status);
+  /*
+   * Const filterDataByStatus = (status: string) => {
+   *   const data = store?.orderListOutput?.data || [];
+   *   const filtered = data.filter((item) => item.status === status);
+   */
 
-  //   setFilteredData(filtered);
-  // };
+  /*
+   *   setFilteredData(filtered);
+   * };
+   */
 
   useEffect(() => {
     const param = {
@@ -256,7 +262,7 @@ const Order: PageComponent = () => {
       customer: 'Holly Acosta',
       direction: 'DESC',
       field: 'NUMBER',
-      first: 15,
+      first: 100,
       paymentStatus: 'FULLY_CHARGED',
       status: 'UNCONFIRMED'
     };
@@ -267,13 +273,7 @@ const Order: PageComponent = () => {
 
   }, []);
 
-  // useEffect(() => {
-  //   filterDataByStatus(statusFilterUnConfirmed);
-  //   filterDataByStatus(statusFilterFulFilled);
-  // }, [store?.orderListOutput?.data]);
-
   console.log('cekstore', store);
-
 
   return (
     <>
@@ -302,6 +302,13 @@ const Order: PageComponent = () => {
         <div>
         {tabValue === 'Diproses' && store?.orderListOutput?.data.map((order) => {
           const isUnfulfilled = order.status === 'UNFULFILLED' || order.status === 'UNCONFIRMED';
+          const totalAmount = order?.lines.reduce((acc, line) => {
+            // Mengonversi line.totalPrice?.net.amount ke tipe number
+            const lineAmount = Number(line.totalPrice?.net.amount) || 0;
+
+            // Menambahkan harga setiap item ke akumulator
+            return acc + lineAmount;
+          }, 0);
 
           if (isUnfulfilled) {
             return (
@@ -311,7 +318,7 @@ const Order: PageComponent = () => {
                   <Typography color="black" variant="caption">No. Pesanan</Typography>
                 </Grid>
                 <Grid item={true} sx={{ textAlign: 'center' }} xs={4}>
-                  <Typography sx={{ color: 'black', fontWeight: 'medium' }} variant="caption">#{order.id}</Typography>
+                  <Typography sx={{ color: 'black', fontWeight: 'medium' }} variant="caption">#{order.number}</Typography>
                 </Grid>
                 <Grid item={true} sx={{ alignItems: 'end', textAlign: 'end', width: 'fit-content' }} xs={4}>
                   <Typography color="primary" sx={{ backgroundColor: '#E4F3FF', borderRadius: '4px', padding: '0.25rem 0.5rem' }} variant="caption">
@@ -331,11 +338,11 @@ const Order: PageComponent = () => {
                 >
                   <Avatar src={MieBaso} sx={{ height: '24px', width: '24px' }} />
                   <Typography color="black" fontWeight="bold" variant="body1">
-                    {order?.lines[0]?.productName}
+                    {order?.channel.name}
                   </Typography>
                 </Box>
                 <Box sx={{ textAlign: 'end' }}>
-                  <Typography color="black" variant="caption">2 Aug 2023</Typography>
+                  <Typography color="black" variant="caption">{order?.created ? new Date(order.created).toLocaleDateString() : ''}</Typography>
                 </Box>
               </Box>
               {order?.lines?.map((obj) => {
@@ -373,7 +380,7 @@ const Order: PageComponent = () => {
                         <Typography
                           variant="body2"
                         >
-                          Rp. {obj?.totalPrice?.gross?.amount?.toLocaleString()}
+                          Rp. {Number(obj?.totalPrice?.gross?.amount || 0).toLocaleString()}
                         </Typography>
                       </Grid>
                       <Grid
@@ -402,6 +409,7 @@ const Order: PageComponent = () => {
                   </div>
                 );
               })}
+
               <hr style={{ borderTop: 'dotted 1px', opacity: '0.1' }} />
               <Grid
                 container={true}
@@ -428,7 +436,7 @@ const Order: PageComponent = () => {
                     fontWeight="Bold"
                     variant="h6"
                   >
-                    Rp. 33333333
+                    Rp. {totalAmount.toLocaleString()}
                   </Typography>
                 </Grid>
               </Grid>
@@ -775,8 +783,8 @@ const Order: PageComponent = () => {
                   </Button>
                 </Box>
               </Card> */}
-              {tabValue === 'Selesai' && store?.orderDetailOutput?.data?.order?.lines?.map((order) => {
-                const isfulfilled = store?.orderDetailOutput?.data?.order?.status === 'FULFILLED';
+              {tabValue === 'Selesai' && store?.orderListOutput?.data?.map((order) => {
+                const isfulfilled = order.status === 'FULFILLED';
 
                 if (isfulfilled) {
                   return (
@@ -786,7 +794,7 @@ const Order: PageComponent = () => {
                         <Typography color="black" variant="caption">No. Pesanan</Typography>
                       </Grid>
                       <Grid item={true} sx={{ textAlign: 'center' }} xs={4}>
-                        <Typography sx={{ color: 'black', fontWeight: 'medium' }} variant="caption">#FFDA21223</Typography>
+                        <Typography sx={{ color: 'black', fontWeight: 'medium' }} variant="caption">#{order?.number}</Typography>
                       </Grid>
                       <Grid item={true} sx={{ alignItems: 'end', textAlign: 'end', width: 'fit-content' }} xs={4}>
                         <Typography color="primary" sx={{ backgroundColor: '#E4F3FF', borderRadius: '4px', padding: '0.25rem 0.5rem' }} variant="caption">
@@ -806,14 +814,14 @@ const Order: PageComponent = () => {
                       >
                         <Avatar src={MieBaso} sx={{ height: '24px', width: '24px' }} />
                         <Typography color="black" fontWeight="bold" variant="body1">
-                          {store?.orderDetailOutput?.data?.order?.channel?.name}
+                          {order?.channel.name}
                         </Typography>
                       </Box>
                       <Box sx={{ textAlign: 'end' }}>
-                        <Typography color="black" variant="caption">2 Aug 2023</Typography>
+                        <Typography color="black" variant="caption">{order?.created ? new Date(order.created).toLocaleDateString() : ''}</Typography>
                       </Box>
                     </Box>
-                    {store?.orderDetailOutput?.data?.order?.lines.map((obj) => {
+                    {order?.lines?.map((obj) => {
                       return (
                         <div key={obj.id}>
 
@@ -871,7 +879,7 @@ const Order: PageComponent = () => {
                           <Box sx={{ marginBottom: '0.75rem' }}>
                             <TextField
                               fullWidth={true}
-                              placeholder={obj.metadata[0].value}
+                              placeholder={obj.metafields.note}
                               size="small"
                               variant="outlined" />
                           </Box>
@@ -904,7 +912,7 @@ const Order: PageComponent = () => {
                           fontWeight="Bold"
                           variant="h6"
                         >
-                          Rp. 111111
+                          Rp. {order?.lines[0].totalPrice?.net.amount?.toLocaleString()}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -978,8 +986,8 @@ const Order: PageComponent = () => {
                 return null;
               })}
             {/* </>} */}
-            {tabValue === 'Selesai' && store?.orderDetailOutput?.data?.order?.lines?.map((order) => {
-              const isFulfilled = store?.orderDetailOutput?.data?.order?.status === 'CANCEL';
+            {tabValue === 'Dibatalkan' && store?.orderListOutput?.data?.map((order) => {
+              const isFulfilled = order?.status === 'CANCEL';
 
               if (isFulfilled) {
                 return (
@@ -989,7 +997,7 @@ const Order: PageComponent = () => {
                   <Typography color="black" variant="caption">No. Pesanan</Typography>
                 </Grid>
                 <Grid item={true} sx={{ textAlign: 'center' }} xs={4}>
-                  <Typography sx={{ color: 'black', fontWeight: 'medium' }} variant="caption">#FFDA21223</Typography>
+                  <Typography sx={{ color: 'black', fontWeight: 'medium' }} variant="caption">#{order?.number}</Typography>
                 </Grid>
                 <Grid item={true} sx={{ alignItems: 'end', textAlign: 'end', width: 'fit-content' }} xs={4}>
                   <Typography color="primary" sx={{ backgroundColor: '#E4F3FF', borderRadius: '4px', padding: '0.25rem 0.5rem' }} variant="caption">
@@ -1009,7 +1017,7 @@ const Order: PageComponent = () => {
                 >
                   <Avatar src={MieBaso} sx={{ height: '24px', width: '24px' }} />
                   <Typography color="black" fontWeight="bold" variant="body1">
-                    Resto Bunda Gila
+                    {order?.channel.name}
                   </Typography>
                 </Box>
                 <Box
@@ -1032,7 +1040,7 @@ const Order: PageComponent = () => {
                   <Typography color="black" variant="caption">2 Aug 2023</Typography>
                 </Box>
               </Box>
-              {store?.orderDetailOutput?.data?.order?.lines?.map((obj) => {
+              {order?.lines?.map((obj) => {
                 return (
                   <div key={obj.id}>
                     <Grid
@@ -1089,14 +1097,11 @@ const Order: PageComponent = () => {
                     <Box sx={{ marginBottom: '0.75rem' }}>
                       <TextField
                         fullWidth={true}
-                        placeholder={obj.metadata[0].value}
+                        placeholder={obj.metafields.note}
                         size="small"
                         variant="outlined" />
                     </Box>
-                  </div>
-                );
-              })}
-              <hr style={{ borderTop: 'dotted 1px', opacity: '0.1' }} />
+                    <hr style={{ borderTop: 'dotted 1px', opacity: '0.1' }} />
               <Grid
                 container={true}
                 sx={{ marginBottom: '0.75rem' }}
@@ -1122,7 +1127,7 @@ const Order: PageComponent = () => {
                     fontWeight="Bold"
                     variant="h6"
                   >
-                    Rp. 0000
+                    Rp. {obj.totalPrice.gross.amount.toLocaleString()}
                   </Typography>
                 </Grid>
               </Grid>
@@ -1136,6 +1141,10 @@ const Order: PageComponent = () => {
                   Beli Lagi
                 </Button>
               </Box>
+                  </div>
+                );
+              })}
+
       </Card>
                 );
               }

@@ -235,6 +235,79 @@ interface RestoRating {
   verified: boolean
   foto: string
 }
+interface CheckoutDetailsDataModel {
+  data: {
+    checkout: {
+      channel: {
+        id: string
+        metadata: {
+          key: string
+          value: string
+        }[]
+        name: string
+      }
+      created: string
+      id: string
+      lines: {
+        id: string
+        metadata: {
+          key: string
+          value: string
+        }[]
+        metafields: {
+          note: string
+        }
+        quantity: number
+        totalPrice: {
+          gross: {
+            amount: number
+            currency: string
+          }
+        }
+        variant: {
+          id: string
+          name: string
+          pricing: {
+            price: {
+              gross: {
+                amount: number
+                currency: string
+              }
+            }
+          }
+          product: {
+            id: string
+            name: string
+            slug: string
+            thumbnail: {
+              alt: string
+              url: string
+            }
+          }
+        }
+      }[]
+      totalPrice: {
+        gross: {
+          amount: number
+          currency: string
+        }
+      }
+      user: {
+        addresses: {
+          city: string
+          countryArea: string
+          id: string
+          postalCode: string
+          streetAddress1: string
+        }[]
+        firstName: string
+        id: string
+        lastName: string
+      }
+    }
+  }
+}
+
 
 interface HalamanRestoModel {
 
@@ -247,6 +320,7 @@ interface HalamanRestoModel {
   productByMetadataOutput?: ProductByMetadataDataModel
   productByCollectionsOutput?: ProductbyCollectionsDataModel
   checkoutOutput?: CheckoutDataModel
+  checkoutDetailOutput?: CheckoutDetailsDataModel
 
 }
 

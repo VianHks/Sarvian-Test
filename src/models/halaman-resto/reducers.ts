@@ -194,15 +194,12 @@ const DefaultProductbyCollection: ProductbyCollectionsDataModel = {
   },
   totalCount: 0
 };
-const DefaultCheckout: CheckoutDataModel = {
-  checkout_id: ''
-};
+
 const ChannelDefault: HalamanRestoModel = {
   channelDetailOutput: DefaultChannelDetail,
   productListOutput: DefaultProductList,
   productByMetadataOutput: DefaultCollectionsbyMetadata,
-  productByCollectionsOutput: DefaultProductbyCollection,
-  checkoutOutput: DefaultCheckout
+  productByCollectionsOutput: DefaultProductbyCollection
 };
 const HalamanRestoReducer = (
   state: HalamanRestoModel = ChannelDefault,
@@ -330,66 +327,22 @@ export const ChannelCommand = {
         });
     };
   },
-  postCheckout: (params: unknown, token: string): TAction<HalamanRestoAction, void> => {
-    return (dispatch: TDispatch<HalamanRestoAction>) => {
-      return apiFetch(token)
-        .post(`/foodbuyer/0.1/checkasdout`, params)
-        .then((response) => {
-          if (response.status === 200) {
-            if (response.data && Object.keys(response.data).length > 0) {
-              console.log('cekrespPost', response.data);
-              const checkout: HalamanRestoModel = {
-                checkoutOutput: response.data as CheckoutDataModel
-              };
+  postCreateCheckout: (payload: unknown, token: string): Promise<string> => {
+    return apiFetch(token).post(`/foodbuyer/0.1/checkout`, payload)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .then((response: any) => {
+        const id: string = response?.data?.checkout_id;
 
-              dispatch({
-                data: checkout,
-                type: HalamanRestoActionType.CheckoutLoad
-              });
-            } else {
-              dispatch({
-                data: ChannelDefault,
-                type: HalamanRestoActionType.CheckoutLoad
-              });
-            }
-          }
-        })
-        .catch((error) => {
-          console.error('Error during checkout:', error);
-        });
-    };
+        if (response.status === 200) {
+          return id;
+        }
+
+        return 'err';
+      }).catch(() => {
+        return 'err';
+      });
   }
 };
 
-/*
- * Const HalamanRestoReducer = (
- *   state: HalamanRestoModel = {},
- *   action: Readonly<HalamanRestoAction>
- * ): HalamanRestoModel => {
- *   switch (action.type) {
- *     case HalamanRestoActionType.UlasanAndRatingLoad:
- *       return { ...state, ...action.value };
- *     case HalamanRestoActionType.UlasanAndRatingClear:
- *       return {};
- *     case HalamanRestoActionType.MenuRekomendLoad:
- *       return { ...state, ...action.value };
- *     case HalamanRestoActionType.MenuRekomendClear:
- *       return {};
- *     case HalamanRestoActionType.PaketHematLoad:
- *       return { ...state, ...action.value };
- *     case HalamanRestoActionType.PaketHematClear:
- *       return {};
- *     case HalamanRestoActionType.RestoRatingLoad:
- *       return { ...state, ...action.value };
- *     case HalamanRestoActionType.RestoRatingClear:
- *       return {};
- */
-
-/*
- *     default:
- *       return state;
- *   }
- * };
- */
 
 export { HalamanRestoReducer };

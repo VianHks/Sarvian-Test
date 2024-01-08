@@ -22,6 +22,9 @@ export interface OrderList {
       }
       created: string
       id: string
+      channel: {
+        name: string
+      }
       lines: [
         {
           id: string

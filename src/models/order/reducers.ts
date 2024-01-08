@@ -28,6 +28,9 @@ const DefaultOrderList: OrderList = {
       },
       created: '',
       id: '',
+      channel: {
+        name: ''
+      },
       lines: [
         {
           id: '',
