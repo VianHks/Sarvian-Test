@@ -54,7 +54,7 @@ export interface OrderDataModel {
 // eslint-disable-next-line import/exports-last
 export const DUMMY_ORDER = [
   {
-    DELIVERY_STATUS: 'Pickup',
+    DELIVERY_STATUS: 'Delivery Order',
     NO_ORDER: 1,
     ORDER_DATE: '2 Aug 2023',
     ORDER_ITEM: [
@@ -118,8 +118,8 @@ const CustomTab = styled((props: StyledTabProps) => <Tab disableRipple={true} {.
       minWidth: 0
     },
     fontWeight: theme.typography.fontWeightRegular,
-    marginRight: theme.spacing(1),
     color: '#D5ECFE',
+    marginRight: theme.spacing(1),
     fontFamily: [
       '-apple-system',
       'BlinkMacSystemFont',
@@ -273,13 +273,13 @@ const Order: PageComponent = () => {
 
   }, []);
 
-  console.log('cekstore', store);
+  // Console.log('cekstore', store);
 
   return (
     <>
       <Box sx={{ backgroundColor: 'white', marginBottom: '1rem' }}>
         <Box sx={{ padding: '2.5rem 1.75rem 1rem 1.75rem' }}>
-          <Typography color="black" sx={{ fontWeight: 'bold' }} variant="h4">
+          <Typography color="black" sx={{ fontFamily: theme?.typography?.fontFamily?.split(',')[0].trim(), fontWeight: 'bold' }} variant="h4">
             Pesanan
           </Typography>
         </Box>
@@ -293,12 +293,12 @@ const Order: PageComponent = () => {
           variant="fullWidth"
           onChange={handleTabChange}
         >
-          <CustomTab label="Diproses" value="Diproses" />
-          <CustomTab label="Selesai" value="Selesai" />
-          <CustomTab label="Dibatalkan" value="Dibatalkan" />
+          <CustomTab label="Diproses" sx={{ fontFamily: theme?.typography?.fontFamily?.split(',')[1].trim() }} value="Diproses" />
+          <CustomTab label="Selesai" sx={{ fontFamily: theme?.typography?.fontFamily?.split(',')[1].trim() }} value="Selesai" />
+          <CustomTab label="Dibatalkan" sx={{ fontFamily: theme?.typography?.fontFamily?.split(',')[1].trim() }} value="Dibatalkan" />
         </CustomTabs>
       </Box>
-      <Container sx={{ paddingInline: '0.5rem' }}>
+      <Container sx={{ padding: '0rem 1.6rem 0rem 1.6rem' }}>
         <div>
         {tabValue === 'Diproses' && store?.orderListOutput?.data.map((order) => {
           const isUnfulfilled = order.status === 'UNFULFILLED' || order.status === 'UNCONFIRMED';
@@ -315,13 +315,13 @@ const Order: PageComponent = () => {
       <Card key={order.id} sx={{ marginBottom: '1rem', padding: '1rem' }}>
         <Grid container={true} sx={{ alignItems: 'center', display: 'flex', marginBottom: '0.75rem' }}>
                 <Grid item={true} sx={{ textAlign: 'start' }} xs={4}>
-                  <Typography color="black" variant="caption">No. Pesanan</Typography>
+                  <Typography color="black" sx={{ fontFamily: theme?.typography?.fontFamily?.split(',')[1].trim() }} variant="caption">No. Pesanan</Typography>
                 </Grid>
                 <Grid item={true} sx={{ textAlign: 'center' }} xs={4}>
-                  <Typography sx={{ color: 'black', fontWeight: 'medium' }} variant="caption">#{order.number}</Typography>
+                  <Typography sx={{ color: 'black', fontFamily: theme?.typography?.fontFamily?.split(',')[1].trim(), fontWeight: 'bold' }} variant="caption">#{order.number}</Typography>
                 </Grid>
                 <Grid item={true} sx={{ alignItems: 'end', textAlign: 'end', width: 'fit-content' }} xs={4}>
-                  <Typography color="primary" sx={{ backgroundColor: '#E4F3FF', borderRadius: '4px', padding: '0.25rem 0.5rem' }} variant="caption">
+                  <Typography color="primary" sx={{ backgroundColor: '#E4F3FF', borderRadius: '4px', fontFamily: theme?.typography?.fontFamily?.split(',')[1].trim(), padding: '0.25rem 0.5rem' }} variant="caption">
                     Single Order
                   </Typography>
                 </Grid>
@@ -373,11 +373,13 @@ const Order: PageComponent = () => {
                         <Typography
                           color="black"
                           fontWeight="medium"
+                          sx={{ fontFamily: theme?.typography?.fontFamily?.split(',')[1].trim() }}
                           variant="body2"
                         >
                           {obj.productName}
                         </Typography>
                         <Typography
+                          sx={{ fontFamily: theme?.typography?.fontFamily?.split(',')[1].trim() }}
                           variant="body2"
                         >
                           Rp. {Number(obj?.totalPrice?.gross?.amount || 0).toLocaleString()}
@@ -393,6 +395,7 @@ const Order: PageComponent = () => {
                         <Typography
                           color="black"
                           fontWeight="medium"
+                          sx={{ fontFamily: theme?.typography?.fontFamily?.split(',')[1].trim() }}
                           variant="caption"
                         >
                           {obj.quantity} item
@@ -401,6 +404,7 @@ const Order: PageComponent = () => {
                     </Grid>
                     <Box sx={{ marginBottom: '0.75rem' }}>
                       <TextField
+                        disabled={true}
                         fullWidth={true}
                         placeholder={obj.metafields?.note}
                         size="small"
@@ -419,6 +423,7 @@ const Order: PageComponent = () => {
                   <Typography
                     color="black"
                     fontWeight="Bold"
+                    sx={{ fontFamily: theme?.typography?.fontFamily?.split(',')[0].trim() }}
                     variant="h6"
                   >
                     Total Pembayaran
@@ -434,6 +439,7 @@ const Order: PageComponent = () => {
                   <Typography
                     color="primary"
                     fontWeight="Bold"
+                    sx={{ fontFamily: theme?.typography?.fontFamily?.split(',')[0].trim() }}
                     variant="h6"
                   >
                     Rp. {totalAmount.toLocaleString()}
@@ -445,6 +451,7 @@ const Order: PageComponent = () => {
                   color="primary"
                   fullWidth={true}
                   size="medium"
+                  sx={{ padding: '0.6rem' }}
                   variant="contained"
                   onClick={() => handleLihatPesanana(store?.orderDetailOutput?.data?.order?.id as unknown as string)}
                 >
@@ -776,7 +783,7 @@ const Order: PageComponent = () => {
                     endIcon={false}
                     size="medium"
                     startIcon={false}
-                    sx={{ flex: 1, padding: '0.5rem 1.375rem' }}
+                    sx={{ flex: 1, padding: '0.5rem' }}
                     variant="contained"
                   >
                     Beli Lagi

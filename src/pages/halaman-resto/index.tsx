@@ -14,6 +14,8 @@ import type { PageComponent } from '@nxweb/react';
 
 import { useAuth } from '@hooks/use-auth';
 import { ChannelCommand } from '@models/halaman-resto/reducers';
+import { orderCommand } from '@models/order/commands';
+import { OrderCommand } from '@models/order/reducers';
 import { RatingCommand } from '@models/rating/commands';
 import { useStore } from '@models/store';
 
@@ -105,10 +107,27 @@ interface LinesModel {
 
     }
   ]
+  lineId: string
+  note: string
   price: string
   quantity: number
   variantId: string
+  update: string
 }
+/*
+ * Interface LinesUpdateModel {
+ *   lineId: string
+ *   note: string
+ *   price: string
+ *   quantity: number
+ * }
+ * const DefaultLinesUpdate: LinesUpdateModelModel = {
+ *   lineId: '',
+ *   note: '',
+ *   price: '',
+ *   quantity: 0
+ * };
+ */
 const DefaultLines: LinesModel = {
   metadata: [
     {
@@ -117,11 +136,30 @@ const DefaultLines: LinesModel = {
 
     }
   ],
+  lineId: '',
+  note: '',
   price: '',
   quantity: 0,
-  variantId: ''
+  variantId: '',
+  update: ''
 
 };
+
+/*
+ * Interface PayloadUpdateDataModel {
+ *   checkoutId: string
+ *   lines: LinesUpdateModel[]
+ */
+
+// }
+
+/*
+ * const UPDATE: PayloadUpdateDataModel =
+ * {
+ *   checkoutId: '',
+ *   lines: [DefaultLinesUpdate]
+ * };
+ */
 
 interface PayloadDataModel {
   after: string
@@ -143,10 +181,6 @@ const DATA: PayloadDataModel =
 };
 
 const HalamanResto: PageComponent = () => {
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const snackbarSeverity: 'error' | 'info' | 'success' | 'warning' = 'error';
-
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
   const [store, dispatch] = useStore((state) => state);
@@ -187,8 +221,15 @@ const HalamanResto: PageComponent = () => {
       return total + lineTotal;
     }, 0);
   };
-  const handleShoppingButtonClick = () => {
-    navigate('keranjang');
+
+  const calculateTotalItems = (lines: LinesModel[] | undefined): number => {
+    if (!lines) {
+      return 0;
+    }
+
+    return lines.reduce((total, line) => {
+      return total + line.quantity;
+    }, 0);
   };
 
   const handleIncrement = (id: string) => {
@@ -201,6 +242,7 @@ const HalamanResto: PageComponent = () => {
 
       if (lineToUpdate) {
         lineToUpdate.quantity = Math.max(lineToUpdate.quantity + 1, 0);
+
         setTotalItems((prevTotalItems) => prevTotalItems + 1);
       }
 
@@ -237,33 +279,96 @@ const HalamanResto: PageComponent = () => {
     navigate('./ulasan-rating');
   };
 
+  const handleResponse = (res: string | null | undefined) => {
+    if (res !== 'err' && res !== null && res !== undefined) {
+      setIsLoading(false);
+      sessionStorage.setItem('checkoutId', res);
+      const colIdsString = JSON.stringify(colIds);
+
+      sessionStorage.setItem('colIds', colIdsString);
+      navigate('/keranjang');
+    } else {
+      setIsLoading(true);
+    }
+  };
+
+  const handleShoppingButtonClick = () => {
+    navigate('/keranjang');
+  };
+
+  const handleCardClick = (variantId: string) => {
+    navigate(`/product-view/${variantId}`);
+  };
+
   const handleLanjutPembayaranClick = () => {
     setIsLoading(true);
     const filteredLines = formData.lines.filter((line) => line.quantity > 0);
 
-    const param = {
+    const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
 
+    if (checkoutIdFromStorage) {
+      const linesToUpdate = formData.lines.filter((line) => line.lineId);
+      const paramUpdate = {
+        checkoutId: checkoutIdFromStorage,
+        lines: linesToUpdate.map((line) => ({
+          lineId: line.lineId,
+          note: line.note,
+          price: line.price,
+          quantity: line.quantity
+        }))
+      };
+
+      console.log('cekrespUpdate', paramUpdate);
+      ChannelCommand.putCheckoutLines(paramUpdate, token || '').then((res) => {
+        handleResponse(res);
+      });
+    }
+
+    if (filteredLines.length > 0) {
+      const paramCreate = {
+        after: '',
+        channel: 'makan',
+        deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
+        first: 100,
+        lines: filteredLines.map((line) => ({
+          metadata: line.metadata,
+          price: line.price,
+          quantity: line.quantity,
+          variantId: line.variantId
+        })),
+        userId: 'VXNlcjozMTc4NjkwMDc='
+      };
+
+      ChannelCommand.postCreateCheckout(paramCreate, token || '').then((res) => {
+        handleResponse(res);
+      });
+    }
+  };
+
+  useEffect(() => {
+    const collectionIds = (store?.halamanResto?.productListOutput?.data || [])
+      .filter((category) => category.products.totalCount > 0)
+      .map((category) => ({
+        id: category.id.toString(),
+        name: category.name
+      }));
+
+    console.log('Collection IDs:', collectionIds);
+    setColIds(collectionIds);
+
+    const colIdsOnly = colIds.map((colObj) => colObj.id);
+
+    const paramCollection = {
       after: '',
       channel: 'makan',
-      deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
-      first: 100,
-      lines: filteredLines,
-      userId: 'VXNlcjozMTc4NjkwMDc='
+      collection: colIdsOnly,
+      direction: 'ASC',
+      field: 'NAME',
+      first: 100
     };
 
-    console.log('cekparam', param);
-    ChannelCommand.postCreateCheckout(param, token || '')
-      .then((res) => {
-        console.log('cekres', res);
-
-        if (res !== 'err') {
-          setIsLoading(false);
-          navigate('/keranjang');
-        } else {
-          setIsLoading(true);
-        }
-      });
-  };
+    dispatch(ChannelCommand.getproductbyCollection(paramCollection, token || ''));
+  }, [store?.halamanResto?.productListOutput?.data]);
 
   useEffect(() => {
     const param = {
@@ -279,35 +384,23 @@ const HalamanResto: PageComponent = () => {
 
     dispatch(ChannelCommand.getCollections(param, token || ''));
 
-    const paramMetadata = {
-
-      after: '',
-      channel: 'makan',
-      filterKey: 'recomendation',
-      filterValue: 'true',
-      first: 100
-
-    };
-    // If (colIds && colIds.length > 0) {
     const colIdsOnly = colIds.map((colObj) => colObj.id);
 
-    console.log('cekcollid', colIdsOnly);
-
     const paramCollection = {
-
       after: '',
       channel: 'makan',
-      collection: ['Q29sbGVjdGlvbjo1MQ==', 'Q29sbGVjdGlvbjoxMw=='],
+      collection: colIdsOnly,
       direction: 'ASC',
       field: 'NAME',
       first: 100
-
     };
 
     dispatch(ChannelCommand.getproductbyCollection(paramCollection, token || ''));
-    // }
+    const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
+    if (checkoutIdFromStorage !== null) {
+      dispatch(OrderCommand.getCheckoutDetails(checkoutIdFromStorage, token || ''));
+    }
 
-    dispatch(ChannelCommand.getCollectionsbyMetadata(paramMetadata, token || ''));
     dispatch(ChannelCommand.getChannelDetail(channelId, token || ''));
     dispatch(
       RatingCommand.RatingLoad(channelId)
@@ -341,29 +434,53 @@ const HalamanResto: PageComponent = () => {
           const defaultPrice =
             matchingProduct?.pricing?.priceRange?.start?.net?.amount || 0;
 
+          const initialQuantity =
+            store?.order?.checkoutDetails?.data?.checkout?.lines &&
+            store.order.checkoutDetails.data.checkout &&
+            store.order.checkoutDetails.data.checkout.lines &&
+            store.order.checkoutDetails.data.checkout.lines.length > 0
+              ? store.order.checkoutDetails.data.checkout.lines.find(
+                (line) => line.variant.id === targetId
+              )?.quantity || 0
+              : 0;
+
+          const initialLineId =
+              store?.order?.checkoutDetails?.data?.checkout?.lines &&
+              store.order.checkoutDetails.data.checkout.lines.length > 0
+                ? store.order.checkoutDetails.data.checkout.lines.find(
+                  (line) => line?.variant?.id === targetId
+                )?.id || ''
+                : '';
+          const initialNote =
+                store?.order?.checkoutDetails?.data?.checkout?.lines &&
+                store.order.checkoutDetails.data.checkout.lines.length > 0
+                  ? store.order.checkoutDetails.data.checkout.lines.find(
+                    (line) => line.variant.id === targetId
+                  )?.metafields?.note || ''
+                  : '';
+
           return {
             ...DefaultLines,
             variantId: targetId,
-            price: String(defaultPrice)
+            price: String(defaultPrice),
+            quantity: initialQuantity,
+            lineId: initialLineId,
+            note: initialNote
           };
         }
       );
 
       setFormData({ ...formData, lines: linesUpdate });
     }
-  }, [store?.halamanResto?.productByCollectionsOutput]);
+  }, [store?.halamanResto?.productByCollectionsOutput, store?.order?.checkoutDetails?.data?.checkout]);
 
   useEffect(() => {
-    const collectionIds = (store?.halamanResto?.productListOutput?.data || [])
-      .filter((category) => category.products.totalCount > 0)
-      .map((category) => ({
-        id: category.id.toString(),
-        name: category.name
-      }));
+    const initialTotalAmount = calculateTotalAmount(formData.lines);
+    const initialTotalItems = calculateTotalItems(formData.lines);
 
-    console.log('Collection IDs:', collectionIds);
-    setColIds(collectionIds);
-  }, [store?.halamanResto?.productListOutput]);
+    setTotalAmount(initialTotalAmount);
+    setTotalItems(initialTotalItems);
+  }, [formData]);
 
   const scrollToKategoriMenu = (event: SelectChangeEvent<string>) => {
     const selectedCategory = event.target.value as string;
@@ -375,8 +492,8 @@ const HalamanResto: PageComponent = () => {
   };
 
   console.log('cekstore', store);
-  console.log('cekformdata', formData);
-  console.log('jadwal', filteredJadwal);
+
+  console.log('formdata', formData);
 
   useEffect(() => {
     if (isLoading) {
@@ -617,11 +734,11 @@ const HalamanResto: PageComponent = () => {
             </Typography>
             {store?.halamanResto?.productByCollectionsOutput?.data
               ?.filter((obj) => obj.collections.some((collection) => collection.id === colId.id))
-              .map((obj) => (
+              .map((obj, index) => (
 
                 <div key={obj.id} style={{ marginBottom: '0.5rem' }}>
 
-                  <Card sx={{ paddingInline: '0.5rem' }}>
+                  <Card sx={{ paddingInline: '0.5rem' }} onClick={() => handleCardClick(obj.variants[index].id)}>
                     <Grid
                       container={true}
                       spacing={2}

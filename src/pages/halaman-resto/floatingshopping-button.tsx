@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import React from 'react';
 
 import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
@@ -14,19 +15,19 @@ const FloatingShoppingButton: React.FC<FloatingShoppingButtonProps> = ({ onClick
     <Button
       color="primary"
       sx={{
-        position: 'fixed',
+        borderRadius: '100%',
         bottom: '3rem',
+        height: '65px',
+        position: 'fixed',
         right: '3rem',
-        borderRadius: '50%',
         width: '60px',
-        height: '60px',
         zIndex: 100
       }}
       variant="contained"
       onClick={onClick}
       {...buttonProps}
     >
-      <ShoppingBasketIcon />
+      <ShoppingBasketIcon style={{ fontSize: '2.5rem' }} />
     </Button>
   );
 };

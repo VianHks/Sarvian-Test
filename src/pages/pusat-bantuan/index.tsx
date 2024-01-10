@@ -10,7 +10,7 @@ import {
 
 import { ChevronRight, GeoFill } from '@nxweb/icons/bootstrap';
 import { Mail } from '@nxweb/icons/ionicons';
-import { PhoneFilled } from '@nxweb/icons/material';
+import { LocationOnFilled, PhoneFilled } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
 
 import { Card, Grid, Typography } from '@components/material.js';
@@ -51,11 +51,15 @@ const PusatBantuan: PageComponent = () => {
           alignItems: 'center',
           backgroundColor: '#E4F3FF',
           display: 'flex',
-          height: '11rem',
-          position: 'relative'
+          height: '9rem',
+          marginLeft: '-1rem',
+          marginRight: '-1rem',
+          marginTop: '-1rem',
+          position: 'relative',
+          width: '150%'
         }}
       >
-        <Box>
+        <Box sx={{ marginTop: '-2rem', padding: '1.5rem', width: '100%' }}>
           <Typography color="primary" variant="h4">
             Mengalami kesulitan?
             <br />
@@ -64,7 +68,7 @@ const PusatBantuan: PageComponent = () => {
         </Box>
       </Container>
 
-      <Container sx={{ marginTop: '-3rem', paddingInline: '1.5rem', position: 'relative', zIndex: '1' }}>
+      <Container sx={{ marginTop: '-2rem', paddingInline: '1.5rem', position: 'relative', zIndex: '1' }}>
         <Card sx={{ padding: '1rem' }}>
           <Grid
             container={true}
@@ -157,7 +161,7 @@ const PusatBantuan: PageComponent = () => {
           })}
         </Card>
       </Container>
-      <Container sx={{ bottom: 0, paddingInline: '1.5rem', position: 'fixed' }}>
+      <Container sx={{ paddingInline: '1.5rem', position: 'fixed' }}>
         <Box sx={{ alignItems: 'center', display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
           <PhoneFilled color="#1050AE" size={24} />
           <Typography
@@ -176,11 +180,11 @@ const PusatBantuan: PageComponent = () => {
             }}
             variant="h5"
           >
-            Finfo@tokorumahan.com
+            info@tokorumahan.com
           </Typography>
         </Box>
         <Box sx={{ alignItems: 'center', display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-          <GeoFill color="#1050AE" size={24} />
+          <LocationOnFilled color="#1050AE" size={24} />
           <Typography
             sx={{
               fontWeight: 'bold',

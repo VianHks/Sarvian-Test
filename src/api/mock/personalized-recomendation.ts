@@ -80,7 +80,7 @@ export const personalizedRecList: FetchMockInitializer = (adapter: Readonly<Fetc
       {
         id: '10',
         photo: `${Sate}`,
-        title: 'SAAAAT'
+        title: 'Sate'
       },
       {
         id: '11',

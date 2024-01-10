@@ -334,7 +334,22 @@ export const ChannelCommand = {
         const id: string = response?.data?.checkout_id;
 
         if (response.status === 200) {
-          return id;
+          return id || 'err';
+        }
+
+        return 'err';
+      }).catch(() => {
+        return 'err';
+      });
+  },
+  putCheckoutLines: (payload: unknown, token: string): Promise<string> => {
+    return apiFetch(token).put(`/foodbuyer/0.1/checkout`, payload)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .then((response: any) => {
+        const id: string = response?.data?.checkout_id;
+
+        if (response.status === 200) {
+          return id || 'err';
         }
 
         return 'err';
