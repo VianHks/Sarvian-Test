@@ -243,7 +243,7 @@ const Order: PageComponent = () => {
   };
 
   const handleLihatPesanana = (orderNumber: string) => {
-    // console.log('cekordernumber', orderNumber);
+    sessionStorage.setItem('orderId', orderNumber);
     navigate(`/order-in-progress/single-order?id=${orderNumber}`);
   };
 
