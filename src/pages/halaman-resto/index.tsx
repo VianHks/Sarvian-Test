@@ -1,15 +1,14 @@
 /* eslint-disable multiline-ternary */
 /* eslint-disable linebreak-style */
-import { error } from 'console';
 
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import type { MouseEvent, SyntheticEvent } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
 import { Alert, Avatar, Box, Button, Card, Divider, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, Snackbar, TextField, Toolbar, Typography } from '@mui/material';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
 import { AccessTimeFilled, AddBoxFilled, ArrowBackFilled, IndeterminateCheckBoxFilled, LocationOnFilled, SearchOutlined, StarFilled } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
@@ -115,6 +114,11 @@ interface LinesModel {
   quantity: number
   variantId: string
   update: string
+  colectionId: string
+  productId: string
+  thumbnail: string
+  name: string
+  isAvailableForPurchase: boolean
 }
 /*
  * Interface LinesUpdateModel {
@@ -143,7 +147,12 @@ const DefaultLines: LinesModel = {
   price: '',
   quantity: 0,
   variantId: '',
-  update: ''
+  update: '',
+  colectionId: '',
+  productId: '',
+  thumbnail: '',
+  name: '',
+  isAvailableForPurchase: false
 
 };
 
@@ -312,7 +321,7 @@ const HalamanResto: PageComponent = () => {
     setIsLoading(true);
     const filteredLines = formData.lines.filter((line) => line.quantity > 0 && !line.lineId);
 
-    // const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
+    // Const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
 
     if (checkoutIdFromStorage) {
       const linesToUpdate = formData.lines.filter((line) => line.lineId);
@@ -343,7 +352,7 @@ const HalamanResto: PageComponent = () => {
           quantity: line.quantity,
           variantId: line.variantId
         })),
-        userId: 'VXNlcjozMTc4NjkwMDc='
+        userId: 'VXNlcjoyMDUwMjQwNjE5'
       };
 
       ChannelCommand.postCreateCheckout(paramCreate, token || '').then((res) => {
@@ -378,7 +387,7 @@ const HalamanResto: PageComponent = () => {
       console.log('cekreserr', res);
     });
 
-    // const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
+    // Const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
     if (checkoutIdFromStorage !== null) {
       dispatch(OrderCommand.getCheckoutDetails(checkoutIdFromStorage, token || ''));
     }
@@ -432,6 +441,8 @@ const HalamanResto: PageComponent = () => {
 
           ));
 
+          console.log('cekColectionIds', matchingColId);
+          const colectionIds = matchingColId?.id || '';
           const targetId = matchingColId
             ? store?.halamanResto?.productByCollectionsOutput?.data[index]?.variants[0].id || ''
             : '';
@@ -439,8 +450,13 @@ const HalamanResto: PageComponent = () => {
             (product) => product.variants[0].id === targetId
           );
 
+          const productIds = store?.halamanResto?.productByCollectionsOutput?.data[index].id || '';
           const defaultPrice =
             matchingProduct?.pricing?.priceRange?.start?.net?.amount || 0;
+
+          const defaultName = matchingProduct?.name || '';
+          const defaultThumbnail = matchingProduct?.thumbnail.url || '';
+          const defaultAvailableforPurchase = matchingProduct?.channelListings[0]?.isAvailableForPurchase || false;
 
           const initialQuantity =
             store?.order?.checkoutDetails?.data?.checkout?.lines &&
@@ -473,7 +489,13 @@ const HalamanResto: PageComponent = () => {
             price: String(defaultPrice),
             quantity: initialQuantity,
             lineId: initialLineId,
-            note: initialNote
+            note: initialNote,
+            colectionId: colectionIds,
+            productId: productIds,
+            thumbnail: defaultThumbnail,
+            name: defaultName,
+            isAvailableForPurchase: defaultAvailableforPurchase
+
           };
         }
       );
@@ -514,20 +536,20 @@ const HalamanResto: PageComponent = () => {
   }, [isLoading, showAlert]);
 
   return (
-    <div>
-      <Toolbar sx={{ backgroundColor: '#D5ECFE' }}>
+    <><div>
+      <Toolbar sx={{ backgroundColor: '#D5ECFE', paddingInline: '1rem' }}>
 
         <IconButton
           aria-label="back"
           color="default"
           edge="start"
           size="large"
-          sx={{ mr: 2, marginTop: '0.2rem' }}
+          sx={{ mr: -2, marginTop: '0.2rem' }}
         >
           <ArrowBackFilled />
         </IconButton>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <FormControl sx={{ backgroundColor: '#D5ECFE' }}>
+          <FormControl size="small" sx={{ backgroundColor: '#D5ECFE' }}>
             <InputLabel id="filter-label" sx={{ color: 'black' }}>Menu</InputLabel>
             <Select
               id="filter"
@@ -549,15 +571,15 @@ const HalamanResto: PageComponent = () => {
             </Select>
           </FormControl>
 
-          <IconButton aria-label="search" color="inherit" sx={{ backgroundColor: '#FFFFFF' }}>
+          <IconButton aria-label="search" color="inherit" size="small" sx={{ marginLeft: '0.5rem', backgroundColor: '#FFFFFF' }}>
             <SearchOutlined fontSize="25px" style={{ color: 'black' }} />
           </IconButton>
-          <IconButton aria-label="share" color="inherit" sx={{ marginLeft: '0.25rem', backgroundColor: '#FFFFFF' }}>
+          <IconButton aria-label="share" color="inherit" size="small" sx={{ marginLeft: '0.5rem', backgroundColor: '#FFFFFF' }}>
             <ShareOutlinedIcon fontSize="medium" style={{ color: 'black' }} />
           </IconButton>
         </Box>
       </Toolbar>
-      <Box sx={{ margin: '0.5rem 0.5rem' }}>
+      <Box sx={{ margin: '0.5rem 0.5rem', paddingInline: '1rem' }}>
 
         {filteredJadwal.map((resto: RestoSchedule) => {
           const currentHour = new Date().getHours();
@@ -576,31 +598,31 @@ const HalamanResto: PageComponent = () => {
           return (
             <div key={store?.halamanResto?.channelDetailOutput?.data?.channel?.id}>
 
-<Grid item={true} xs={12}>
-  {isLoading ? <Alert
-    color="error"
-    severity="error"
-    sx={{ alignItems: 'center', display: 'flex' }}
-               >
-      <Typography fontSize="1rem">
-        Ada kesalahan pada Jaringan, Silahkan coba lagi kembali
-      </Typography>
-               </Alert> : null}
+              <Grid item={true} xs={12}>
+                {isLoading ? <Alert
+                  color="error"
+                  severity="error"
+                  sx={{ alignItems: 'center', display: 'flex' }}
+                             >
+                  <Typography fontSize="1rem">
+                    Ada kesalahan pada Jaringan, Silahkan coba lagi kembali
+                  </Typography>
+                             </Alert> : null}
 
-  {!isOpen && !isLoading && (
-    <Alert
-      color="info"
-      severity="info"
-      sx={{ alignItems: 'center', display: 'flex' }}
-    >
-      <Typography fontSize="1rem">
-        Resto ini lagi tutup, Buka lagi besok jam {resto.open.split(' - ')[0]} ya!
-      </Typography>
-    </Alert>
-  )}
-</Grid>
+                {!isOpen && !isLoading && (
+                  <Alert
+                    color="info"
+                    severity="info"
+                    sx={{ alignItems: 'center', display: 'flex' }}
+                  >
+                    <Typography fontSize="1rem">
+                      Resto ini lagi tutup, Buka lagi besok jam {resto.open.split(' - ')[0]} ya!
+                    </Typography>
+                  </Alert>
+                )}
+              </Grid>
 
-              <Card key={store?.halamanResto?.channelDetailOutput?.data?.channel?.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem', marginTop: '2rem' }}>
+              <Card key={store?.halamanResto?.channelDetailOutput?.data?.channel?.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem', marginTop: '2rem', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
                 <Grid container={true} spacing={2}>
                   <Grid
                     item={true}
@@ -657,6 +679,7 @@ const HalamanResto: PageComponent = () => {
             </div>
           );
         })}
+
         <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
           <Grid item={true} xs={6}>
             <Typography
@@ -669,7 +692,7 @@ const HalamanResto: PageComponent = () => {
           <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'end' }} xs={6}>
             <Button
               size="small"
-              sx={{ paddingInline: '1rem', backgroundColor: '#FBD600', fontSize: '0.5rem', color: 'black' }}
+              sx={{ paddingInline: '0.5rem', backgroundColor: '#FBD600', fontSize: '0.75rem', color: 'black' }}
               variant="outlined"
               onClick={handleLihatSemuaClick}
             >
@@ -677,53 +700,53 @@ const HalamanResto: PageComponent = () => {
             </Button>
           </Grid>
         </Grid>
+        <Box sx={{ paddingInline: '1rem' }}>
+          <Card sx={{ borderColor: 'transparent', borderRadius: 0, boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '1rem', marginInline: '-1.5rem', position: 'relative', zIndex: 100 }}>
+            <Box sx={{ overflowX: 'auto' }}>
+              <Grid container={true} sx={{ width: '100rem', overflowX: 'auto' }}>
+                <Grid item={true} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  {store?.rating?.data?.map((obj) => {
+                    return (
+                      <Card key={obj.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem' }}>
+                        <Grid container={true} spacing={2}>
+                          <Grid
+                            item={true}
+                            sx={{
+                              alignItems: 'center',
+                              display: 'flex',
+                              justifyContent: 'center'
+                            }}
+                            xs={2}
+                          >
+                            <Avatar src={ProfilFoto} sx={{ height: '50px', width: '50px' }} />
+                          </Grid>
+                          <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'start', paddingTop: '0rem!important' }} xs={8}>
+                            <Box>
 
-        <Card sx={{ borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '1rem', marginInline: '-1.5rem', padding: '1rem 1.5rem', position: 'relative', zIndex: 100 }}>
-          <Box sx={{ overflowX: 'auto' }}>
-            <Grid container={true} sx={{ width: '100rem', overflowX: 'auto' }}>
-              <Grid item={true} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                {store?.rating?.data?.map((obj) => {
-                  return (
-                    <Card key={obj.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem' }}>
-                      <Grid container={true} spacing={2}>
-                        <Grid
-                          item={true}
-                          sx={{
-                            alignItems: 'center',
-                            display: 'flex',
-                            justifyContent: 'center'
-                          }}
-                          xs={2}
-                        >
-                          <Avatar src={ProfilFoto} sx={{ height: '50px', width: '50px' }} />
-                        </Grid>
-                        <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'start', paddingTop: '0rem!important' }} xs={8}>
-                          <Box>
-
-                            <Typography
-                              sx={{ fontWeight: 'bold', textAlign: 'start', marginLeft: '0.5rem' }}
-                              variant="h6"
-                            >
-                              {obj.customerId}
-                            </Typography>
-                            <Box sx={{ marginLeft: '0.5rem' }}>
-                              {obj.rating ? <Rating rating={obj.rating.toString()} /> : null}
+                              <Typography
+                                sx={{ fontWeight: 'bold', textAlign: 'start', marginLeft: '0.5rem' }}
+                                variant="h6"
+                              >
+                                {obj.customerId}
+                              </Typography>
+                              <Box sx={{ marginLeft: '0.5rem' }}>
+                                {obj.rating ? <Rating rating={obj.rating.toString()} /> : null}
+                              </Box>
                             </Box>
+                          </Grid>
+                          <Box sx={{ marginTop: '10px', marginLeft: '10px', width: '80%' }}>
+                            <TextField fullWidth={true} placeholder={obj.review} size="small" variant="outlined" />
                           </Box>
+
                         </Grid>
-                        <Box sx={{ marginTop: '10px', marginLeft: '10px', width: '100%    ' }}>
-                          <TextField fullWidth={true} placeholder={obj.review} size="small" variant="outlined" />
-                        </Box>
-
-                      </Grid>
-                    </Card>
-                  );
-                })}
+                      </Card>
+                    );
+                  })}
+                </Grid>
               </Grid>
-            </Grid>
-          </Box>
-        </Card>
-
+            </Box>
+          </Card>
+        </Box>
         <Typography
           sx={{ fontWeight: 'bold', textAlign: 'start', color: 'black', marginBottom: '1rem' }}
           variant="h4"
@@ -740,191 +763,214 @@ const HalamanResto: PageComponent = () => {
               {colId.name}
 
             </Typography>
-            {store?.halamanResto?.productByCollectionsOutput?.data
-              ?.filter((obj) => obj.collections.some((collection) => collection.id === colId.id))
-              .map((obj, index) => (
+            {formData?.lines?.filter((obj) => (Array.isArray(obj.colectionId) ? obj.colectionId.some((collection) => collection === colId.id) : true))
+              .map((obj) => {
+                return (
+                  (
 
-                <div key={obj.id} style={{ marginBottom: '0.5rem' }}>
+    <div key={obj.productId} style={{ marginBottom: '0.5rem' }}>
 
-                  <Card sx={{ paddingInline: '0.5rem' }}>
-                    <Grid
-                      container={true}
-                      spacing={2}
-                      sx={{
-                        alignItems: 'center',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginBottom: '0.5rem'
-                      }}
+      <Card sx={{ paddingInline: '0.5rem' }}>
+        <Grid
+          container={true}
+          spacing={2}
+          sx={{
+            alignItems: 'center',
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginBottom: '0.5rem'
+          }}
 
-                    >
-                      <Grid item={true} xs={3}>
-                        <div
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          <img
-                            alt={obj.name}
-                            src={obj.thumbnail.url}
-                            style={{ maxHeight: '100%', maxWidth: '100%', marginTop: '0.5rem', borderRadius: '8px' }} />
-                        </div>
-                      </Grid>
-                      <Grid
-                        item={true}
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'space-between'
-                        }}
-                        xs={9}
-                      >
-                        <Box
-                          sx={{
-                            marginTop: obj.channelListings[0].isAvailableForPurchase ? '2.5rem' : '1rem',
-                            alignItems: 'center',
-                            display: 'flex',
-                            justifyContent: 'space-between'
-                          }}
-                          onClick={() => handleCardClick(obj.variants[index].id, obj.collections[index].id)}
-                        >
-                          <Typography
-                            sx={{ fontWeight: 'bold', textAlign: 'start', marginTop: '-2rem', color: 'black' }}
-                            variant="body2"
-                          >
-                            {obj.name}
-                          </Typography>
-                        </Box>
-                        {!obj.channelListings[0].isAvailableForPurchase && (
-                          <Typography
-                            sx={{
-                              fontWeight: 'bold',
-                              textAlign: 'start',
-                              color: 'red'
-                            }}
-                            variant="body2"
-                          >
-                            Persediaan Habis
-                          </Typography>
-                        )}
-                        {obj.channelListings[0].isAvailableForPurchase
-                          ? <div>
-                            <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
-                              <Grid item={true} xs={6}>
-                                <Typography
-                                  sx={{ fontWeight: 'bold', textAlign: 'start', color: '#1f66d0' }}
-                                  variant="body2"
-                                >
-                                  Rp. {obj.pricing.priceRange.start.net.amount.toLocaleString()}
-                                </Typography>
-                              </Grid>
-                              <Grid item={true} xs={6}>
-                                <Typography sx={{ fontWeight: 'medium', marginLeft: '3.5rem' }} variant="body2">
-                                  Terjual 4
-                                </Typography>
-                              </Grid>
-                            </Grid>
-                            <Box
-                              sx={{
-                                alignItems: 'center',
-                                display: 'flex',
-                                justifyContent: 'end',
-                                marginTop: '-1rem'
-                              }}
-                            >
-                              <Grid item={true} sx={{ display: 'flex', justifyContent: 'end' }} xs="auto">
-                                <IconButton
-                                  aria-label="min"
-                                  size="small"
-                                  sx={{ color: 'black' }}
-                                  onClick={() => handleDecrement(obj.variants[0].id)}
-                                >
-                                  <IndeterminateCheckBoxFilled size={24} />
-                                </IconButton>
-                                <Typography
-                                  key={obj.id}
-                                  style={{
-                                    display: 'inline-block',
-                                    margin: '0 0.5rem',
-                                    marginTop: '0.5rem'
-                                  }}
-                                  variant="body2"
-                                >
-                                  {formData?.lines.find((line) => line.variantId === obj.variants[0].id)?.quantity || 0}
-                                </Typography>
-                                {/* {formData.map((item, itemIndex) => item.lines.map((line, lineIndex) => (
-    <Typography
-      key={`${itemIndex}-${lineIndex}`}
-      style={{
-        display: 'inline-block',
-        margin: '0 0.5rem',
-        marginTop: '0.5rem'
-      }}
-      variant="body2"
-    >
-      {line.quantity}
-    </Typography>
-                        )))} */}
-                                <IconButton
-                                  aria-label="plus"
-                                  size="small"
-                                  sx={{ color: 'black' }}
-                                  onClick={() => handleIncrement(obj.variants[0].id)}
-                                >
-                                  <AddBoxFilled size={24} />
-                                </IconButton>
-                              </Grid>
-                            </Box>
-                            </div>
-                          : null}
-                      </Grid>
-                    </Grid>
-                  </Card>
-                </div>
-              ))}
-          </Fragment>
-        ))}
-        <Typography
-          sx={{ fontWeight: 'medium', textAlign: 'start', color: '#1F66D0' }}
-          variant="body2"
         >
-          {totalItems} Item
-        </Typography>
-        <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
-          <Grid item={true} xs={6}>
-            <Typography
-              sx={{ fontWeight: 'medium', textAlign: 'start', color: 'black' }}
-              variant="h6"
+          <Grid item={true} xs={3}>
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
             >
-              Total Pembayaran
-            </Typography>
+              <img
+                alt={obj.name}
+                src={obj.thumbnail}
+                style={{ maxHeight: '100%', maxWidth: '100%', marginTop: '0.5rem', borderRadius: '8px' }} />
+            </div>
           </Grid>
-          <Grid item={true} xs={6}>
-            <Typography
-              sx={{ fontWeight: 'medium', textAlign: 'end', color: 'black' }}
-              variant="h6"
+          <Grid
+            item={true}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}
+            xs={9}
+          >
+            <Box
+              sx={{
+                marginTop: obj.isAvailableForPurchase ? '2.5rem' : '1rem',
+                alignItems: 'center',
+                display: 'flex',
+                justifyContent: 'space-between'
+              }}
+              onClick={() => handleCardClick(obj?.variantId, obj?.productId || '')}
             >
-              Rp. {totalAmount.toLocaleString('id-ID')}
-            </Typography>
+              <Typography
+                sx={{ fontWeight: 'bold', textAlign: 'start', marginTop: '-2rem', color: 'black' }}
+                variant="body2"
+              >
+                {obj.name}
+              </Typography>
+            </Box>
+            {!obj.isAvailableForPurchase && (
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                  textAlign: 'start',
+                  color: 'red'
+                }}
+                variant="body2"
+              >
+                Persediaan Habis
+              </Typography>
+            )}
+            {obj.isAvailableForPurchase
+              ? <div>
+                <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
+                  <Grid item={true} xs={6}>
+                    <Typography
+                      sx={{ fontWeight: 'bold', textAlign: 'start', color: '#1f66d0' }}
+                      variant="body2"
+                    >
+                      Rp. {obj?.price?.toLocaleString()}
+                    </Typography>
+                  </Grid>
+                  <Grid item={true} xs={6}>
+                    <Typography sx={{ fontWeight: 'medium', marginLeft: '2.5rem' }} variant="body2">
+                      Terjual 4
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <Box
+                  sx={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    justifyContent: 'end',
+                    marginTop: '-1rem'
+                  }}
+                >
+                  <Grid item={true} sx={{ display: 'flex', justifyContent: 'end' }} xs="auto">
+                    <IconButton
+                      aria-label="min"
+                      size="small"
+                      sx={{ color: 'black' }}
+                      onClick={() => handleDecrement(obj.variantId)}
+                    >
+                      <IndeterminateCheckBoxFilled size={24} />
+                    </IconButton>
+                    <Typography
+                      key={obj.productId}
+                      style={{
+                        display: 'inline-block',
+                        margin: '0 0.5rem',
+                        marginTop: '0.5rem'
+                      }}
+                      variant="body2"
+                    >
+                      {obj?.quantity || 0}
+                    </Typography>
+                    {/* {formData.map((item, itemIndex) => item.lines.map((line, lineIndex) => (
+<Typography
+key={`${itemIndex}-${lineIndex}`}
+style={{
+display: 'inline-block',
+margin: '0 0.5rem',
+marginTop: '0.5rem'
+}}
+variant="body2"
+>
+{line.quantity}
+</Typography>
+        )))} */}
+                    <IconButton
+                      aria-label="plus"
+                      size="small"
+                      sx={{ color: 'black' }}
+                      onClick={() => handleIncrement(obj.variantId)}
+                    >
+                      <AddBoxFilled size={24} />
+                    </IconButton>
+                  </Grid>
+                </Box>
+                </div>
+              : null}
           </Grid>
         </Grid>
-        <Button
-          color="primary"
-          size="medium"
-          sx={{ textTransform: 'none', width: '100%' }}
-          variant="contained"
-          onClick={handleLanjutPembayaranClick}
-        >
-          Lanjut Pembayaran
-        </Button>
-        <FloatingShoppingButton onClick={handleShoppingButtonClick} />
+      </Card>
+    </div>
+                  )
+                );
+              })}
+          </Fragment>
+        ))}
+
+        {!checkoutIdFromStorage &&
+          <FloatingShoppingButton onClick={handleShoppingButtonClick} />}
       </Box>
 
-    </div>
+      </div><Card sx={{ borderRadius: '12px 12px 0 0', paddingInline: '1rem', marginTop: '1rem', position: 'sticky', bottom: 0 }}>
+          <Typography
+            sx={{ fontWeight: 'medium', textAlign: 'start', color: '#1F66D0' }}
+            variant="body2"
+          >
+            {totalItems} Item
+          </Typography>
+          <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
+            <Grid item={true} xs={6}>
+              <Typography
+                sx={{ fontWeight: 'medium', textAlign: 'start', color: 'black' }}
+                variant="h6"
+              >
+                Total Pembayaran
+              </Typography>
+            </Grid>
+            <Grid item={true} xs={6}>
+              <Typography
+                sx={{ fontWeight: 'medium', textAlign: 'end', color: 'black' }}
+                variant="h6"
+              >
+                Rp. {totalAmount.toLocaleString('id-ID')}
+              </Typography>
+            </Grid>
+          </Grid>
+          <Grid gap={1} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Button
+            color="primary"
+            size="small"
+            sx={{ textTransform: 'none', width: '20%', marginBottom: '0.5rem' }}
+            variant="outlined"
+            onClick={handleLanjutPembayaranClick}
+          >
+  <Grid alignItems="center" container={true} justifyContent="center" spacing={1}>
+    <Grid item={true}>
+      <ShoppingBasketIcon />
+    </Grid>
+    <Grid item={true} />
+  </Grid>
+          </Button>
+          <Button
+            color="primary"
+            size="medium"
+            sx={{ textTransform: 'none', width: '80%', marginBottom: '0.5rem' }}
+            variant="contained"
+            onClick={handleLanjutPembayaranClick}
+          >
+            Lanjut Pembayaran
+          </Button>
+          </Grid>
+            </Card>
+    </>
   );
 };
 
