@@ -354,7 +354,7 @@ export const ChannelCommand = {
     return apiFetch(token).put(`/foodbuyer/0.1/checkout`, payload)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .then((response: any) => {
-        const id: string = response?.data?.checkout_id;
+        const id: string = response?.data?.checkoutId;
 
         if (response.status === 200) {
           return id || 'err';
