@@ -303,47 +303,48 @@ const HalamanResto: PageComponent = () => {
 
   const handleLanjutPembayaranClick = () => {
     setIsLoading(true);
-    const filteredLines = formData.lines.filter((line) => line.quantity > 0);
+    const filteredLines = formData.lines.filter((line) => line.quantity > 0 && !line.lineId);
 
-    const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
+    // const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
 
-    if (checkoutIdFromStorage) {
-      const linesToUpdate = formData.lines.filter((line) => line.lineId);
-      const paramUpdate = {
-        checkoutId: checkoutIdFromStorage,
-        lines: linesToUpdate.map((line) => ({
-          lineId: line.lineId,
-          note: line.note,
-          price: line.price,
-          quantity: line.quantity
-        }))
-      };
+    console.log('cekfilter', filteredLines);
+    // if (checkoutIdFromStorage) {
+    //   const linesToUpdate = formData.lines.filter((line) => line.lineId);
+    //   const paramUpdate = {
+    //     checkoutId: checkoutIdFromStorage,
+    //     lines: linesToUpdate.map((line) => ({
+    //       lineId: line.lineId,
+    //       note: line.note,
+    //       price: line.price,
+    //       quantity: line.quantity
+    //     }))
+    //   };
 
-      console.log('cekrespUpdate', paramUpdate);
-      ChannelCommand.putCheckoutLines(paramUpdate, token || '').then((res) => {
-        handleResponse(res);
-      });
-    }
+    //   console.log('cekrespUpdate', paramUpdate);
+    //   ChannelCommand.putCheckoutLines(paramUpdate, token || '').then((res) => {
+    //     handleResponse(res);
+    //   });
+    // }
 
-    if (filteredLines.length > 0) {
-      const paramCreate = {
-        after: '',
-        channel: 'makan',
-        deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
-        first: 100,
-        lines: filteredLines.map((line) => ({
-          metadata: line.metadata,
-          price: line.price,
-          quantity: line.quantity,
-          variantId: line.variantId
-        })),
-        userId: 'VXNlcjozMTc4NjkwMDc='
-      };
+    // if (filteredLines.length > 0) {
+    //   const paramCreate = {
+    //     after: '',
+    //     channel: 'makan',
+    //     deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
+    //     first: 100,
+    //     lines: filteredLines.map((line) => ({
+    //       metadata: line.metadata,
+    //       price: line.price,
+    //       quantity: line.quantity,
+    //       variantId: line.variantId
+    //     })),
+    //     userId: 'VXNlcjozMTc4NjkwMDc='
+    //   };
 
-      ChannelCommand.postCreateCheckout(paramCreate, token || '').then((res) => {
-        handleResponse(res);
-      });
-    }
+    //   ChannelCommand.postCreateCheckout(paramCreate, token || '').then((res) => {
+    //     handleResponse(res);
+    //   });
+    // }
   };
 
   useEffect(() => {
@@ -509,7 +510,7 @@ const HalamanResto: PageComponent = () => {
 
   return (
     <div>
-      <Toolbar>
+      <Toolbar sx={{ backgroundColor: '#D5ECFE' }}>
 
         <IconButton
           aria-label="back"
@@ -520,14 +521,14 @@ const HalamanResto: PageComponent = () => {
         >
           <ArrowBackFilled />
         </IconButton>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <FormControl sx={{ marginTop: '0.5rem' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+          <FormControl sx={{ backgroundColor: '#D5ECFE' }}>
             <InputLabel id="filter-label" sx={{ color: 'black' }}>Menu</InputLabel>
             <Select
               id="filter"
               label="Menu"
               labelId="filter-label"
-              sx={{ width: 200, marginRight: 1, color: 'black' }}
+              sx={{ width: 210, marginRight: 1, color: 'black', backgroundColor: '#FFFFFF' }}
 
               value={selectedValue}
               onChange={scrollToKategoriMenu}
@@ -542,11 +543,11 @@ const HalamanResto: PageComponent = () => {
 
             </Select>
           </FormControl>
-
-          <IconButton aria-label="search" color="inherit" sx={{ marginTop: '0.5rem' }}>
+          
+          <IconButton aria-label="search" color="inherit" sx={{ backgroundColor: '#FFFFFF' }}>
             <SearchOutlined fontSize="25px" style={{ color: 'black' }} />
           </IconButton>
-          <IconButton aria-label="share" color="inherit" sx={{ marginTop: '0.5rem' }}>
+          <IconButton aria-label="share" color="inherit" sx={{ marginLeft: '0.25rem', backgroundColor: '#FFFFFF' }}>
             <ShareOutlinedIcon fontSize="medium" style={{ color: 'black' }} />
           </IconButton>
         </Box>
