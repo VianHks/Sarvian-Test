@@ -21,6 +21,8 @@ import { productsCommand } from './products/commands.js';
 import { productsReducer } from './products/reducers.js';
 
 import type { RootAction, RootModel } from './types.js';
+import { RatingCommand } from './rating/commands.js';
+import { RatingReducer } from './rating/reducers.js';
 
 // ** Init reducers
 const rootReducer = combineReducers({
@@ -32,11 +34,14 @@ const rootReducer = combineReducers({
   order: OrderReducer,
   personalizedRec: PersonalizedRecReducer,
   products: productsReducer,
-  productView: ProductViewReducer
+  productView: ProductViewReducer,
+  rating: RatingReducer
 });
 
 // ** Init models
 const rootModel: RootModel = {
+  rating: {},
+
   productView: ProductViewsDefault
 };
 
@@ -49,7 +54,8 @@ const rootCommand = {
   order: orderCommand,
   personalizedRec: personalizedRecCommand,
   products: productsCommand,
-  productView: ProductViewsCommand
+  productView: ProductViewsCommand,
+  rating: RatingCommand
 };
 
 // ** Create store

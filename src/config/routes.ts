@@ -3,7 +3,10 @@ import { lazy } from 'react';
 
 import type { Route } from '@nxweb/react';
 
+const dropDownValue = '';
+
 export const routes: Route[] = [
+
   {
     path: '/',
     redirectTo: (_location, authenticated) => (authenticated ? '/recomendation' : '/beranda')
@@ -90,8 +93,8 @@ export const routes: Route[] = [
     auth: false,
     element: lazy(() => import('@pages/halaman-resto/index.js')),
     hash: true,
-    layout: 'appbar',
-    meta: { appBarId: 'pageresto' },
+    // meta: { appBarId: 'pageresto', dropDownValue },
+    layout: 'blank',
     path: '/page-resto',
     search: true
   },

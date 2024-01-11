@@ -13,6 +13,7 @@ import { useStore } from '@models/store';
 import Rating from './rating';
 
 import RestoFoto from '@assets/images/RestoFoto.svg';
+import { RatingCommand } from '@models/rating/commands';
 // eslint-disable-next-line import/exports-last
 export const DUMMY_Rating = [
   {
@@ -52,26 +53,26 @@ const UlasandanRating: PageComponent = () => {
   const navigate = useNavigate();
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
-  const [store, dispatch] = useStore((state) => state?.halamanResto?.ulasanRatingOutput);
+  const [store, dispatch] = useStore((state) => state?.rating);
+  const channelId = 'Q2hhbm5lbDo0';
 
 
   useEffect(() => {
-    if (token) {
-      dispatch(halamanRestoCommand.ulasanRatingLoad(token))
+    dispatch(
+      RatingCommand.RatingLoad(channelId)
+    )
+      .catch((err: unknown) => {
+        console.error(err);
+      });
 
-        .catch((err: unknown) => {
-          console.error(err);
-        });
-
-      return () => {
-        dispatch(halamanRestoCommand.ulasanRatingClear());
-      };
-    }
-  }, [token]);
+    return () => {
+      dispatch(RatingCommand.RatingClear());
+    };
+  }, [dispatch, token]);
 
   return (
     <Box sx={{ margin: '0.5rem 0.5rem' }}>
-    {store?.map((obj) => (
+    {store?.data?.map((obj) => (
       <Card key={obj.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem', marginTop: '2rem' }}>
         <Grid container={true} spacing={4} sx={{ display: 'flex', justifyContent: 'space-between' }}>
 
@@ -81,19 +82,19 @@ const UlasandanRating: PageComponent = () => {
 
             <Grid item={true} sx={{ justifyContent: 'start', marginLeft: '-20px' }} xs={5}>
                 <Typography fontWeight="bold" sx={{ color: 'black' }}>
-                    {obj.userName}
+                    {obj.customerId}
                 </Typography>
             </Grid>
             <Grid item={true} sx={{ justifyContent: 'start' }} xs={5}>
                 <Box sx={{ marginLeft: '20px' }}>
-                    <Rating rating={obj.rating} />
+                    <Rating rating={obj.rating.toString()} />
                 </Box>
             </Grid>
         </Grid>
         <Grid container={true} spacing={2} sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '-0.25rem' }}>
 
-            <Grid item={true} sx={{ textAlign: 'start', marginBottom: '0.5rem' }} xs={12}>
-                {obj.tagDetail.map((item) => {
+            {/* <Grid item={true} sx={{ textAlign: 'start', marginBottom: '0.5rem' }} xs={12}>
+                {obj.review.map((item) => {
                   return (
 
                         <Chip key={item} color="primary" label={item} size="small" sx={{ marginRight: '5px' }} />
@@ -101,18 +102,18 @@ const UlasandanRating: PageComponent = () => {
                   );
                 })}
 
-            </Grid>
+            </Grid> */}
 
         </Grid>
         <Grid container={true} spacing={2} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
 
            <Grid item={true} sx={{ textAlign: 'start' }} xs={12}>
-               <Typography variant="body2">{obj.commentDetail}</Typography>
+               <Typography variant="body2">{obj.review}</Typography>
            </Grid>
 
         </Grid>
        <Grid sx={{ display: 'flex', justifyContent: 'end' }}>
-            <Typography sx={{ fontSize: '0.5rem' }} variant="caption">{obj.tanggal}</Typography>
+            <Typography sx={{ fontSize: '0.5rem' }} variant="caption">{obj.createdAt}</Typography>
        </Grid>
       </Card>
     ))}

@@ -30,6 +30,10 @@ export const API = (token: string, type: string = 'Bearer' as const, mocked: boo
   return mocked ? apiMock(fetch) : fetch;
 };
 
+export const apiFetchNonAuth = () => createFetch({
+  baseURL: getApiURL()
+});
+
 export const apiFetch = (token: string) => createFetch({
   baseURL: getApiURL(),
   headers: {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/member-ordering */
 import type { Action } from 'redux';
 import type { ThunkAction, ThunkDispatch } from 'redux-thunk';
 
@@ -9,6 +10,7 @@ import type { OrderAction, OrderModel } from './order/types.js';
 import type { PersonalizedRecAction, PersonalizedRecModel } from './personalized-recomendation/types.js';
 import type { ProductViewsAction, ProductViewsModel } from './product-view/types.js';
 import type { ProductsAction, ProductsModel } from './products/types.js';
+import type { RatingAction, RatingModel } from './rating/types.js';
 
 export type SortDirection = 'asc' | 'desc';
 
@@ -31,17 +33,30 @@ export interface PagedModel<T> {
 }
 
 export interface RootModel {
-  checkout?: CheckoutModel
-  faq?: FAQModel
-  halamanResto?: HalamanRestoModel
+  /*
+   * Checkout?: CheckoutModel
+  
+   * halamanResto?: HalamanRestoModel
+   */
   home?: HomeModel
-  order?: OrderModel
-  personalizedRec?: PersonalizedRecModel
+  /*
+   * Order?: OrderModel
+   * personalizedRec?: PersonalizedRecModel
+   */
+  faq?: FAQModel
   products?: ProductsModel
   productView?: ProductViewsModel
+  halamanResto?: HalamanRestoModel
+  checkout?: CheckoutModel
+  personalizedRec?: PersonalizedRecModel
+  // Beranda?: BerandaModel
+  order?: OrderModel
+  rating?: RatingModel
 }
 
-export type RootAction = CheckoutAction | FAQAction | HalamanRestoAction | HomeAction | OrderAction | PersonalizedRecAction | ProductsAction | ProductViewsAction;
-
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type RootAction = CheckoutAction | FAQAction | HalamanRestoAction | HomeAction | OrderAction | PersonalizedRecAction | ProductsAction | ProductViewsAction | RatingAction | {
+  type: ''
+};
 export type TAction<A extends Action, R> = ThunkAction<Promise<R>, RootModel, unknown, A>;
 export type TDispatch<A extends Action> = ThunkDispatch<RootModel, unknown, A>;

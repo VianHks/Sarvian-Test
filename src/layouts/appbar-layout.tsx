@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState  } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { SearchOutlined } from '@mui/icons-material';
@@ -14,6 +14,11 @@ import { ArrowBackFilled, ContentCopyOutlined, EmailOutlined, FileDownloadOutlin
 import { Facebook, Instagram, LINE, Telegram, Twitter, WhatsApp } from '@nxweb/icons/simple';
 
 import { routes } from '@config/routes';
+import { useAuth } from '@hooks/use-auth';
+import { ChannelCommand } from '@models/halaman-resto/reducers';
+import { useStore } from '@models/store';
+
+import type { SelectChangeEvent } from '@mui/material/Select';
 
 type ActionType = 'detailpesanan' | undefined;
 
@@ -41,7 +46,7 @@ const SESSION_STORAGE_CHECKOUT = 'CheckoutId';
 const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, readonly action?: ActionType }) => {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [selectedValue, setSelectedValue] = useState('');
+  const [selectedValue, setSelectedValue] = useState<string>('');
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -49,26 +54,36 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
   const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '';
   let dynamicIcon = null;
   let dynamicHandler: React.ReactNode = null;
+  const selectedValueRef = useRef(null);
 
+  const colRefs: React.RefObject<HTMLDivElement>[] = [];
   const currentRoute = routes.find((route) => route.path === location.pathname);
   const pageDescription = currentRoute?.meta?.description || '';
   const pageId = currentRoute?.meta?.appBarId || '';
+  let dropDownValue = currentRoute?.meta?.dropDownValue || '';
 
-  useEffect(() => {
-    setAnchorEl(document.body);
-  }, []);
+  const handleSelectChange = (event: SelectChangeEvent<string>) => {
+    const selectedCategory = event.target.value as string;
+
+    // Find the corresponding ref for the selected category
+    const selectedRef = colRefs.find(
+      (ref) => ref.current && ref.current.getAttribute('data-category') === selectedCategory
+    );
+
+    if (selectedRef && selectedRef.current) {
+      // Scroll to the selected component
+      selectedRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    dropDownValue = selectedCategory;
+    setSelectedValue(selectedCategory);
+  };
 
   const handleBack = () => {
     console.log('cek');
     navigate(-1);
   };
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const closeDialog = () => {
@@ -157,33 +172,7 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
             </IconButton>
           </Paper>
           ) }
-          {pageId === 'pageresto' && (
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <FormControl>
-            <InputLabel id="filter-label" sx={{ color: 'black' }}>Menu</InputLabel>
-              <Select
-                id="filter"
-                label="Menu"
-                labelId="filter-label"
-                sx={{ width: 200, marginRight: 1, color: 'black' }}
-                value={selectedValue}
-                onChange={(event) => setSelectedValue(event.target.value as string)}
-              >
-                {DUMMY_MENU.filter((category) => category.category_name !== 'Menu').map((category) => (
-                  <MenuItem key={category.id} value={category.category_name}>
-                    {category.category_description}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-              <IconButton aria-label="search" color="inherit">
-                <SearchOutlined fontSize="medium" style={{ color: 'black' }} />
-              </IconButton>
-              <IconButton aria-label="share" color="inherit">
-              <ShareOutlinedIcon fontSize="medium" style={{ color: 'black' }} />
-              </IconButton>
-          </Box>
-          )}
+
           <Typography color={pageDescription === 'Pusat Bantuan' ? theme.palette.primary.main : theme.palette.grey[900]} component="div" fontWeight="bold" sx={{ flexGrow: 1 }} variant="h4">
             {String(pageDescription)}
           </Typography>
