@@ -308,8 +308,6 @@ const HalamanResto: PageComponent = () => {
 
     const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
 
-    console.log('cekfilter', filteredLines);
-
     if (checkoutIdFromStorage) {
       const linesToUpdate = formData.lines.filter((line) => line.lineId);
       const paramUpdate = {
@@ -321,8 +319,6 @@ const HalamanResto: PageComponent = () => {
           quantity: line.quantity
         }))
       };
-
-      console.log('cekrespUpdate', paramUpdate);
       ChannelCommand.putCheckoutLines(paramUpdate, token || '').then((res) => {
         handleResponse(res);
       });
