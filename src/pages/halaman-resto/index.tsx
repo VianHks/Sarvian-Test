@@ -182,6 +182,11 @@ const DATA: PayloadDataModel =
   userId: 'string'
 };
 
+const SESSION_STORAGE_KEYS = {
+  CHECKOUT: 'CheckoutId',
+  COLIDS: 'ColIds'
+};
+
 const HalamanResto: PageComponent = () => {
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
@@ -189,6 +194,8 @@ const HalamanResto: PageComponent = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const navigate = useNavigate();
+  const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_KEYS.CHECKOUT) ?? '';
+  const colIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_KEYS.COLIDS) ?? '';
   const [isLoading, setIsLoading] = useState(false);
   const channelId = 'Q2hhbm5lbDo0';
   const daysOfWeek = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
@@ -284,10 +291,9 @@ const HalamanResto: PageComponent = () => {
   const handleResponse = (res: string | null | undefined) => {
     if (res !== 'err' && res !== null && res !== undefined) {
       setIsLoading(false);
-      sessionStorage.setItem('checkoutId', res);
-      const colIdsString = JSON.stringify(colIds);
+      window.sessionStorage.setItem(SESSION_STORAGE_KEYS.CHECKOUT, JSON.stringify(res));
+      window.sessionStorage.setItem(SESSION_STORAGE_KEYS.COLIDS, JSON.stringify(colIds));
 
-      sessionStorage.setItem('colIds', colIdsString);
       navigate('/keranjang');
     } else {
       setIsLoading(true);
@@ -306,7 +312,7 @@ const HalamanResto: PageComponent = () => {
     setIsLoading(true);
     const filteredLines = formData.lines.filter((line) => line.quantity > 0 && !line.lineId);
 
-    const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
+    // const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
 
     if (checkoutIdFromStorage) {
       const linesToUpdate = formData.lines.filter((line) => line.lineId);
@@ -319,6 +325,7 @@ const HalamanResto: PageComponent = () => {
           quantity: line.quantity
         }))
       };
+
       ChannelCommand.putCheckoutLines(paramUpdate, token || '').then((res) => {
         handleResponse(res);
       });
@@ -371,7 +378,7 @@ const HalamanResto: PageComponent = () => {
       console.log('cekreserr', res);
     });
 
-    const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
+    // const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
     if (checkoutIdFromStorage !== null) {
       dispatch(OrderCommand.getCheckoutDetails(checkoutIdFromStorage, token || ''));
     }
