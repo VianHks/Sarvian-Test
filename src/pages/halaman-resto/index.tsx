@@ -1,5 +1,7 @@
 /* eslint-disable multiline-ternary */
 /* eslint-disable linebreak-style */
+import { error } from 'console';
+
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import type { MouseEvent, SyntheticEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -29,7 +31,6 @@ import Pisan from '@assets/images/Pisan.png';
 
 import type { SnackbarCloseReason } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material/Select';
-import { error } from 'console';
 
 // eslint-disable-next-line import/exports-last
 export interface RestoItem {
@@ -305,46 +306,47 @@ const HalamanResto: PageComponent = () => {
     setIsLoading(true);
     const filteredLines = formData.lines.filter((line) => line.quantity > 0 && !line.lineId);
 
-    // const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
+    const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
 
     console.log('cekfilter', filteredLines);
-    // if (checkoutIdFromStorage) {
-    //   const linesToUpdate = formData.lines.filter((line) => line.lineId);
-    //   const paramUpdate = {
-    //     checkoutId: checkoutIdFromStorage,
-    //     lines: linesToUpdate.map((line) => ({
-    //       lineId: line.lineId,
-    //       note: line.note,
-    //       price: line.price,
-    //       quantity: line.quantity
-    //     }))
-    //   };
 
-    //   console.log('cekrespUpdate', paramUpdate);
-    //   ChannelCommand.putCheckoutLines(paramUpdate, token || '').then((res) => {
-    //     handleResponse(res);
-    //   });
-    // }
+    if (checkoutIdFromStorage) {
+      const linesToUpdate = formData.lines.filter((line) => line.lineId);
+      const paramUpdate = {
+        checkoutId: checkoutIdFromStorage,
+        lines: linesToUpdate.map((line) => ({
+          lineId: line.lineId,
+          note: line.note,
+          price: line.price,
+          quantity: line.quantity
+        }))
+      };
 
-    // if (filteredLines.length > 0) {
-    //   const paramCreate = {
-    //     after: '',
-    //     channel: 'makan',
-    //     deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
-    //     first: 100,
-    //     lines: filteredLines.map((line) => ({
-    //       metadata: line.metadata,
-    //       price: line.price,
-    //       quantity: line.quantity,
-    //       variantId: line.variantId
-    //     })),
-    //     userId: 'VXNlcjozMTc4NjkwMDc='
-    //   };
+      console.log('cekrespUpdate', paramUpdate);
+      ChannelCommand.putCheckoutLines(paramUpdate, token || '').then((res) => {
+        handleResponse(res);
+      });
+    }
 
-    //   ChannelCommand.postCreateCheckout(paramCreate, token || '').then((res) => {
-    //     handleResponse(res);
-    //   });
-    // }
+    if (filteredLines.length > 0) {
+      const paramCreate = {
+        after: '',
+        channel: 'makan',
+        deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
+        first: 100,
+        lines: filteredLines.map((line) => ({
+          metadata: line.metadata,
+          price: line.price,
+          quantity: line.quantity,
+          variantId: line.variantId
+        })),
+        userId: 'VXNlcjozMTc4NjkwMDc='
+      };
+
+      ChannelCommand.postCreateCheckout(paramCreate, token || '').then((res) => {
+        handleResponse(res);
+      });
+    }
   };
 
   useEffect(() => {
@@ -521,7 +523,7 @@ const HalamanResto: PageComponent = () => {
         >
           <ArrowBackFilled />
         </IconButton>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <FormControl sx={{ backgroundColor: '#D5ECFE' }}>
             <InputLabel id="filter-label" sx={{ color: 'black' }}>Menu</InputLabel>
             <Select
@@ -543,7 +545,7 @@ const HalamanResto: PageComponent = () => {
 
             </Select>
           </FormControl>
-          
+
           <IconButton aria-label="search" color="inherit" sx={{ backgroundColor: '#FFFFFF' }}>
             <SearchOutlined fontSize="25px" style={{ color: 'black' }} />
           </IconButton>
