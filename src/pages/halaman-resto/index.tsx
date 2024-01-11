@@ -296,8 +296,8 @@ const HalamanResto: PageComponent = () => {
     navigate('/keranjang');
   };
 
-  const handleCardClick = (variantId: string) => {
-    navigate(`/product-view/${variantId}`);
+  const handleCardClick = (variantId: string, productId: string) => {
+    navigate(`/product-view?productId=${productId}&variantId?=${variantId}`);
   };
 
   const handleLanjutPembayaranClick = () => {
@@ -346,31 +346,6 @@ const HalamanResto: PageComponent = () => {
   };
 
   useEffect(() => {
-    const collectionIds = (store?.halamanResto?.productListOutput?.data || [])
-      .filter((category) => category.products.totalCount > 0)
-      .map((category) => ({
-        id: category.id.toString(),
-        name: category.name
-      }));
-
-    console.log('Collection IDs:', collectionIds);
-    setColIds(collectionIds);
-
-    const colIdsOnly = colIds.map((colObj) => colObj.id);
-
-    const paramCollection = {
-      after: '',
-      channel: 'makan',
-      collection: colIdsOnly,
-      direction: 'ASC',
-      field: 'NAME',
-      first: 100
-    };
-
-    dispatch(ChannelCommand.getproductbyCollection(paramCollection, token || ''));
-  }, [store?.halamanResto?.productListOutput?.data]);
-
-  useEffect(() => {
     const param = {
 
       after: '',
@@ -384,18 +359,6 @@ const HalamanResto: PageComponent = () => {
 
     dispatch(ChannelCommand.getCollections(param, token || ''));
 
-    const colIdsOnly = colIds.map((colObj) => colObj.id);
-
-    const paramCollection = {
-      after: '',
-      channel: 'makan',
-      collection: colIdsOnly,
-      direction: 'ASC',
-      field: 'NAME',
-      first: 100
-    };
-
-    dispatch(ChannelCommand.getproductbyCollection(paramCollection, token || ''));
     const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
     if (checkoutIdFromStorage !== null) {
       dispatch(OrderCommand.getCheckoutDetails(checkoutIdFromStorage, token || ''));
@@ -413,6 +376,32 @@ const HalamanResto: PageComponent = () => {
       dispatch(RatingCommand.RatingClear());
     };
   }, [dispatch, token]);
+
+  useEffect(() => {
+    const collectionIds = (store?.halamanResto?.productListOutput?.data || [])
+      .filter((category) => category.products.totalCount > 0)
+      .map((category) => ({
+        id: category.id.toString(),
+        name: category.name
+      }));
+
+    console.log('Collection IDs:', collectionIds);
+    setColIds(collectionIds);
+
+    const colIdsOnly = colIds.map((colObj) => colObj.id);
+    if (colIds.length > 0) {
+      const paramCollection = {
+        after: '',
+        channel: 'makan',
+        collection: colIdsOnly,
+        direction: 'ASC',
+        field: 'NAME',
+        first: 100
+      };
+
+      dispatch(ChannelCommand.getproductbyCollection(paramCollection, token || ''));
+    }
+  }, [store?.halamanResto?.productListOutput?.data]);
 
   useEffect(() => {
     if (store?.halamanResto?.productByCollectionsOutput) {
@@ -738,7 +727,7 @@ const HalamanResto: PageComponent = () => {
 
                 <div key={obj.id} style={{ marginBottom: '0.5rem' }}>
 
-                  <Card sx={{ paddingInline: '0.5rem' }} onClick={() => handleCardClick(obj.variants[index].id)}>
+                  <Card sx={{ paddingInline: '0.5rem' }}>
                     <Grid
                       container={true}
                       spacing={2}
@@ -748,6 +737,7 @@ const HalamanResto: PageComponent = () => {
                         justifyContent: 'space-between',
                         marginBottom: '0.5rem'
                       }}
+
                     >
                       <Grid item={true} xs={3}>
                         <div
@@ -781,6 +771,7 @@ const HalamanResto: PageComponent = () => {
                             display: 'flex',
                             justifyContent: 'space-between'
                           }}
+                          onClick={() => handleCardClick(obj.variants[index].id, obj.collections[index].id)}
                         >
                           <Typography
                             sx={{ fontWeight: 'bold', textAlign: 'start', marginTop: '-2rem', color: 'black' }}
