@@ -1,3 +1,5 @@
+/* eslint-disable sort-keys */
+/* eslint-disable no-console */
 /* eslint-disable linebreak-style */
 import { apiFetch } from '@api/base.js';
 import type { TAction, TDispatch } from '@models/types';
@@ -308,17 +310,6 @@ const DefaultOrderDetail: OrderListDetail = {
   }
 };
 
-/*
- * Const DefaultOrder: Order = {
- *   DELIVERY_STATUS: '',
- *   NO_ORDER: 0,
- *   ORDER_DATE: '',
- *   ORDER_ITEM: [],
- *   ORDER_STATUS: '',
- *   RESTO_NAME: '',
- *   SINGLE_ORDER: false
- * };
- */
 
 const OrderDefault: OrderModel = {
   cart: DEFAULT_CART,
@@ -353,6 +344,206 @@ const OrderReducer = (
       return state;
   }
 };
+
+// export const OrderCommand = {
+//   deleteCheckoutLines: (checkoutId: string, linesIds: string[], token: string): Promise<string> => {
+//     return fetch(`https://apigateway-dev.tokrum.com:8081/foodbuyer/0.1/checkout/${checkoutId}`, {
+//       method: 'DELETE',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         Authorization: token
+//       },
+//       body: JSON.stringify({ checkoutId, linesIds })
+//     })
+//       .then((response: Response) => {
+//         if (!response.ok) {
+//           throw new Error('Network response was not ok');
+//         }
+
+//         return response.json();
+//       })
+//       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//       .then((data: any) => {
+//         const id: string = data?.checkoutId;
+
+//         if (id) {
+//           return 'ok';
+//         }
+
+//         return 'err';
+//       })
+//       .catch(() => {
+//         return 'err';
+//       });
+//   },
+//   getCart: (checkoutId: string, token: string): TAction<OrderAction, void> => {
+//     return (dispatch: TDispatch<OrderAction>) => {
+//       return apiFetch(token).get(`/foodbuyer/0.1/checkout/${checkoutId}`).then((response) => {
+//         if (response.status === 200) {
+//           if (response.data !== null) {
+//             const order: OrderModel = {
+//               cart: (response.data as CartDataModel)
+//             };
+
+//             dispatch({
+//               data: order,
+//               type: OrderActionType.GetCart
+//             });
+//           } else {
+//             dispatch({
+//               data: OrderDefault,
+//               type: OrderActionType.GetCart
+//             });
+//           }
+//         }
+//       });
+//     };
+//   },
+//   getCheckoutDetails: (checkoutId: string, token: string): TAction<OrderAction, void> => {
+//     return (dispatch: TDispatch<OrderAction>) => {
+//       return apiFetch(token).get(`/foodbuyer/0.1/checkout/details/${checkoutId}`).then((response) => {
+//         if (response.status === 200) {
+//           if (response.data !== null) {
+//             const order: OrderModel = {
+//               checkoutDetails: (response.data as CheckoutDetailsDataModel)
+//             };
+
+//             dispatch({
+//               data: order,
+//               type: OrderActionType.GetCheckoutDetails
+//             });
+//           } else {
+//             dispatch({
+//               data: OrderDefault,
+//               type: OrderActionType.GetCheckoutDetails
+//             });
+//           }
+//         }
+//       });
+//     };
+//   },
+//   getOrderDetails: (orderId: string, token: string): TAction<OrderAction, void> => {
+//     return (dispatch: TDispatch<OrderAction>) => {
+//       return apiFetch(token).get(`/foodbuyer/0.1/order/${orderId}`).then((response) => {
+//         if (response.status === 200) {
+//           if (response.data !== null) {
+//             const order: OrderModel = {
+//               orderDetails: (response.data as OrderDetailsDataModel)
+//             };
+
+//             dispatch({
+//               data: order,
+//               type: OrderActionType.GetOrderDetails
+//             });
+//           } else {
+//             dispatch({
+//               data: OrderDefault,
+//               type: OrderActionType.GetOrderDetails
+//             });
+//           }
+//         }
+//       });
+//     };
+//   },
+//   postCancelOrder: (payload: unknown, token: string): Promise<string> => {
+//     return apiFetch(token).post(`/foodbuyer/0.1/order/cancel`, payload)
+//       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//       .then((response: any) => {
+//         const id: string = response?.data?.orderId;
+
+//         if (response.status === 200) {
+//           return id;
+//         }
+
+//         return 'err';
+//       }).catch(() => {
+//         return 'err';
+//       });
+//   },
+//   postCheckoutCustomerDetach: (payload: unknown, token: string): Promise<string> => {
+//     return apiFetch(token).post(`/foodbuyer/0.1/checkout/detach`, payload)
+//       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//       .then((response: any) => {
+//         const id: string = response?.data?.orderId;
+
+//         if (response.status === 200) {
+//           return id;
+//         }
+
+//         return 'err';
+//       }).catch(() => {
+//         return 'err';
+//       });
+//   },
+//   postCreateOrder: (payload: unknown, token: string): Promise<string> => {
+//     return apiFetch(token).post(`/foodbuyer/0.1/order`, payload)
+//       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//       .then((response: any) => {
+//         const id: string = response?.data?.orderId;
+
+//         if (response.status === 200) {
+//           return id;
+//         }
+
+//         return 'err';
+//       }).catch(() => {
+//         return 'err';
+//       });
+//   },
+//   getOrderList: (params: unknown, token: string): TAction<OrderAction, void> => {
+//     return (dispatch: TDispatch<OrderAction>) => {
+//       return apiFetch(token)
+//         .post(`/foodbuyer/0.1/orders`, params)
+//         .then((response) => {
+//           if (response.status === 200) {
+//             if (response.data !== null) {
+//               const orderlist: OrderModel = {
+//                 orderListOutput: response.data as OrderList
+//               };
+
+//               dispatch({
+//                 data: orderlist,
+//                 type: OrderActionType.OrderList
+//               });
+//             } else {
+//               dispatch({
+//                 data: OrderDefault,
+//                 type: OrderActionType.OrderList
+//               });
+//             }
+//           }
+//         });
+//     };
+//   },
+//   getOrderDetail: (id: string, token: string): TAction<OrderAction, void> => {
+//     return (dispatch: TDispatch<OrderAction>) => {
+//       return apiFetch(token)
+//         .get(`/foodbuyer/0.1/order/${id}`)
+//         .then((response) => {
+//           if (response.status === 200) {
+//             if (response.data !== null) {
+//               const order: OrderModel = {
+//                 orderDetailOutput: response.data as OrderListDetail
+//               };
+
+//               dispatch({
+//                 data: order,
+//                 type: OrderActionType.OrderDetailLoad
+//               });
+//             } else {
+//               dispatch({
+//                 data: OrderDefault,
+//                 type: OrderActionType.OrderDetailLoad
+//               });
+//             }
+//           }
+
+//           console.log('cekres', response);
+//         });
+//     };
+//   }
+
+// };
 
 export const OrderCommand = {
   deleteCheckoutLines: (checkoutId: string, linesIds: string[], token: string): Promise<string> => {
@@ -554,4 +745,152 @@ export const OrderCommand = {
 
 };
 
-export { OrderReducer };
+// const OrderCommand = {
+//   deleteCheckoutLines: (checkoutId: string, linesIds: string[], token: string): Promise<string> => {
+//     return fetch(`https://apigateway-dev.tokrum.com:8081/foodbuyer/0.1/checkout/${checkoutId}`, {
+//       method: 'DELETE',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         Authorization: token
+//       },
+//       body: JSON.stringify({ checkoutId, linesIds })
+//     })
+//       .then((response: Response) => {
+//         if (!response.ok) {
+//           throw new Error('Network response was not ok');
+//         }
+
+//         return response.json();
+//       })
+//       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//       .then((data: any) => {
+//         const id: string = data?.checkoutId;
+
+//         if (id) {
+//           return 'ok';
+//         }
+
+//         return 'err';
+//       })
+//       .catch(() => {
+//         return 'err';
+//       });
+//   },
+//   getCart: (checkoutId: string, token: string): TAction<OrderAction, void> => {
+//     return (dispatch: TDispatch<OrderAction>) => {
+//       return apiFetch(token).get(`/foodbuyer/0.1/checkout/${checkoutId}`).then((response) => {
+//         if (response.status === 200) {
+//           if (response.data !== null) {
+//             const order: OrderModel = {
+//               cart: (response.data as CartDataModel)
+//             };
+
+//             dispatch({
+//               data: order,
+//               type: OrderActionType.GetCart
+//             });
+//           } else {
+//             dispatch({
+//               data: OrderDefault,
+//               type: OrderActionType.GetCart
+//             });
+//           }
+//         }
+//       });
+//     };
+//   },
+//   getCheckoutDetails: (checkoutId: string, token: string): TAction<OrderAction, void> => {
+//     return (dispatch: TDispatch<OrderAction>) => {
+//       return apiFetch(token).get(`/foodbuyer/0.1/checkout/details/${checkoutId}`).then((response) => {
+//         if (response.status === 200) {
+//           if (response.data !== null) {
+//             const order: OrderModel = {
+//               checkoutDetails: (response.data as CheckoutDetailsDataModel)
+//             };
+
+//             dispatch({
+//               data: order,
+//               type: OrderActionType.GetCheckoutDetails
+//             });
+//           } else {
+//             dispatch({
+//               data: OrderDefault,
+//               type: OrderActionType.GetCheckoutDetails
+//             });
+//           }
+//         }
+//       });
+//     };
+//   },
+//   getOrderDetails: (orderId: string, token: string): TAction<OrderAction, void> => {
+//     return (dispatch: TDispatch<OrderAction>) => {
+//       return apiFetch(token).get(`/foodbuyer/0.1/order/${orderId}`).then((response) => {
+//         if (response.status === 200) {
+//           if (response.data !== null) {
+//             const order: OrderModel = {
+//               orderDetails: (response.data as OrderDetailsDataModel)
+//             };
+
+//             dispatch({
+//               data: order,
+//               type: OrderActionType.GetOrderDetails
+//             });
+//           } else {
+//             dispatch({
+//               data: OrderDefault,
+//               type: OrderActionType.GetOrderDetails
+//             });
+//           }
+//         }
+//       });
+//     };
+//   },
+//   postCancelOrder: (payload: unknown, token: string): Promise<string> => {
+//     return apiFetch(token).post(`/foodbuyer/0.1/order/cancel`, payload)
+//       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//       .then((response: any) => {
+//         const id: string = response?.data?.orderId;
+
+//         if (response.status === 200) {
+//           return id;
+//         }
+
+//         return 'err';
+//       }).catch(() => {
+//         return 'err';
+//       });
+//   },
+//   postCheckoutCustomerDetach: (payload: unknown, token: string): Promise<string> => {
+//     return apiFetch(token).post(`/foodbuyer/0.1/checkout/detach`, payload)
+//       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//       .then((response: any) => {
+//         const id: string = response?.data?.orderId;
+
+//         if (response.status === 200) {
+//           return id;
+//         }
+
+//         return 'err';
+//       }).catch(() => {
+//         return 'err';
+//       });
+//   },
+//   postCreateOrder: (payload: unknown, token: string): Promise<string> => {
+//     return apiFetch(token).post(`/foodbuyer/0.1/order`, payload)
+//       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//       .then((response: any) => {
+//         const id: string = response?.data?.orderId;
+
+//         if (response.status === 200) {
+//           return id;
+//         }
+
+//         return 'err';
+//       }).catch(() => {
+//         return 'err';
+//       });
+//   }
+
+// };
+
+export { OrderReducer, OrderDefault, DEFAULT_CART, DEFAULT_LINES, DEFAULT_ORDER_DETAILS };

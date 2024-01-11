@@ -41,6 +41,8 @@ const DUMMY_MENU = [
   { id: 3, category_name: 'Paket Komplit', active: true, category_description: 'Paket Komplit' }
 ];
 
+const SESSION_STORAGE_CHECKOUT = 'CheckoutId';
+
 const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, readonly action?: ActionType }) => {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -49,9 +51,7 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const action = searchParams.get('action');
-  const { auth } = useAuth();
-  const token = useMemo(() => auth?.token.accessToken, [auth]);
-  const [store, dispatch] = useStore((state) => state);
+  const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '';
   let dynamicIcon = null;
   let dynamicHandler: React.ReactNode = null;
   const selectedValueRef = useRef(null);
@@ -61,25 +61,6 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
   const pageDescription = currentRoute?.meta?.description || '';
   const pageId = currentRoute?.meta?.appBarId || '';
   let dropDownValue = currentRoute?.meta?.dropDownValue || '';
-  const filteredCategories = store?.halamanResto?.productListOutput?.data
-    ?.filter((category) => category.products.totalCount > 0) || [];
-
-  useEffect(() => {
-    const param = {
-
-      after: '',
-      channel: 'makan',
-      direction: 'ASC',
-      field: 'NAME',
-      first: 100,
-      published: 'PUBLISHED'
-
-    };
-
-    dispatch(ChannelCommand.getCollections(param, token || ''));
-
-    setAnchorEl(document.body);
-  }, []);
 
   const handleSelectChange = (event: SelectChangeEvent<string>) => {
     const selectedCategory = event.target.value as string;
@@ -95,23 +76,14 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
     }
 
     dropDownValue = selectedCategory;
-    console.log('cekdropdvalue', dropDownValue);
     setSelectedValue(selectedCategory);
   };
-
-  
 
   const handleBack = () => {
     console.log('cek');
     navigate(-1);
   };
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const closeDialog = () => {
@@ -145,6 +117,7 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
         <div>
           <Button
             color="primary"
+            disabled={!checkoutIdFromStorage}
             variant="text"
             onClick={() => navigate(action === 'edit' ? '/keranjang' : '/keranjang?action=edit')}
           >
@@ -199,34 +172,7 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
             </IconButton>
           </Paper>
           ) }
-          {pageId === 'pageresto' && (
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <FormControl>
-            <InputLabel id="filter-label" sx={{ color: 'black' }}>Menu</InputLabel>
-              <Select
-                id="filter"
-                label="Menu"
-                labelId="filter-label"
-                sx={{ width: 200, marginRight: 1, color: 'black' }}
-                value={selectedValue}
-                // OnChange={(event) => setSelectedValue(event.target.value as string)}
-                onChange={handleSelectChange}
-              >
-                {filteredCategories.map((category) => (
-        <MenuItem key={category.id} value={category.name}>
-          {category.name}
-        </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-              <IconButton aria-label="search" color="inherit">
-                <SearchOutlined fontSize="medium" style={{ color: 'black' }} />
-              </IconButton>
-              <IconButton aria-label="share" color="inherit">
-              <ShareOutlinedIcon fontSize="medium" style={{ color: 'black' }} />
-              </IconButton>
-          </Box>
-          )}
+
           <Typography color={pageDescription === 'Pusat Bantuan' ? theme.palette.primary.main : theme.palette.grey[900]} component="div" fontWeight="bold" sx={{ flexGrow: 1 }} variant="h4">
             {String(pageDescription)}
           </Typography>

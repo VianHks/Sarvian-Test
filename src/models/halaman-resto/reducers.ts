@@ -298,7 +298,15 @@ export const ChannelCommand = {
                 type: HalamanRestoActionType.ProductbyMetadataLoad
               });
             }
+          } else {
+            throw new Error('err');
           }
+        })
+        .catch((error: unknown) => {
+          console.error('API error:', error);
+          const errorMessage = (error as Error).message || 'Unknown error';
+
+          throw new Error(errorMessage);
         });
     };
   },
@@ -358,6 +366,5 @@ export const ChannelCommand = {
       });
   }
 };
-
 
 export { HalamanRestoReducer };

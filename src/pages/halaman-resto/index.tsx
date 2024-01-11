@@ -29,6 +29,7 @@ import Pisan from '@assets/images/Pisan.png';
 
 import type { SnackbarCloseReason } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material/Select';
+import { error } from 'console';
 
 // eslint-disable-next-line import/exports-last
 export interface RestoItem {
@@ -358,6 +359,18 @@ const HalamanResto: PageComponent = () => {
     };
 
     dispatch(ChannelCommand.getCollections(param, token || ''));
+    const paramMetadata = {
+
+      after: '',
+      channel: 'makan',
+      filterKey: 'recomendation',
+      filterValue: 'true',
+      first: 100
+    };
+
+    dispatch(ChannelCommand.getCollectionsbyMetadata(paramMetadata, token || '')).then((res) => {
+      console.log('cekreserr', res);
+    });
 
     const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
     if (checkoutIdFromStorage !== null) {

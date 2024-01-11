@@ -16,8 +16,7 @@ import { orderCommand } from './order/commands.js';
 import { OrderReducer } from './order/reducers.js';
 import { personalizedRecCommand } from './personalized-recomendation/commands.js';
 import { PersonalizedRecReducer } from './personalized-recomendation/reducers.js';
-import { productviewCommand } from './product-view/commands.js';
-import { ProductViewReducer } from './product-view/reducers.js';
+import { ProductViewReducer, ProductViewsCommand, ProductViewsDefault } from './product-view/reducers.js';
 import { productsCommand } from './products/commands.js';
 import { productsReducer } from './products/reducers.js';
 
@@ -41,7 +40,9 @@ const rootReducer = combineReducers({
 
 // ** Init models
 const rootModel: RootModel = {
-  rating: {}
+  rating: {},
+
+  productView: ProductViewsDefault
 };
 
 // ** Init commands
@@ -53,7 +54,7 @@ const rootCommand = {
   order: orderCommand,
   personalizedRec: personalizedRecCommand,
   products: productsCommand,
-  productView: productviewCommand,
+  productView: ProductViewsCommand,
   rating: RatingCommand
 };
 

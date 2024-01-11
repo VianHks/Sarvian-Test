@@ -243,18 +243,9 @@ const Order: PageComponent = () => {
   };
 
   const handleLihatPesanana = (orderNumber: string) => {
+    // console.log('cekordernumber', orderNumber);
     navigate(`/order-in-progress/single-order?id=${orderNumber}`);
   };
-  /*
-   * Const filterDataByStatus = (status: string) => {
-   *   const data = store?.orderListOutput?.data || [];
-   *   const filtered = data.filter((item) => item.status === status);
-   */
-
-  /*
-   *   setFilteredData(filtered);
-   * };
-   */
 
   useEffect(() => {
     const param = {
@@ -273,7 +264,7 @@ const Order: PageComponent = () => {
 
   }, []);
 
-  // Console.log('cekstore', store);
+  console.log('cekstore', store);
 
   return (
     <>
@@ -453,7 +444,7 @@ const Order: PageComponent = () => {
                   size="medium"
                   sx={{ padding: '0.6rem' }}
                   variant="contained"
-                  onClick={() => handleLihatPesanana(store?.orderDetailOutput?.data?.order?.id as unknown as string)}
+                  onClick={() => handleLihatPesanana(order?.id)}
                 >
                   Lihat Pesanan
                 </Button>
