@@ -4,7 +4,7 @@ import type { TAction, TDispatch } from '@models/types';
 
 import { HalamanRestoActionType } from './types.js';
 
-import type { ChannelDetailDataModel, CheckoutDataModel, HalamanRestoAction, HalamanRestoModel, ProductbyCollectionsDataModel, ProductByMetadataDataModel, ProductListDataModel } from './types.js';
+import type { ChannelDetailDataModel, HalamanRestoAction, HalamanRestoModel, ProductbyCollectionsDataModel, ProductByMetadataDataModel, ProductListDataModel } from './types.js';
 
 const DefaultChannelDetail: ChannelDetailDataModel = {
   avgRating: '',
@@ -26,7 +26,7 @@ const DefaultChannelDetail: ChannelDetailDataModel = {
         bank_name: '',
         delivery: '',
         dine_in: '',
-        jadwal_operasional: '',
+        operationalHour: '',
         pick_up: ''
       },
       name: '',
@@ -245,8 +245,6 @@ export const ChannelCommand = {
               });
             }
           }
-
-          console.log('cekres', response);
         });
     };
   },
@@ -272,8 +270,6 @@ export const ChannelCommand = {
               });
             }
           }
-
-          console.log('cekres', response);
         });
     };
   },

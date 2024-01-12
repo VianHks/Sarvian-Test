@@ -23,7 +23,7 @@ export interface ChannelDetailDataModel {
         bank_name: string
         delivery: string
         dine_in: string
-        jadwal_operasional: string
+        operationalHour: string
         pick_up: string
       }
       name: string
@@ -307,7 +307,6 @@ interface CheckoutDetailsDataModel {
     }
   }
 }
-
 
 interface HalamanRestoModel {
 

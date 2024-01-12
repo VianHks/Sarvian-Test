@@ -264,8 +264,6 @@ const Order: PageComponent = () => {
 
   }, []);
 
-  console.log('cekstore', store);
-
   return (
     <>
       <Box sx={{ backgroundColor: 'white', marginBottom: '1rem' }}>
