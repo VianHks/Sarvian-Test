@@ -2,7 +2,6 @@
 /* eslint-disable linebreak-style */
 
 import { Fragment, useEffect, useMemo, useState } from 'react';
-import type { MouseEvent, SyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -15,20 +14,15 @@ import type { PageComponent } from '@nxweb/react';
 
 import { useAuth } from '@hooks/use-auth';
 import { ChannelCommand } from '@models/halaman-resto/reducers';
-import { orderCommand } from '@models/order/commands';
 import { OrderCommand } from '@models/order/reducers';
 import { RatingCommand } from '@models/rating/commands';
 import { useStore } from '@models/store';
 
-import CustomizedSnackbars from './alert';
 import FloatingShoppingButton from './floatingshopping-button';
 import Rating from './rating';
 
-import Bakar from '@assets/images/Bakar.png';
 import ProfilFoto from '@assets/images/Orang.svg';
-import Pisan from '@assets/images/Pisan.png';
 
-import type { SnackbarCloseReason } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material/Select';
 
 // eslint-disable-next-line import/exports-last
@@ -120,20 +114,7 @@ interface LinesModel {
   name: string
   isAvailableForPurchase: boolean
 }
-/*
- * Interface LinesUpdateModel {
- *   lineId: string
- *   note: string
- *   price: string
- *   quantity: number
- * }
- * const DefaultLinesUpdate: LinesUpdateModelModel = {
- *   lineId: '',
- *   note: '',
- *   price: '',
- *   quantity: 0
- * };
- */
+
 const DefaultLines: LinesModel = {
   metadata: [
     {
@@ -155,22 +136,6 @@ const DefaultLines: LinesModel = {
   isAvailableForPurchase: false
 
 };
-
-/*
- * Interface PayloadUpdateDataModel {
- *   checkoutId: string
- *   lines: LinesUpdateModel[]
- */
-
-// }
-
-/*
- * const UPDATE: PayloadUpdateDataModel =
- * {
- *   checkoutId: '',
- *   lines: [DefaultLinesUpdate]
- * };
- */
 
 interface PayloadDataModel {
   after: string
@@ -210,9 +175,9 @@ const HalamanResto: PageComponent = () => {
   const daysOfWeek = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
   const currentDayIndex = new Date().getDay();
   const currentDay = daysOfWeek[currentDayIndex];
-  const jadwalOperasional = JSON.parse(store?.halamanResto?.channelDetailOutput?.data?.channel?.metafields?.jadwal_operasional || '[]');
-  const jadwalDummy = JSON.parse('[{"day":"senin","open":"07:00","closed":"12:00","isOpen":true},{"day":"selasa","open":"07:00","closed":"12:00","isOpen":true},{"day":"rabu","open":"07:00","closed":"12:00","isOpen":true},{"day":"kamis","open":"07:00","closed":"12:00","isOpen":true},{"day":"jumat","open":"07:00","closed":"12:00","isOpen":true},{"day":"sabtu","open":"07:00","closed":"12:00","isOpen":true},{"day":"minggu","open":"07:00","closed":"12:00","isOpen":false}]');
-  const filteredJadwal = jadwalDummy.filter((resto: RestoSchedule) => {
+  const jadwalOperasional = JSON.parse(store?.halamanResto?.channelDetailOutput?.data?.channel?.metafields?.operationalHour || '[]');
+
+  const filteredJadwal = jadwalOperasional.filter((resto: RestoSchedule) => {
     return resto.day.toLowerCase() === currentDay;
   });
   const [colIds, setColIds] = useState<{ id: string, name: string }[]>([]);
@@ -230,11 +195,7 @@ const HalamanResto: PageComponent = () => {
 
     return lines.reduce((total, line) => {
       const price = parseFloat(line.price) || 0;
-
       const lineTotal = price * line.quantity;
-
-      console.log('cekprice', price);
-      console.log('ceklientotal', lineTotal);
 
       return total + lineTotal;
     }, 0);
@@ -251,8 +212,6 @@ const HalamanResto: PageComponent = () => {
   };
 
   const handleIncrement = (id: string) => {
-    console.log('cekvariant', id);
-
     setFormData((prevFormData) => {
       const updatedFormData = { ...prevFormData };
 
@@ -383,9 +342,7 @@ const HalamanResto: PageComponent = () => {
       first: 100
     };
 
-    dispatch(ChannelCommand.getCollectionsbyMetadata(paramMetadata, token || '')).then((res) => {
-      console.log('cekreserr', res);
-    });
+    dispatch(ChannelCommand.getCollectionsbyMetadata(paramMetadata, token || ''));
 
     // Const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
     if (checkoutIdFromStorage !== null) {
@@ -413,7 +370,6 @@ const HalamanResto: PageComponent = () => {
         name: category.name
       }));
 
-    console.log('Collection IDs:', collectionIds);
     setColIds(collectionIds);
 
     const colIdsOnly = colIds.map((colObj) => colObj.id);
@@ -441,7 +397,6 @@ const HalamanResto: PageComponent = () => {
 
           ));
 
-          console.log('cekColectionIds', matchingColId);
           const colectionIds = matchingColId?.id || '';
           const targetId = matchingColId
             ? store?.halamanResto?.productByCollectionsOutput?.data[index]?.variants[0].id || ''
@@ -521,10 +476,6 @@ const HalamanResto: PageComponent = () => {
     setSelectedValue(selectedCategory);
   };
 
-  console.log('cekstore', store);
-
-  console.log('formdata', formData);
-
   useEffect(() => {
     if (isLoading) {
       const timeoutId = setTimeout(() => {
@@ -579,6 +530,7 @@ const HalamanResto: PageComponent = () => {
           </IconButton>
         </Box>
       </Toolbar>
+
       <Box sx={{ margin: '0.5rem 0.5rem', paddingInline: '1rem' }}>
 
         {filteredJadwal.map((resto: RestoSchedule) => {
@@ -588,12 +540,6 @@ const HalamanResto: PageComponent = () => {
           const [closeHour] = (resto.closed || '').split(' - ').map((time) => parseInt(time));
 
           const isOpen = currentHour >= openHour && currentHour <= closeHour;
-
-          console.log('cekjamOpen', openHour);
-
-          console.log('cekjamCurrent', currentHour);
-
-          console.log('cekjamTutup', closeHour);
 
           return (
             <div key={store?.halamanResto?.channelDetailOutput?.data?.channel?.id}>
@@ -700,7 +646,7 @@ const HalamanResto: PageComponent = () => {
             </Button>
           </Grid>
         </Grid>
-        <Box sx={{ paddingInline: '1rem' }}>
+        <Box sx={{ paddingInline: '1.5rem' }}>
           <Card sx={{ borderColor: 'transparent', borderRadius: 0, boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '1rem', marginInline: '-1.5rem', position: 'relative', zIndex: 100 }}>
             <Box sx={{ overflowX: 'auto' }}>
               <Grid container={true} sx={{ width: '100rem', overflowX: 'auto' }}>
@@ -734,7 +680,7 @@ const HalamanResto: PageComponent = () => {
                               </Box>
                             </Box>
                           </Grid>
-                          <Box sx={{ marginTop: '10px', marginLeft: '10px', width: '80%' }}>
+                          <Box sx={{ marginTop: '10px', width: '80%' }}>
                             <TextField fullWidth={true} placeholder={obj.review} size="small" variant="outlined" />
                           </Box>
 
@@ -747,6 +693,15 @@ const HalamanResto: PageComponent = () => {
             </Box>
           </Card>
         </Box>
+        <Grid container={true} justifyContent="center">
+        {isLoading
+          ? (
+          <Box>
+            <CircularProgress />
+          </Box>
+          )
+          : null}
+        </Grid>
         <Typography
           sx={{ fontWeight: 'bold', textAlign: 'start', color: 'black', marginBottom: '1rem' }}
           variant="h4"
@@ -880,19 +835,7 @@ const HalamanResto: PageComponent = () => {
                     >
                       {obj?.quantity || 0}
                     </Typography>
-                    {/* {formData.map((item, itemIndex) => item.lines.map((line, lineIndex) => (
-<Typography
-key={`${itemIndex}-${lineIndex}`}
-style={{
-display: 'inline-block',
-margin: '0 0.5rem',
-marginTop: '0.5rem'
-}}
-variant="body2"
->
-{line.quantity}
-</Typography>
-        )))} */}
+
                     <IconButton
                       aria-label="plus"
                       size="small"
@@ -953,8 +896,8 @@ variant="body2"
             onClick={handleLanjutPembayaranClick}
           >
   <Grid alignItems="center" container={true} justifyContent="center" spacing={1}>
-    <Grid item={true}>
-      <ShoppingBasketIcon />
+    <Grid item onClick={handleLanjutPembayaranClick} >
+      <ShoppingBasketIcon/>
     </Grid>
     <Grid item={true} />
   </Grid>
@@ -970,6 +913,7 @@ variant="body2"
           </Button>
           </Grid>
             </Card>
+
     </>
   );
 };
