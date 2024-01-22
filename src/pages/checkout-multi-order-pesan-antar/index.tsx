@@ -1,6 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable jsx-a11y/prefer-tag-over-role */
-/* eslint-disable linebreak-style */
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,7 +13,6 @@ import {
   Box,
   Button,
   Container,
-  Icon,
   IconButton,
   Modal,
   styled,

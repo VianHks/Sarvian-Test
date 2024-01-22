@@ -35,7 +35,6 @@ import Nasi from '@assets/images/Nasi.png';
 import Padang from '@assets/images/Padang.png';
 import Roti from '@assets/images/Roti.png';
 import Sate from '@assets/images/Sate.png';
-// eslint-disable-next-line import/max-dependencies
 import Sunda from '@assets/images/Sunda.png';
 
 interface FoodsDataModel {

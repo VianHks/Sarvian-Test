@@ -1,4 +1,3 @@
-/* eslint-disable linebreak-style */
 import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,7 +7,7 @@ import {
   useTheme
 } from '@mui/material';
 
-import { ChevronRight, GeoFill } from '@nxweb/icons/bootstrap';
+import { ChevronRight } from '@nxweb/icons/bootstrap';
 import { Mail } from '@nxweb/icons/ionicons';
 import { LocationOnFilled, PhoneFilled } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
@@ -41,8 +40,6 @@ const PusatBantuan: PageComponent = () => {
       };
     }
   }, []);
-
-  console.log('STORE', store)
 
   return (
     <>

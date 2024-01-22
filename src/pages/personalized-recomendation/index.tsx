@@ -1,6 +1,3 @@
-/* eslint-disable import/exports-last */
-/* eslint-disable complexity */
-/* eslint-disable linebreak-style */
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,8 +7,6 @@ import {
   Button,
   Container,
   Step,
-  StepButton,
-  StepConnector,
   StepLabel,
   Stepper,
   useTheme
@@ -24,26 +19,13 @@ import { useAuth } from '@hooks/use-auth';
 import { personalizedRecCommand } from '@models/personalized-recomendation/commands';
 import { useStore } from '@models/store';
 
-import Bubur from '@assets/images/Bubur.png';
-import Chinese from '@assets/images/Chinese.png';
-import Dessert from '@assets/images/Dessert.png';
-import Jajanan from '@assets/images/Jajanan.png';
-import Kopi from '@assets/images/Kopi.png';
-import MieBaso from '@assets/images/MieBaso.png';
-import Minuman from '@assets/images/Minuman.png';
-import Nasi from '@assets/images/Nasi.png';
-import Padang from '@assets/images/Padang.png';
-import Roti from '@assets/images/Roti.png';
-import Sate from '@assets/images/Sate.png';
-import Sunda from '@assets/images/Sunda.png';
-
-export interface FoodsDataModel {
+interface FoodsDataModel {
   id: string
   photo: string
   title: string
 }
 
-export interface FoodsListDataModel {
+interface FoodsListDataModel {
   [key: string]: FoodsDataModel[]
   breakfast: FoodsDataModel[]
   dinner: FoodsDataModel[]
@@ -52,70 +34,7 @@ export interface FoodsListDataModel {
 
 const STEPS = ['Sarapan', 'Makan Siang', 'Makan Malam'];
 
-const DUMMY_FOODS: FoodsDataModel[] = [
-  {
-    id: '0',
-    photo: `${Minuman}`,
-    title: 'Minuman'
-  },
-  {
-    id: '1',
-    photo: `${Nasi}`,
-    title: 'Aneka Nasi'
-  },
-  {
-    id: '2',
-    photo: `${Roti}`,
-    title: 'Roti'
-  },
-  {
-    id: '3',
-    photo: `${Jajanan}`,
-    title: 'Jajanan'
-  },
-  {
-    id: '4',
-    photo: `${Kopi}`,
-    title: 'Kopi'
-  },
-  {
-    id: '5',
-    photo: `${MieBaso}`,
-    title: 'Mie & Bakso'
-  },
-  {
-    id: '6',
-    photo: `${Dessert}`,
-    title: 'Desert'
-  },
-  {
-    id: '7',
-    photo: `${Sunda}`,
-    title: 'Sunda'
-  },
-  {
-    id: '8',
-    photo: `${Chinese}`,
-    title: 'Chinese'
-  },
-  {
-    id: '9',
-    photo: `${Padang}`,
-    title: 'Padang'
-  },
-  {
-    id: '10',
-    photo: `${Sate}`,
-    title: 'Sate'
-  },
-  {
-    id: '11',
-    photo: `${Bubur}`,
-    title: 'Bubur'
-  }
-];
-
-export const DEFAULT_FOODS_LIST: FoodsListDataModel = {
+const DEFAULT_FOODS_LIST: FoodsListDataModel = {
   breakfast: [],
   dinner: [],
   lunch: []
@@ -172,7 +91,6 @@ const PersonalizedRecomendation: PageComponent = () => {
       const isItemAlreadySelected = selectedItems.some((item) => item.id === clickedItem.id);
 
       if (isItemAlreadySelected) {
-        // If item is already selected, remove it from the list
         updatedFoodsList[mealType] = selectedItems.filter((item) => item.id !== clickedItem.id);
       } else {
         const selectedItem = store?.personalizedRecOutput?.find(
@@ -180,7 +98,6 @@ const PersonalizedRecomendation: PageComponent = () => {
         );
 
         if (selectedItem) {
-          // If item is not selected, add it to the list
           updatedFoodsList[mealType] = [...selectedItems, selectedItem];
         }
       }
@@ -498,3 +415,5 @@ const PersonalizedRecomendation: PageComponent = () => {
 PersonalizedRecomendation.displayName = 'PersonalizedRecomendation';
 PersonalizedRecomendation.layout = 'blank';
 export default PersonalizedRecomendation;
+export { DEFAULT_FOODS_LIST };
+export type { FoodsDataModel, FoodsListDataModel };

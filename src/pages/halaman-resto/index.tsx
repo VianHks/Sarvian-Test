@@ -1,15 +1,36 @@
-/* eslint-disable multiline-ternary */
-/* eslint-disable linebreak-style */
-
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
-import { Alert, Avatar, Box, Button, Card, Divider, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, Snackbar, TextField, Toolbar, Typography } from '@mui/material';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Toolbar,
+  Typography
+} from '@mui/material';
 
-import { AccessTimeFilled, AddBoxFilled, ArrowBackFilled, IndeterminateCheckBoxFilled, LocationOnFilled, SearchOutlined, StarFilled } from '@nxweb/icons/material';
+import {
+  AccessTimeFilled,
+  AddBoxFilled,
+  ArrowBackFilled,
+  IndeterminateCheckBoxFilled,
+  LocationOnFilled,
+  SearchOutlined,
+  StarFilled
+} from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
 
 import { useAuth } from '@hooks/use-auth';
@@ -25,8 +46,7 @@ import ProfilFoto from '@assets/images/Orang.svg';
 
 import type { SelectChangeEvent } from '@mui/material/Select';
 
-// eslint-disable-next-line import/exports-last
-export interface RestoItem {
+interface RestoItem {
   id: number
   location: number
   open: string
@@ -36,10 +56,7 @@ export interface RestoItem {
   verified: boolean
 }
 
-// eslint-disable-next-line import/exports-last
-
-// eslint-disable-next-line import/exports-last
-export const DUMMY_MENU_RECOMDATION = [
+const DUMMY_MENU_RECOMDATION = [
   {
     id: 1,
     userName: 'Jatnika',
@@ -70,11 +87,9 @@ export const DUMMY_MENU_RECOMDATION = [
     rating: '3',
     comment: 'Kurang enak g ada rasa'
   }
-
 ];
 
-// eslint-disable-next-line import/exports-last
-export const DUMMY_RESTO = [
+const DUMMY_RESTO = [
   {
     id: 1,
     location: 1.5,
@@ -84,7 +99,6 @@ export const DUMMY_RESTO = [
     restoName: 'Resto Sunda Gila 1',
     verified: true
   }
-
 ];
 
 interface RestoSchedule {
@@ -99,7 +113,6 @@ interface LinesModel {
     {
       key: string
       value: string
-
     }
   ]
   lineId: string
@@ -120,7 +133,6 @@ const DefaultLines: LinesModel = {
     {
       key: 'note',
       value: ''
-
     }
   ],
   lineId: '',
@@ -134,7 +146,6 @@ const DefaultLines: LinesModel = {
   thumbnail: '',
   name: '',
   isAvailableForPurchase: false
-
 };
 
 interface PayloadDataModel {
@@ -146,8 +157,7 @@ interface PayloadDataModel {
   userId: string
 }
 
-const DATA: PayloadDataModel =
-{
+const DATA: PayloadDataModel = {
   after: '',
   channel: 'makan',
   deliveryMethodId: 'string',
@@ -172,10 +182,21 @@ const HalamanResto: PageComponent = () => {
   const colIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_KEYS.COLIDS) ?? '';
   const [isLoading, setIsLoading] = useState(false);
   const channelId = 'Q2hhbm5lbDo0';
-  const daysOfWeek = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
+  const daysOfWeek = [
+    'minggu',
+    'senin',
+    'selasa',
+    'rabu',
+    'kamis',
+    'jumat',
+    'sabtu'
+  ];
   const currentDayIndex = new Date().getDay();
   const currentDay = daysOfWeek[currentDayIndex];
-  const jadwalOperasional = JSON.parse(store?.halamanResto?.channelDetailOutput?.data?.channel?.metafields?.operationalHour || '[]');
+  const jadwalOperasional = JSON.parse(
+    store?.halamanResto?.channelDetailOutput?.data?.channel?.metafields
+      ?.operationalHour || '[]'
+  );
 
   const filteredJadwal = jadwalOperasional.filter((resto: RestoSchedule) => {
     return resto.day.toLowerCase() === currentDay;
@@ -183,8 +204,10 @@ const HalamanResto: PageComponent = () => {
   const [colIds, setColIds] = useState<{ id: string, name: string }[]>([]);
   const [selectedValue, setSelectedValue] = useState<string>('');
   const [showAlert, setShowAlert] = useState(true);
-  const filteredCategories = store?.halamanResto?.productListOutput?.data
-    ?.filter((category) => category.products.totalCount > 0) || [];
+  const filteredCategories =
+    store?.halamanResto?.productListOutput?.data?.filter(
+      (category) => category.products.totalCount > 0
+    ) || [];
 
   const [formData, setFormData] = useState(DATA);
 
@@ -215,7 +238,9 @@ const HalamanResto: PageComponent = () => {
     setFormData((prevFormData) => {
       const updatedFormData = { ...prevFormData };
 
-      const lineToUpdate = updatedFormData.lines.find((line) => line.variantId === id);
+      const lineToUpdate = updatedFormData.lines.find(
+        (line) => line.variantId === id
+      );
 
       if (lineToUpdate) {
         lineToUpdate.quantity = Math.max(lineToUpdate.quantity + 1, 0);
@@ -236,7 +261,9 @@ const HalamanResto: PageComponent = () => {
       const updatedFormData = { ...prevFormData };
 
       if (updatedFormData.lines) {
-        const lineToUpdate = updatedFormData.lines.find((line) => line.variantId === id);
+        const lineToUpdate = updatedFormData.lines.find(
+          (line) => line.variantId === id
+        );
 
         if (lineToUpdate && lineToUpdate.quantity > 0) {
           lineToUpdate.quantity = Math.max(lineToUpdate.quantity - 1, 0);
@@ -259,8 +286,14 @@ const HalamanResto: PageComponent = () => {
   const handleResponse = (res: string | null | undefined) => {
     if (res !== 'err' && res !== null && res !== undefined) {
       setIsLoading(false);
-      window.sessionStorage.setItem(SESSION_STORAGE_KEYS.CHECKOUT, JSON.stringify(res));
-      window.sessionStorage.setItem(SESSION_STORAGE_KEYS.COLIDS, JSON.stringify(colIds));
+      window.sessionStorage.setItem(
+        SESSION_STORAGE_KEYS.CHECKOUT,
+        JSON.stringify(res)
+      );
+      window.sessionStorage.setItem(
+        SESSION_STORAGE_KEYS.COLIDS,
+        JSON.stringify(colIds)
+      );
 
       navigate('/keranjang');
     } else {
@@ -278,7 +311,9 @@ const HalamanResto: PageComponent = () => {
 
   const handleLanjutPembayaranClick = () => {
     setIsLoading(true);
-    const filteredLines = formData.lines.filter((line) => line.quantity > 0 && !line.lineId);
+    const filteredLines = formData.lines.filter(
+      (line) => line.quantity > 0 && !line.lineId
+    );
 
     // Const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
 
@@ -303,7 +338,8 @@ const HalamanResto: PageComponent = () => {
       const paramCreate = {
         after: '',
         channel: 'makan',
-        deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
+        deliveryMethodId:
+          'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
         first: 100,
         lines: filteredLines.map((line) => ({
           metadata: line.metadata,
@@ -314,27 +350,26 @@ const HalamanResto: PageComponent = () => {
         userId: 'VXNlcjoyMDUwMjQwNjE5'
       };
 
-      ChannelCommand.postCreateCheckout(paramCreate, token || '').then((res) => {
-        handleResponse(res);
-      });
+      ChannelCommand.postCreateCheckout(paramCreate, token || '').then(
+        (res) => {
+          handleResponse(res);
+        }
+      );
     }
   };
 
   useEffect(() => {
     const param = {
-
       after: '',
       channel: 'makan',
       direction: 'ASC',
       field: 'NAME',
       first: 100,
       published: 'PUBLISHED'
-
     };
 
     dispatch(ChannelCommand.getCollections(param, token || ''));
     const paramMetadata = {
-
       after: '',
       channel: 'makan',
       filterKey: 'recomendation',
@@ -342,20 +377,21 @@ const HalamanResto: PageComponent = () => {
       first: 100
     };
 
-    dispatch(ChannelCommand.getCollectionsbyMetadata(paramMetadata, token || ''));
+    dispatch(
+      ChannelCommand.getCollectionsbyMetadata(paramMetadata, token || '')
+    );
 
     // Const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
     if (checkoutIdFromStorage !== null) {
-      dispatch(OrderCommand.getCheckoutDetails(checkoutIdFromStorage, token || ''));
+      dispatch(
+        OrderCommand.getCheckoutDetails(checkoutIdFromStorage, token || '')
+      );
     }
 
     dispatch(ChannelCommand.getChannelDetail(channelId, token || ''));
-    dispatch(
-      RatingCommand.RatingLoad(channelId)
-    )
-      .catch((err: unknown) => {
-        console.error(err);
-      });
+    dispatch(RatingCommand.RatingLoad(channelId)).catch((err: unknown) => {
+      console.error(err);
+    });
 
     return () => {
       dispatch(RatingCommand.RatingClear());
@@ -383,7 +419,9 @@ const HalamanResto: PageComponent = () => {
         first: 100
       };
 
-      dispatch(ChannelCommand.getproductbyCollection(paramCollection, token || ''));
+      dispatch(
+        ChannelCommand.getproductbyCollection(paramCollection, token || '')
+      );
     }
   }, [store?.halamanResto?.productListOutput?.data]);
 
@@ -392,26 +430,31 @@ const HalamanResto: PageComponent = () => {
       const linesUpdate = Array.from(
         { length: store?.halamanResto?.productByCollectionsOutput.totalCount },
         (_, index) => {
-          const matchingColId = colIds.find((colId) => store?.halamanResto?.productByCollectionsOutput?.data[index]?.collections.some(
-            (collection) => collection.id === colId.id
-
-          ));
+          const matchingColId = colIds.find((colId) => store?.halamanResto?.productByCollectionsOutput?.data[
+            index
+          ]?.collections.some((collection) => collection.id === colId.id));
 
           const colectionIds = matchingColId?.id || '';
           const targetId = matchingColId
-            ? store?.halamanResto?.productByCollectionsOutput?.data[index]?.variants[0].id || ''
+            ? store?.halamanResto?.productByCollectionsOutput?.data[index]
+              ?.variants[0].id || ''
             : '';
-          const matchingProduct = store?.halamanResto?.productByCollectionsOutput?.data.find(
-            (product) => product.variants[0].id === targetId
-          );
+          const matchingProduct =
+            store?.halamanResto?.productByCollectionsOutput?.data.find(
+              (product) => product.variants[0].id === targetId
+            );
 
-          const productIds = store?.halamanResto?.productByCollectionsOutput?.data[index].id || '';
+          const productIds =
+            store?.halamanResto?.productByCollectionsOutput?.data[index].id ||
+            '';
           const defaultPrice =
             matchingProduct?.pricing?.priceRange?.start?.net?.amount || 0;
 
           const defaultName = matchingProduct?.name || '';
           const defaultThumbnail = matchingProduct?.thumbnail.url || '';
-          const defaultAvailableforPurchase = matchingProduct?.channelListings[0]?.isAvailableForPurchase || false;
+          const defaultAvailableforPurchase =
+            matchingProduct?.channelListings[0]?.isAvailableForPurchase ||
+            false;
 
           const initialQuantity =
             store?.order?.checkoutDetails?.data?.checkout?.lines &&
@@ -424,19 +467,19 @@ const HalamanResto: PageComponent = () => {
               : 0;
 
           const initialLineId =
-              store?.order?.checkoutDetails?.data?.checkout?.lines &&
-              store.order.checkoutDetails.data.checkout.lines.length > 0
-                ? store.order.checkoutDetails.data.checkout.lines.find(
-                  (line) => line?.variant?.id === targetId
-                )?.id || ''
-                : '';
+            store?.order?.checkoutDetails?.data?.checkout?.lines &&
+            store.order.checkoutDetails.data.checkout.lines.length > 0
+              ? store.order.checkoutDetails.data.checkout.lines.find(
+                (line) => line?.variant?.id === targetId
+              )?.id || ''
+              : '';
           const initialNote =
-                store?.order?.checkoutDetails?.data?.checkout?.lines &&
-                store.order.checkoutDetails.data.checkout.lines.length > 0
-                  ? store.order.checkoutDetails.data.checkout.lines.find(
-                    (line) => line.variant.id === targetId
-                  )?.metafields?.note || ''
-                  : '';
+            store?.order?.checkoutDetails?.data?.checkout?.lines &&
+            store.order.checkoutDetails.data.checkout.lines.length > 0
+              ? store.order.checkoutDetails.data.checkout.lines.find(
+                (line) => line.variant.id === targetId
+              )?.metafields?.note || ''
+              : '';
 
           return {
             ...DefaultLines,
@@ -450,14 +493,16 @@ const HalamanResto: PageComponent = () => {
             thumbnail: defaultThumbnail,
             name: defaultName,
             isAvailableForPurchase: defaultAvailableforPurchase
-
           };
         }
       );
 
       setFormData({ ...formData, lines: linesUpdate });
     }
-  }, [store?.halamanResto?.productByCollectionsOutput, store?.order?.checkoutDetails?.data?.checkout]);
+  }, [
+    store?.halamanResto?.productByCollectionsOutput,
+    store?.order?.checkoutDetails?.data?.checkout
+  ]);
 
   useEffect(() => {
     const initialTotalAmount = calculateTotalAmount(formData.lines);
@@ -487,407 +532,621 @@ const HalamanResto: PageComponent = () => {
   }, [isLoading, showAlert]);
 
   return (
-    <><div>
-      <Toolbar sx={{ backgroundColor: '#D5ECFE', paddingInline: '1rem' }}>
-
-        <IconButton
-          aria-label="back"
-          color="default"
-          edge="start"
-          size="large"
-          sx={{ mr: -2, marginTop: '0.2rem' }}
-        >
-          <ArrowBackFilled />
-        </IconButton>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <FormControl size="small" sx={{ backgroundColor: '#D5ECFE' }}>
-            <InputLabel id="filter-label" sx={{ color: 'black' }}>Menu</InputLabel>
-            <Select
-              id="filter"
-              label="Menu"
-              labelId="filter-label"
-              sx={{ width: 210, marginRight: 1, color: 'black', backgroundColor: '#FFFFFF' }}
-
-              value={selectedValue}
-              onChange={scrollToKategoriMenu}
-
-            >
-
-              {filteredCategories.map((category) => (
-                <MenuItem key={category.id} value={category.name}>
-                  {category.name}
-                </MenuItem>
-              ))}
-
-            </Select>
-          </FormControl>
-
-          <IconButton aria-label="search" color="inherit" size="small" sx={{ marginLeft: '0.5rem', backgroundColor: '#FFFFFF' }}>
-            <SearchOutlined fontSize="25px" style={{ color: 'black' }} />
+    <>
+      <div>
+        <Toolbar sx={{ backgroundColor: '#D5ECFE', paddingInline: '1rem' }}>
+          <IconButton
+            aria-label="back"
+            color="default"
+            edge="start"
+            size="large"
+            sx={{ mr: -2, marginTop: '0.2rem' }}
+          >
+            <ArrowBackFilled />
           </IconButton>
-          <IconButton aria-label="share" color="inherit" size="small" sx={{ marginLeft: '0.5rem', backgroundColor: '#FFFFFF' }}>
-            <ShareOutlinedIcon fontSize="medium" style={{ color: 'black' }} />
-          </IconButton>
-        </Box>
-      </Toolbar>
-
-      <Box sx={{ margin: '0.5rem 0.5rem', paddingInline: '1rem' }}>
-
-        {filteredJadwal.map((resto: RestoSchedule) => {
-          const currentHour = new Date().getHours();
-
-          const [openHour] = (resto.open || '').split(' - ').map((time) => parseInt(time));
-          const [closeHour] = (resto.closed || '').split(' - ').map((time) => parseInt(time));
-
-          const isOpen = currentHour >= openHour && currentHour <= closeHour;
-
-          return (
-            <div key={store?.halamanResto?.channelDetailOutput?.data?.channel?.id}>
-
-              <Grid item={true} xs={12}>
-                {isLoading ? <Alert
-                  color="error"
-                  severity="error"
-                  sx={{ alignItems: 'center', display: 'flex' }}
-                             >
-                  <Typography fontSize="1rem">
-                    Ada kesalahan pada Jaringan, Silahkan coba lagi kembali
-                  </Typography>
-                             </Alert> : null}
-
-                {!isOpen && !isLoading && (
-                  <Alert
-                    color="info"
-                    severity="info"
-                    sx={{ alignItems: 'center', display: 'flex' }}
-                  >
-                    <Typography fontSize="1rem">
-                      Resto ini lagi tutup, Buka lagi besok jam {resto.open.split(' - ')[0]} ya!
-                    </Typography>
-                  </Alert>
-                )}
-              </Grid>
-
-              <Card key={store?.halamanResto?.channelDetailOutput?.data?.channel?.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem', marginTop: '2rem', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
-                <Grid container={true} spacing={2}>
-                  <Grid
-                    item={true}
-                    sx={{
-                      alignItems: 'center',
-                      display: 'flex',
-                      justifyContent: 'center'
-                    }}
-                    xs={2}
-                  >
-                    <Avatar src={store?.halamanResto?.channelDetailOutput?.data?.channel?.metafields?.media} sx={{ height: '50px', width: '50px' }} />
-                  </Grid>
-                  <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'start', paddingTop: '0rem!important' }} xs={8}>
-                    <Box>
-                      {store?.halamanResto?.channelDetailOutput?.data?.channel?.name
-                        ? <Typography color="neutral-70" sx={{ marginBottom: '0.125' }} variant="body2">
-                          Verified by TokoRumahan
-                          </Typography>
-                        : null}
-                      <Typography
-                        sx={{ fontWeight: 'bold', textAlign: 'start' }}
-                        variant="h4"
-                      >
-                        {store?.halamanResto?.channelDetailOutput?.data?.channel?.name}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item={true} sx={{ display: 'flex', justifyContent: 'center' }} xs={11}>
-                    <Box gap={1} sx={{ display: 'flex' }}>
-                      <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
-                        <StarFilled size={10} style={{ color: '#FBD600' }} />
-                        <Typography color="neutral-90" variant="caption">
-                          {store?.halamanResto?.channelDetailOutput?.avgRating}
-                        </Typography>
-                      </Box>
-                      <Divider flexItem={true} orientation="vertical" />
-                      <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
-                        <LocationOnFilled size={10} style={{ color: 'red' }} />
-                        <Typography color="neutral-90" variant="caption">
-                          9m
-                        </Typography>
-                      </Box>
-                      <Divider flexItem={true} orientation="vertical" />
-                      <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
-                        <AccessTimeFilled size={10} />
-                        <Typography color="neutral-90" variant="caption">
-                          {`${resto.open} - ${resto.closed}`}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Grid>
-                </Grid>
-              </Card>
-            </div>
-          );
-        })}
-
-        <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
-          <Grid item={true} xs={6}>
-            <Typography
-              sx={{ fontWeight: 'bold', textAlign: 'start', color: '#1F66D0' }}
-              variant="h6"
-            >
-              Ulasan dan Rating
-            </Typography>
-          </Grid>
-          <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'end' }} xs={6}>
-            <Button
-              size="small"
-              sx={{ paddingInline: '0.5rem', backgroundColor: '#FBD600', fontSize: '0.75rem', color: 'black' }}
-              variant="outlined"
-              onClick={handleLihatSemuaClick}
-            >
-              Lihat Semua
-            </Button>
-          </Grid>
-        </Grid>
-        <Box sx={{ paddingInline: '1.5rem' }}>
-          <Card sx={{ borderColor: 'transparent', borderRadius: 0, boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '1rem', marginInline: '-1.5rem', position: 'relative', zIndex: 100 }}>
-            <Box sx={{ overflowX: 'auto' }}>
-              <Grid container={true} sx={{ width: '100rem', overflowX: 'auto' }}>
-                <Grid item={true} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  {store?.rating?.data?.map((obj) => {
-                    return (
-                      <Card key={obj.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem' }}>
-                        <Grid container={true} spacing={2}>
-                          <Grid
-                            item={true}
-                            sx={{
-                              alignItems: 'center',
-                              display: 'flex',
-                              justifyContent: 'center'
-                            }}
-                            xs={2}
-                          >
-                            <Avatar src={ProfilFoto} sx={{ height: '50px', width: '50px' }} />
-                          </Grid>
-                          <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'start', paddingTop: '0rem!important' }} xs={8}>
-                            <Box>
-
-                              <Typography
-                                sx={{ fontWeight: 'bold', textAlign: 'start', marginLeft: '0.5rem' }}
-                                variant="h6"
-                              >
-                                {obj.customerId}
-                              </Typography>
-                              <Box sx={{ marginLeft: '0.5rem' }}>
-                                {obj.rating ? <Rating rating={obj.rating.toString()} /> : null}
-                              </Box>
-                            </Box>
-                          </Grid>
-                          <Box sx={{ marginTop: '10px', width: '80%' }}>
-                            <TextField fullWidth={true} placeholder={obj.review} size="small" variant="outlined" />
-                          </Box>
-
-                        </Grid>
-                      </Card>
-                    );
-                  })}
-                </Grid>
-              </Grid>
-            </Box>
-          </Card>
-        </Box>
-        <Grid container={true} justifyContent="center">
-        {isLoading
-          ? (
-          <Box>
-            <CircularProgress />
-          </Box>
-          )
-          : null}
-        </Grid>
-        <Typography
-          sx={{ fontWeight: 'bold', textAlign: 'start', color: 'black', marginBottom: '1rem' }}
-          variant="h4"
-        >
-          Menu
-        </Typography>
-        {colIds.map((colId, colIndex) => (
-          <Fragment key={colIndex}>
-            <Typography
-              id="tes"
-              sx={{ fontWeight: 'medium', textAlign: 'start', marginBottom: '0.25rem' }}
-              variant="h5"
-            >
-              {colId.name}
-
-            </Typography>
-            {formData?.lines?.filter((obj) => (Array.isArray(obj.colectionId) ? obj.colectionId.some((collection) => collection === colId.id) : true))
-              .map((obj) => {
-                return (
-                  (
-
-    <div key={obj.productId} style={{ marginBottom: '0.5rem' }}>
-
-      <Card sx={{ paddingInline: '0.5rem' }}>
-        <Grid
-          container={true}
-          spacing={2}
-          sx={{
-            alignItems: 'center',
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginBottom: '0.5rem'
-          }}
-
-        >
-          <Grid item={true} xs={3}>
-            <div
-              style={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <img
-                alt={obj.name}
-                src={obj.thumbnail}
-                style={{ maxHeight: '100%', maxWidth: '100%', marginTop: '0.5rem', borderRadius: '8px' }} />
-            </div>
-          </Grid>
-          <Grid
-            item={true}
+          <Box
             sx={{
               display: 'flex',
-              flexDirection: 'column',
+              alignItems: 'center',
               justifyContent: 'space-between'
             }}
-            xs={9}
           >
-            <Box
-              sx={{
-                marginTop: obj.isAvailableForPurchase ? '2.5rem' : '1rem',
-                alignItems: 'center',
-                display: 'flex',
-                justifyContent: 'space-between'
-              }}
-              onClick={() => handleCardClick(obj?.variantId, obj?.productId || '')}
-            >
-              <Typography
-                sx={{ fontWeight: 'bold', textAlign: 'start', marginTop: '-2rem', color: 'black' }}
-                variant="body2"
+            <FormControl size="small" sx={{ backgroundColor: '#D5ECFE' }}>
+              <InputLabel id="filter-label" sx={{ color: 'black' }}>
+                Menu
+              </InputLabel>
+              <Select
+                id="filter"
+                label="Menu"
+                labelId="filter-label"
+                sx={{
+                  width: 210,
+                  marginRight: 1,
+                  color: 'black',
+                  backgroundColor: '#FFFFFF'
+                }}
+                value={selectedValue}
+                onChange={scrollToKategoriMenu}
               >
-                {obj.name}
-              </Typography>
-            </Box>
-            {!obj.isAvailableForPurchase && (
+                {filteredCategories.map((category) => (
+                  <MenuItem key={category.id} value={category.name}>
+                    {category.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <IconButton
+              aria-label="search"
+              color="inherit"
+              size="small"
+              sx={{ marginLeft: '0.5rem', backgroundColor: '#FFFFFF' }}
+            >
+              <SearchOutlined fontSize="25px" style={{ color: 'black' }} />
+            </IconButton>
+            <IconButton
+              aria-label="share"
+              color="inherit"
+              size="small"
+              sx={{ marginLeft: '0.5rem', backgroundColor: '#FFFFFF' }}
+            >
+              <ShareOutlinedIcon fontSize="medium" style={{ color: 'black' }} />
+            </IconButton>
+          </Box>
+        </Toolbar>
+
+        <Box sx={{ margin: '0.5rem 0.5rem', paddingInline: '1rem' }}>
+          {filteredJadwal.map((resto: RestoSchedule) => {
+            const currentHour = new Date().getHours();
+
+            const [openHour] = (resto.open || '')
+              .split(' - ')
+              .map((time) => parseInt(time, 10));
+            const [closeHour] = (resto.closed || '')
+              .split(' - ')
+              .map((time) => parseInt(time, 10));
+
+            const isOpen = currentHour >= openHour && currentHour <= closeHour;
+
+            return (
+              <div
+                key={
+                  store?.halamanResto?.channelDetailOutput?.data?.channel?.id
+                }
+              >
+                <Grid item={true} xs={12}>
+                  {isLoading
+                    ? (
+                    <Alert
+                      color="error"
+                      severity="error"
+                      sx={{ alignItems: 'center', display: 'flex' }}
+                    >
+                      <Typography fontSize="1rem">
+                        Ada kesalahan pada Jaringan, Silahkan coba lagi kembali
+                      </Typography>
+                    </Alert>
+                    )
+                    : null}
+
+                  {!isOpen && !isLoading && (
+                    <Alert
+                      color="info"
+                      severity="info"
+                      sx={{ alignItems: 'center', display: 'flex' }}
+                    >
+                      <Typography fontSize="1rem">
+                        Resto ini lagi tutup, Buka lagi besok jam{' '}
+                        {resto.open.split(' - ')[0]} ya!
+                      </Typography>
+                    </Alert>
+                  )}
+                </Grid>
+
+                <Card
+                  key={
+                    store?.halamanResto?.channelDetailOutput?.data?.channel?.id
+                  }
+                  sx={{
+                    borderColor: 'transparent',
+                    marginBottom: '1rem',
+                    padding: '0.5rem',
+                    marginTop: '2rem',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+                  }}
+                >
+                  <Grid container={true} spacing={2}>
+                    <Grid
+                      item={true}
+                      sx={{
+                        alignItems: 'center',
+                        display: 'flex',
+                        justifyContent: 'center'
+                      }}
+                      xs={2}
+                    >
+                      <Avatar
+                        src={
+                          store?.halamanResto?.channelDetailOutput?.data
+                            ?.channel?.metafields?.media
+                        }
+                        sx={{ height: '50px', width: '50px' }} />
+                    </Grid>
+                    <Grid
+                      item={true}
+                      sx={{
+                        alignItems: 'center',
+                        display: 'flex',
+                        justifyContent: 'start',
+                        paddingTop: '0rem!important'
+                      }}
+                      xs={8}
+                    >
+                      <Box>
+                        {store?.halamanResto?.channelDetailOutput?.data?.channel
+                          ?.name
+                          ? (
+                          <Typography
+                            color="neutral-70"
+                            sx={{ marginBottom: '0.125' }}
+                            variant="body2"
+                          >
+                            Verified by TokoRumahan
+                          </Typography>
+                          )
+                          : null}
+                        <Typography
+                          sx={{ fontWeight: 'bold', textAlign: 'start' }}
+                          variant="h4"
+                        >
+                          {
+                            store?.halamanResto?.channelDetailOutput?.data
+                              ?.channel?.name
+                          }
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid
+                      item={true}
+                      sx={{ display: 'flex', justifyContent: 'center' }}
+                      xs={11}
+                    >
+                      <Box gap={1} sx={{ display: 'flex' }}>
+                        <Box
+                          gap={1}
+                          sx={{ alignItems: 'center', display: 'flex' }}
+                        >
+                          <StarFilled size={10} style={{ color: '#FBD600' }} />
+                          <Typography color="neutral-90" variant="caption">
+                            {
+                              store?.halamanResto?.channelDetailOutput
+                                ?.avgRating
+                            }
+                          </Typography>
+                        </Box>
+                        <Divider flexItem={true} orientation="vertical" />
+                        <Box
+                          gap={1}
+                          sx={{ alignItems: 'center', display: 'flex' }}
+                        >
+                          <LocationOnFilled
+                            size={10}
+                            style={{ color: 'red' }} />
+                          <Typography color="neutral-90" variant="caption">
+                            9m
+                          </Typography>
+                        </Box>
+                        <Divider flexItem={true} orientation="vertical" />
+                        <Box
+                          gap={1}
+                          sx={{ alignItems: 'center', display: 'flex' }}
+                        >
+                          <AccessTimeFilled size={10} />
+                          <Typography color="neutral-90" variant="caption">
+                            {`${resto.open} - ${resto.closed}`}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Card>
+              </div>
+            );
+          })}
+
+          <Grid
+            container={true}
+            justifyContent="space-between"
+            spacing={2}
+            sx={{ marginBottom: '1rem' }}
+          >
+            <Grid item={true} xs={6}>
               <Typography
                 sx={{
                   fontWeight: 'bold',
                   textAlign: 'start',
-                  color: 'red'
+                  color: '#1F66D0'
                 }}
-                variant="body2"
+                variant="h6"
               >
-                Persediaan Habis
+                Ulasan dan Rating
               </Typography>
-            )}
-            {obj.isAvailableForPurchase
-              ? <div>
-                <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
-                  <Grid item={true} xs={6}>
-                    <Typography
-                      sx={{ fontWeight: 'bold', textAlign: 'start', color: '#1f66d0' }}
-                      variant="body2"
-                    >
-                      Rp. {obj?.price?.toLocaleString()}
-                    </Typography>
-                  </Grid>
-                  <Grid item={true} xs={6}>
-                    <Typography sx={{ fontWeight: 'medium', marginLeft: '2.5rem' }} variant="body2">
-                      Terjual 4
-                    </Typography>
+            </Grid>
+            <Grid
+              item={true}
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                justifyContent: 'end'
+              }}
+              xs={6}
+            >
+              <Button
+                size="small"
+                sx={{
+                  paddingInline: '0.5rem',
+                  backgroundColor: '#FBD600',
+                  fontSize: '0.75rem',
+                  color: 'black'
+                }}
+                variant="outlined"
+                onClick={handleLihatSemuaClick}
+              >
+                Lihat Semua
+              </Button>
+            </Grid>
+          </Grid>
+          <Box sx={{ paddingInline: '1.5rem' }}>
+            <Card
+              sx={{
+                borderColor: 'transparent',
+                borderRadius: 0,
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                marginBottom: '1rem',
+                marginInline: '-1.5rem',
+                position: 'relative',
+                zIndex: 100
+              }}
+            >
+              <Box sx={{ overflowX: 'auto' }}>
+                <Grid
+                  container={true}
+                  sx={{ width: '100rem', overflowX: 'auto' }}
+                >
+                  <Grid
+                    item={true}
+                    sx={{ display: 'flex', justifyContent: 'space-between' }}
+                  >
+                    {store?.rating?.data?.map((obj) => {
+                      return (
+                        <Card
+                          key={obj.id}
+                          sx={{
+                            borderColor: 'transparent',
+                            marginBottom: '1rem',
+                            padding: '0.5rem'
+                          }}
+                        >
+                          <Grid container={true} spacing={2}>
+                            <Grid
+                              item={true}
+                              sx={{
+                                alignItems: 'center',
+                                display: 'flex',
+                                justifyContent: 'center'
+                              }}
+                              xs={2}
+                            >
+                              <Avatar
+                                src={ProfilFoto}
+                                sx={{ height: '50px', width: '50px' }} />
+                            </Grid>
+                            <Grid
+                              item={true}
+                              sx={{
+                                alignItems: 'center',
+                                display: 'flex',
+                                justifyContent: 'start',
+                                paddingTop: '0rem!important'
+                              }}
+                              xs={8}
+                            >
+                              <Box>
+                                <Typography
+                                  sx={{
+                                    fontWeight: 'bold',
+                                    textAlign: 'start',
+                                    marginLeft: '0.5rem'
+                                  }}
+                                  variant="h6"
+                                >
+                                  {obj.customerId}
+                                </Typography>
+                                <Box sx={{ marginLeft: '0.5rem' }}>
+                                  {obj.rating
+                                    ? <Rating rating={obj.rating.toString()} />
+                                    : null}
+                                </Box>
+                              </Box>
+                            </Grid>
+                            <Box sx={{ marginTop: '10px', width: '80%' }}>
+                              <TextField
+                                fullWidth={true}
+                                placeholder={obj.review}
+                                size="small"
+                                variant="outlined" />
+                            </Box>
+                          </Grid>
+                        </Card>
+                      );
+                    })}
                   </Grid>
                 </Grid>
-                <Box
-                  sx={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    justifyContent: 'end',
-                    marginTop: '-1rem'
-                  }}
-                >
-                  <Grid item={true} sx={{ display: 'flex', justifyContent: 'end' }} xs="auto">
-                    <IconButton
-                      aria-label="min"
-                      size="small"
-                      sx={{ color: 'black' }}
-                      onClick={() => handleDecrement(obj.variantId)}
-                    >
-                      <IndeterminateCheckBoxFilled size={24} />
-                    </IconButton>
-                    <Typography
-                      key={obj.productId}
-                      style={{
-                        display: 'inline-block',
-                        margin: '0 0.5rem',
-                        marginTop: '0.5rem'
-                      }}
-                      variant="body2"
-                    >
-                      {obj?.quantity || 0}
-                    </Typography>
-
-                    <IconButton
-                      aria-label="plus"
-                      size="small"
-                      sx={{ color: 'black' }}
-                      onClick={() => handleIncrement(obj.variantId)}
-                    >
-                      <AddBoxFilled size={24} />
-                    </IconButton>
-                  </Grid>
-                </Box>
-                </div>
+              </Box>
+            </Card>
+          </Box>
+          <Grid container={true} justifyContent="center">
+            {isLoading
+              ? (
+              <Box>
+                <CircularProgress />
+              </Box>
+              )
               : null}
           </Grid>
-        </Grid>
-      </Card>
-    </div>
-                  )
-                );
-              })}
-          </Fragment>
-        ))}
-
-        {!checkoutIdFromStorage &&
-          <FloatingShoppingButton onClick={handleShoppingButtonClick} />}
-      </Box>
-
-      </div><Card sx={{ borderRadius: '12px 12px 0 0', paddingInline: '1rem', marginTop: '1rem', position: 'sticky', bottom: 0 }}>
           <Typography
-            sx={{ fontWeight: 'medium', textAlign: 'start', color: '#1F66D0' }}
-            variant="body2"
+            sx={{
+              fontWeight: 'bold',
+              textAlign: 'start',
+              color: 'black',
+              marginBottom: '1rem'
+            }}
+            variant="h4"
           >
-            {totalItems} Item
+            Menu
           </Typography>
-          <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '1rem' }}>
-            <Grid item={true} xs={6}>
+          {colIds.map((colId, colIndex) => (
+            <Fragment key={colIndex}>
               <Typography
-                sx={{ fontWeight: 'medium', textAlign: 'start', color: 'black' }}
-                variant="h6"
+                id="tes"
+                sx={{
+                  fontWeight: 'medium',
+                  textAlign: 'start',
+                  marginBottom: '0.25rem'
+                }}
+                variant="h5"
               >
-                Total Pembayaran
+                {colId.name}
               </Typography>
-            </Grid>
-            <Grid item={true} xs={6}>
-              <Typography
-                sx={{ fontWeight: 'medium', textAlign: 'end', color: 'black' }}
-                variant="h6"
-              >
-                Rp. {totalAmount.toLocaleString('id-ID')}
-              </Typography>
-            </Grid>
+              {formData?.lines
+                ?.filter((obj) => (Array.isArray(obj.colectionId)
+                  ? obj.colectionId.some(
+                    (collection) => collection === colId.id
+                  )
+                  : true))
+                .map((obj) => {
+                  return (
+                    <div key={obj.productId} style={{ marginBottom: '0.5rem' }}>
+                      <Card sx={{ paddingInline: '0.5rem' }}>
+                        <Grid
+                          container={true}
+                          spacing={2}
+                          sx={{
+                            alignItems: 'center',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            marginBottom: '0.5rem'
+                          }}
+                        >
+                          <Grid item={true} xs={3}>
+                            <div
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                            >
+                              <img
+                                alt={obj.name}
+                                src={obj.thumbnail}
+                                style={{
+                                  maxHeight: '100%',
+                                  maxWidth: '100%',
+                                  marginTop: '0.5rem',
+                                  borderRadius: '8px'
+                                }} />
+                            </div>
+                          </Grid>
+                          <Grid
+                            item={true}
+                            sx={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'space-between'
+                            }}
+                            xs={9}
+                          >
+                            <Box
+                              sx={{
+                                marginTop: obj.isAvailableForPurchase
+                                  ? '2.5rem'
+                                  : '1rem',
+                                alignItems: 'center',
+                                display: 'flex',
+                                justifyContent: 'space-between'
+                              }}
+                              onClick={() => handleCardClick(
+                                obj?.variantId,
+                                obj?.productId || ''
+                              )}
+                            >
+                              <Typography
+                                sx={{
+                                  fontWeight: 'bold',
+                                  textAlign: 'start',
+                                  marginTop: '-2rem',
+                                  color: 'black'
+                                }}
+                                variant="body2"
+                              >
+                                {obj.name}
+                              </Typography>
+                            </Box>
+                            {!obj.isAvailableForPurchase && (
+                              <Typography
+                                sx={{
+                                  fontWeight: 'bold',
+                                  textAlign: 'start',
+                                  color: 'red'
+                                }}
+                                variant="body2"
+                              >
+                                Persediaan Habis
+                              </Typography>
+                            )}
+                            {obj.isAvailableForPurchase
+                              ? (
+                              <div>
+                                <Grid
+                                  container={true}
+                                  justifyContent="space-between"
+                                  spacing={2}
+                                  sx={{ marginBottom: '1rem' }}
+                                >
+                                  <Grid item={true} xs={6}>
+                                    <Typography
+                                      sx={{
+                                        fontWeight: 'bold',
+                                        textAlign: 'start',
+                                        color: '#1f66d0'
+                                      }}
+                                      variant="body2"
+                                    >
+                                      Rp. {obj?.price?.toLocaleString()}
+                                    </Typography>
+                                  </Grid>
+                                  <Grid item={true} xs={6}>
+                                    <Typography
+                                      sx={{
+                                        fontWeight: 'medium',
+                                        marginLeft: '2.5rem'
+                                      }}
+                                      variant="body2"
+                                    >
+                                      Terjual 4
+                                    </Typography>
+                                  </Grid>
+                                </Grid>
+                                <Box
+                                  sx={{
+                                    alignItems: 'center',
+                                    display: 'flex',
+                                    justifyContent: 'end',
+                                    marginTop: '-1rem'
+                                  }}
+                                >
+                                  <Grid
+                                    item={true}
+                                    sx={{
+                                      display: 'flex',
+                                      justifyContent: 'end'
+                                    }}
+                                    xs="auto"
+                                  >
+                                    <IconButton
+                                      aria-label="min"
+                                      size="small"
+                                      sx={{ color: 'black' }}
+                                      onClick={() => handleDecrement(obj.variantId)}
+                                    >
+                                      <IndeterminateCheckBoxFilled size={24} />
+                                    </IconButton>
+                                    <Typography
+                                      key={obj.productId}
+                                      style={{
+                                        display: 'inline-block',
+                                        margin: '0 0.5rem',
+                                        marginTop: '0.5rem'
+                                      }}
+                                      variant="body2"
+                                    >
+                                      {obj?.quantity || 0}
+                                    </Typography>
+
+                                    <IconButton
+                                      aria-label="plus"
+                                      size="small"
+                                      sx={{ color: 'black' }}
+                                      onClick={() => handleIncrement(obj.variantId)}
+                                    >
+                                      <AddBoxFilled size={24} />
+                                    </IconButton>
+                                  </Grid>
+                                </Box>
+                              </div>
+                              )
+                              : null}
+                          </Grid>
+                        </Grid>
+                      </Card>
+                    </div>
+                  );
+                })}
+            </Fragment>
+          ))}
+
+          {!checkoutIdFromStorage &&
+            <FloatingShoppingButton onClick={handleShoppingButtonClick} />}
+        </Box>
+      </div>
+      <Card
+        sx={{
+          borderRadius: '12px 12px 0 0',
+          bottom: 0,
+          marginTop: '1rem',
+          paddingInline: '1rem',
+          position: 'sticky'
+        }}
+      >
+        <Typography
+          sx={{ color: '#1F66D0', fontWeight: 'medium', textAlign: 'start' }}
+          variant="body2"
+        >
+          {totalItems} Item
+        </Typography>
+        <Grid
+          container={true}
+          justifyContent="space-between"
+          spacing={2}
+          sx={{ marginBottom: '1rem' }}
+        >
+          <Grid item={true} xs={6}>
+            <Typography
+              sx={{ fontWeight: 'medium', textAlign: 'start', color: 'black' }}
+              variant="h6"
+            >
+              Total Pembayaran
+            </Typography>
           </Grid>
-          <Grid gap={1} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Grid item={true} xs={6}>
+            <Typography
+              sx={{ fontWeight: 'medium', textAlign: 'end', color: 'black' }}
+              variant="h6"
+            >
+              Rp. {totalAmount.toLocaleString('id-ID')}
+            </Typography>
+          </Grid>
+        </Grid>
+        <Grid
+          gap={1}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}
+        >
           <Button
             color="primary"
             size="small"
@@ -895,12 +1154,17 @@ const HalamanResto: PageComponent = () => {
             variant="outlined"
             onClick={handleLanjutPembayaranClick}
           >
-  <Grid alignItems="center" container={true} justifyContent="center" spacing={1}>
-    <Grid item onClick={handleLanjutPembayaranClick} >
-      <ShoppingBasketIcon/>
-    </Grid>
-    <Grid item={true} />
-  </Grid>
+            <Grid
+              alignItems="center"
+              container={true}
+              justifyContent="center"
+              spacing={1}
+            >
+              <Grid item={true} onClick={handleLanjutPembayaranClick}>
+                <ShoppingBasketIcon />
+              </Grid>
+              <Grid item={true} />
+            </Grid>
           </Button>
           <Button
             color="primary"
@@ -911,9 +1175,8 @@ const HalamanResto: PageComponent = () => {
           >
             Lanjut Pembayaran
           </Button>
-          </Grid>
-            </Card>
-
+        </Grid>
+      </Card>
     </>
   );
 };
@@ -921,3 +1184,5 @@ const HalamanResto: PageComponent = () => {
 HalamanResto.displayName = 'HalamanResto';
 
 export default HalamanResto;
+export { DUMMY_MENU_RECOMDATION, DUMMY_RESTO };
+export type { RestoItem };

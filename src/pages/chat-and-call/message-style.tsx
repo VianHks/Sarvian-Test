@@ -1,9 +1,8 @@
-/* eslint-disable linebreak-style */
+import DoneAllIcon from '@mui/icons-material/DoneAll';
 import { Avatar, Box, Paper, Typography, useTheme } from '@mui/material';
 
-import DoneAllIcon from '@mui/icons-material/DoneAll';
-import fotoOrang from '@assets/images/User1.svg';
 import SellerImage from '@assets/images/MieBaso.png';
+import fotoOrang from '@assets/images/User1.svg';
 
 interface MessageDataModel {
   date: string
@@ -47,7 +46,7 @@ const ChatDetail: React.FC<MessageProps> = ({ message }) => {
               marginBottom: '0.5rem'
             }}
           >
-           <img src={isBot ? SellerImage : fotoOrang} alt="User" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+           <img alt="User" src={isBot ? SellerImage : fotoOrang} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
           </Avatar>
         </Box>
         <Paper
@@ -76,4 +75,3 @@ const ChatDetail: React.FC<MessageProps> = ({ message }) => {
 ChatDetail.displayName = 'ChatDetail';
 
 export default ChatDetail;
-// export type { MessageDataModel };

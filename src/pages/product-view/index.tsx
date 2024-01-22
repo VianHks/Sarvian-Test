@@ -1,4 +1,3 @@
-/* eslint-disable linebreak-style */
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -16,6 +15,7 @@ import {
   AddBoxFilled,
   IndeterminateCheckBoxFilled
 } from '@nxweb/icons/material';
+import { Loader } from '@nxweb/icons/tabler';
 
 import { Grid } from '@components/material.js';
 import { useAuth } from '@hooks/use-auth';
@@ -23,7 +23,6 @@ import { OrderCommand } from '@models/order/reducers';
 import { useCommand, useStore } from '@models/store';
 
 import SwipeableTextMobileStepper from './slider';
-import { Loader } from '@nxweb/icons/tabler';
 
 interface DescriptionDataModel {
   blocks: [

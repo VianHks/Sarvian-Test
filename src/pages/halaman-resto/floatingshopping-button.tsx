@@ -1,4 +1,3 @@
-/* eslint-disable react/display-name */
 import React from 'react';
 
 import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
@@ -32,4 +31,5 @@ const FloatingShoppingButton: React.FC<FloatingShoppingButtonProps> = ({ onClick
   );
 };
 
+FloatingShoppingButton.displayName = 'FloatingShoppingButton';
 export default FloatingShoppingButton;

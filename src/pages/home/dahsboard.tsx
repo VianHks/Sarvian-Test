@@ -1,46 +1,29 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Avatar, Box, Card, CardContent, CardMedia, Chip, Divider, Grid, InputAdornment, TextField, Typography, useTheme } from '@mui/material';
+import { Box, Card, CardContent, CardMedia, Chip, Divider, Grid, InputAdornment, TextField, Typography } from '@mui/material';
 
 import { AccessTimeFilled, ExpandMoreFilled, FilterAltFilled, LocationOnFilled, SearchFilled, StarFilled } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
 
 import { useAuth } from '@hooks/use-auth';
-import { homeCommand } from '@models/home/commands';
 import type { ChannelsDataModel } from '@models/home/types';
 import { useCommand, useStore } from '@models/store';
 import FloatingShoppingButton from '@pages/halaman-resto/floatingshopping-button';
-import type { FoodsDataModel, FoodsListDataModel } from '@pages/personalized-recomendation';
-import { DEFAULT_FOODS_LIST } from '@pages/personalized-recomendation';
 
-import Bubur from '@assets/images/Bubur.png';
-import Chinese from '@assets/images/Chinese.png';
-import Dessert from '@assets/images/Dessert.png';
-import Jajanan from '@assets/images/Jajanan.png';
-import Kopi from '@assets/images/Kopi.png';
-import MieBaso from '@assets/images/MieBaso.png';
-import Minuman from '@assets/images/Minuman.png';
-import Nasi from '@assets/images/Nasi.png';
-import Padang from '@assets/images/Padang.png';
-import Roti from '@assets/images/Roti.png';
-import Sate from '@assets/images/Sate.png';
-import Sunda from '@assets/images/Sunda.png';
 import dineInIcon from '@assets/images/pages/beranda/DineIn.svg';
 import pesanAntarIcon from '@assets/images/pages/beranda/PesanAntar.svg';
 import pickUpIcon from '@assets/images/pages/beranda/PickUp.svg';
 import recomendationIcon from '@assets/images/pages/beranda/Rekomendasi 1.svg';
 import jajananLokalIcon from '@assets/images/pages/beranda/jajananLokalIcon.svg';
 import recomendationImage from '@assets/images/pages/beranda/recomandation.svg';
-import restoImage from '@assets/images/pages/beranda/resto.svg';
 import terdekat from '@assets/images/pages/beranda/terdekat.svg';
 import terhemat from '@assets/images/pages/beranda/terhemat.svg';
 import terlaris from '@assets/images/pages/beranda/terlaris.svg';
 import topRated from '@assets/images/pages/beranda/topRated.svg';
 import verifyIcon from '@assets/images/pages/beranda/verify.svg';
 
-// eslint-disable-next-line import/exports-last
-export interface RestoItem {
+interface RestoItem {
   id: number
   location: string
   open: string
@@ -50,8 +33,7 @@ export interface RestoItem {
   verified: boolean
 }
 
-// eslint-disable-next-line import/exports-last
-export interface MenuItem {
+interface MenuItem {
   id: number
   itemName: string
   itemPrice: number
@@ -149,8 +131,7 @@ export const DUMMY_MENU_RECOMDATION = [
   }
 ];
 
-// eslint-disable-next-line import/exports-last
-export const DUMMY_RESTO = [
+const DUMMY_RESTO = [
   {
     id: 1,
     location: '1.5km',
@@ -738,3 +719,5 @@ const Home: PageComponent = () => {
 Home.displayName = 'Home';
 
 export default Home;
+export { DUMMY_RESTO };
+export type { RestoItem, MenuItem };

@@ -1,21 +1,19 @@
-/* eslint-disable linebreak-style */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Avatar, Box, Card, Chip, Grid, Typography } from '@mui/material';
+import { Avatar, Box, Card, Grid, Typography } from '@mui/material';
 
 import type { PageComponent } from '@nxweb/react';
 
 import { useAuth } from '@hooks/use-auth';
-import { halamanRestoCommand } from '@models/halaman-resto/commands';
+import { RatingCommand } from '@models/rating/commands';
 import { useStore } from '@models/store';
 
 import Rating from './rating';
 
 import RestoFoto from '@assets/images/RestoFoto.svg';
-import { RatingCommand } from '@models/rating/commands';
-// eslint-disable-next-line import/exports-last
-export const DUMMY_Rating = [
+
+const DUMMY_Rating = [
   {
     id: 1,
     rating: '4',
@@ -55,7 +53,6 @@ const UlasandanRating: PageComponent = () => {
   const token = useMemo(() => auth?.token.accessToken, [auth]);
   const [store, dispatch] = useStore((state) => state?.rating);
   const channelId = 'Q2hhbm5lbDo0';
-
 
   useEffect(() => {
     dispatch(
@@ -125,3 +122,4 @@ const UlasandanRating: PageComponent = () => {
 UlasandanRating.displayName = 'UlasandanRating';
 
 export default UlasandanRating;
+export { DUMMY_Rating };

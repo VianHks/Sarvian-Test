@@ -88,8 +88,7 @@ const SwipeableTextMobileStepper: FC<PropsSwipeableTextMobileStepper> = ({ image
           width: '100%',
           zIndex: 1
         }}
-        variant="dots"
-      />
+        variant="dots" />
     </Box>
   );
 };
