@@ -1,7 +1,3 @@
-/* eslint-disable linebreak-style */
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
 import {
   Avatar,
   Box,
@@ -9,26 +5,14 @@ import {
   Chip,
   Container,
   Grid,
-  styled,
-  Tab,
-  Tabs,
-  Typography,
-  useTheme
-} from '@mui/material';
+  Typography} from '@mui/material';
 
-import { CircleFilled, StarBorderOutlined, StarFilled } from '@nxweb/icons/material';
+import { StarBorderOutlined, StarFilled } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
-
-import { useAuth } from '@hooks/use-auth';
 
 import Bakar from '@assets/images/Bakar.png';
 import MieBaso from '@assets/images/MieBaso.png';
 import OrangJatnika from '@assets/images/OrangJatnika.svg';
-
-interface StyledTabProps {
-  label: string
-  value: string
-}
 
 interface OrderDataModel {
   foto: string
@@ -52,68 +36,7 @@ const DATA_ORDER_DUMMY: OrderDataModel[] = [
   }
 ];
 
-const CustomTabs = styled(Tabs)({
-  '& .MuiTabs-indicator': {
-    backgroundColor: '#002B6A'
-  },
-  borderBottom: '1px solid #e8e8e8'
-});
-
-const CustomTab = styled((props: StyledTabProps) => <Tab disableRipple={true} {...props} />)(
-  ({ theme }) => ({
-    textTransform: 'none',
-    minWidth: 0,
-    [theme.breakpoints.up('sm')]: {
-      minWidth: 0
-    },
-    fontWeight: theme.typography.fontWeightRegular,
-    marginRight: theme.spacing(1),
-    color: '#D5ECFE',
-    fontFamily: [
-      '-apple-system',
-      'BlinkMacSystemFont',
-      '"Segoe UI"',
-      'Roboto',
-      '"Helvetica Neue"',
-      'Arial',
-      'sans-serif',
-      '"Apple Color Emoji"',
-      '"Segoe UI Emoji"',
-      '"Segoe UI Symbol"'
-    ].join(','),
-    '&:hover': {
-      color: '#40a9ff',
-      opacity: 1
-    },
-    '&.Mui-selected': {
-      color: '#002B6A',
-      fontWeight: theme.typography.fontWeightMedium
-    },
-    '&:not(.Mui-selected)': {
-      color: '#1D2939'
-    },
-    '&.Mui-focusVisible': {
-      backgroundColor: '#d1eaff'
-    },
-    fontSize: '18px',
-    lineHeight: '21px'
-  })
-);
-
 const Penilaian: PageComponent = () => {
-  const navigate = useNavigate();
-  const { auth } = useAuth();
-
-  const theme = useTheme();
-  const [tabValue, setTabValue] = useState('Diproses');
-
-  const handleTabChange = (
-    _: React.SyntheticEvent<Element, Event>,
-    newValue: string
-  ) => {
-    setTabValue(newValue);
-  };
-
   const totalPrice = DATA_ORDER_DUMMY.reduce(
     (accumulator, currentValue) => accumulator + currentValue.price,
     0

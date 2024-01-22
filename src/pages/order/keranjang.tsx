@@ -1,6 +1,3 @@
-/* eslint-disable no-lonely-if */
-/* eslint-disable @typescript-eslint/no-dynamic-delete */
-/* eslint-disable linebreak-style */
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -25,7 +22,7 @@ import type { PageComponent } from '@nxweb/react';
 import { useAuth } from '@hooks/use-auth';
 import { DEFAULT_LINES, OrderCommand } from '@models/order/reducers';
 import type { linesDataModel } from '@models/order/types';
-import { useCommand, useStore } from '@models/store';
+import { useStore } from '@models/store';
 
 import LogoBilo from '@assets/images/logoBiloCheckout.svg';
 
@@ -37,7 +34,6 @@ const Keranjang: PageComponent = () => {
   const theme = useTheme();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
   const [searchParams] = useSearchParams();
-  const command = useCommand((cmd) => cmd);
   const action = searchParams.get('action');
   const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '';
 
@@ -56,9 +52,9 @@ const Keranjang: PageComponent = () => {
   const dateTime = new Date(inputTime || '');
 
   const options: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
+    day: 'numeric',
     month: 'short',
-    day: 'numeric'
+    year: 'numeric'
   };
   const createdTime = dateTime.toLocaleDateString('en-US', options);
 
@@ -153,9 +149,9 @@ const Keranjang: PageComponent = () => {
           <>
             <div
               style={{
-                textAlign: 'center',
                 marginTop: '2rem',
-                padding: '5rem 5rem 0rem 5rem'
+                padding: '5rem 5rem 0rem 5rem',
+                textAlign: 'center'
               }}
             >
               <img

@@ -1,9 +1,5 @@
-/* eslint-disable multiline-ternary */
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable jsx-a11y/prefer-tag-over-role */
-/* eslint-disable linebreak-style */
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { Global } from '@emotion/react';
 
@@ -44,7 +40,6 @@ import { useAuth } from '@hooks/use-auth';
 import { OrderCommand } from '@models/order/reducers';
 import { useCommand, useStore } from '@models/store';
 
-import Bike from '@assets/images/Bike.svg';
 import DineIn from '@assets/images/DineIn.svg';
 import MieBaso from '@assets/images/MieBaso.png';
 import PickUp from '@assets/images/PickUp.svg';
@@ -86,14 +81,16 @@ const Puller = styled(Box)(({ theme }) => ({
 
 const DeliveryType = [
   // { text: 'Pesan Antar', icon: `${PesanAntar}`, value: 'delivery' },
-  { text: 'Pick Up', icon: `${PickUp}`, value: 'pickUp' },
-  { text: 'Dine In', icon: `${DineIn}`, value: 'dineIn' }
+  { icon: `${PickUp}`, text: 'Pick Up', value: 'pickUp' },
+  { icon: `${DineIn}`, text: 'Dine In', value: 'dineIn' }
 ];
 
-const Delivery = [
-  { text: 'SiJago', icon: `${Bike}`, value: 'siJago' },
-  { text: 'SiJabat', icon: `${Bike}`, value: 'siJabat' }
-];
+/*
+ * Const Delivery = [
+ *   { text: 'SiJago', icon: `${Bike}`, value: 'siJago' },
+ *   { text: 'SiJabat', icon: `${Bike}`, value: 'siJabat' }
+ * ];
+ */
 
 interface ChekoutDetailDataModel {
   channel: {
@@ -270,7 +267,6 @@ const Checkout: PageComponent = (props: Props) => {
   const token = useMemo(() => auth?.token.accessToken, [auth]);
   const theme = useTheme();
   const { windowProps } = props;
-  const [searchParams] = useSearchParams();
   const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '';
   const command = useCommand((cmd) => cmd);
 
@@ -462,7 +458,8 @@ const Checkout: PageComponent = (props: Props) => {
           Gagal Membuat Order
         </Alert>
       </Snackbar>
-      {checkoutIdFromStorage ? (
+      {checkoutIdFromStorage
+        ? (
         <>
           <Typography
             sx={{
@@ -793,16 +790,17 @@ const Checkout: PageComponent = (props: Props) => {
 
           {/* SKENARIO MULTIPLE CHANNEL */}
           {/* <Typography
-        sx={{ fontWeight: 'bold', marginBottom: '0.5rem', marginTop: '1rem' }}
-        variant="h5"
-      >
-        Tambah resto
-      </Typography>
-      <Box sx={{ marginBottom: '1rem' }}>
-        <Button color="primary" fullWidth={true} variant="contained">
-          Tambah Resto
-        </Button>
-      </Box> */}
+                sx={{ fontWeight: 'bold', marginBottom: '0.5rem', marginTop: '1rem' }}
+                variant="h5"
+              >
+                Tambah resto
+              </Typography>
+              <Box sx={{ marginBottom: '1rem' }}>
+                <Button color="primary" fullWidth={true} variant="contained">
+                  Tambah Resto
+                </Button>
+              </Box>
+          */}
 
           <Box
             sx={{
@@ -953,13 +951,37 @@ const Checkout: PageComponent = (props: Props) => {
               </Button>
             </Box>
           </Card>
-          <Global
-            styles={{
-              '.MuiDrawer-root > .MuiPaper-root': {
-                height: `calc(50% - ${drawerBleeding}px)`,
-                overflow: 'visible'
-              }
-            }} />
+        </>
+        )
+        : (
+        <>
+          <div
+            style={{
+              marginTop: '2rem',
+              padding: '5rem 5rem 0rem 5rem',
+              textAlign: 'center'
+            }}
+          >
+          <img
+            alt="Logo"
+            src={LogoBilo}
+            style={{ height: 'auto', width: '100%' }} />
+          </div>
+          <Typography sx={{ color: theme?.palette?.primary?.main, textAlign: 'center' }} variant="h5">
+            Keranjang kamu masih kosong...
+          </Typography>
+          <Typography sx={{ textAlign: 'center' }} variant="body1">
+            Yuk masukan minuman & makanan favoritmu kedalam keranjang!
+          </Typography>
+        </>
+        )}
+        <Global
+          styles={{
+            '.MuiDrawer-root > .MuiPaper-root': {
+              height: `calc(50% - ${drawerBleeding}px)`,
+              overflow: 'visible'
+            }
+          }} />
           <SwipeableDrawer
             ModalProps={{
               keepMounted: true
@@ -1241,28 +1263,6 @@ const Checkout: PageComponent = (props: Props) => {
               </Box>
             </Box>
           </Modal>
-        </>
-      )
-        : <>
-              <div
-                style={{
-                  textAlign: 'center',
-                  marginTop: '2rem',
-                  padding: '5rem 5rem 0rem 5rem'
-                }}
-              >
-              <img
-                alt="Logo"
-                src={LogoBilo}
-                style={{ height: 'auto', width: '100%' }} />
-              </div>
-              <Typography sx={{ color: theme?.palette?.primary?.main, textAlign: 'center' }} variant="h5">
-                Keranjang kamu masih kosong...
-              </Typography>
-              <Typography sx={{ textAlign: 'center' }} variant="body1">
-                Yuk masukan minuman & makanan favoritmu kedalam keranjang!
-              </Typography>
-          </>}
     </Container>
   );
 };
