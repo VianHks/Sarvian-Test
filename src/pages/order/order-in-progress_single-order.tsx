@@ -1,6 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable jsx-a11y/prefer-tag-over-role */
-/* eslint-disable linebreak-style */
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -15,10 +12,6 @@ import {
   Container,
   Divider,
   Modal,
-  Step,
-  StepContent,
-  StepLabel,
-  Stepper,
   styled,
   TextField,
   useTheme
@@ -148,7 +141,6 @@ const Orders: PageComponent = () => {
   const [openModal, setOpenModal] = useState(false);
   const [openQR, setOpenQR] = useState(false);
   const [restoCountdown, setRestoCountdown] = useState(120);
-  const [driverCountdown, setDriverCountdown] = useState(120);
   const [orderApproved, setOrderApproved] = useState(false);
   const [openModalRestoCanceled, setOpenModalRestoCanceled] = useState(false);
   const [isDriverOnTheWay, setIsDriverOnTheWay] = useState(false);

@@ -1,27 +1,18 @@
-/* eslint-disable multiline-ternary */
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
-import SearchIcon from '@mui/icons-material/Search';
 import {
   Box,
   Card,
   Divider,
   Grid,
-  IconButton,
-  Paper,
-  Typography,
-  useTheme
+  Typography
 } from '@mui/material';
-import InputBase from '@mui/material/InputBase';
 
 import {
   AccessTimeFilled,
-  ArrowBackFilled,
-  FilterAltFilled,
   LocationOnFilled,
-  StarFilled,
-  VerifiedFilled
+  StarFilled
 } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
 
@@ -39,8 +30,6 @@ import terhemat from '@assets/images/pages/beranda/terhemat.svg';
 import terlaris from '@assets/images/pages/beranda/terlaris.svg';
 import topRated from '@assets/images/pages/beranda/topRated.svg';
 import verifyIcon from '@assets/images/verified-rounded.svg';
-
-import type { MenuItem, RestoItem } from './dahsboard';
 
 const DashboardSearchResult: PageComponent = () => {
   const navigate = useNavigate();
@@ -101,13 +90,10 @@ const DashboardSearchResult: PageComponent = () => {
       uniqueRestaurants[restaurantName].push(menu);
     });
 
-    // Convert the object back to an array
     const restaurantsSellingMenu = Object.values(uniqueRestaurants);
 
     setRestaurantsSellingMenu(restaurantsSellingMenu);
   }, [query, searchResult?.data]);
-
-  console.log('restaurantsSellingMenu', restaurantsSellingMenu);
 
   const deg2rad = (deg: number) => {
     return deg * (Math.PI / 180);
@@ -228,7 +214,8 @@ const DashboardSearchResult: PageComponent = () => {
                 </div>
               </Grid>
               <Grid item={true} xs={8}>
-                {resto[index]?.channelListings[0].channel.metafields.verified === 'true' ? (
+                {resto[index]?.channelListings[0].channel.metafields.verified === 'true'
+                  ? (
                   <Typography
                     color="neutral-70"
                     sx={{ marginBottom: '0.125' }}
@@ -236,7 +223,8 @@ const DashboardSearchResult: PageComponent = () => {
                   >
                     Verified by TokoRumahan
                   </Typography>
-                ) : null}
+                  )
+                  : null}
                 <Typography
                   color="neutral-90"
                   fontWeight="bold"
@@ -359,7 +347,8 @@ const DashboardSearchResult: PageComponent = () => {
                 </div>
               </Grid>
               <Grid item={true} xs={8}>
-                {resto.verified ? (
+                {resto.verified
+                  ? (
                   <Typography
                     color="neutral-70"
                     sx={{ marginBottom: '0.125' }}
@@ -367,7 +356,8 @@ const DashboardSearchResult: PageComponent = () => {
                   >
                     Verified by TokoRumahan
                   </Typography>
-                ) : null}
+                  )
+                  : null}
                 <Typography
                   color="neutral-90"
                   fontWeight="bold"

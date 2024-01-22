@@ -1,9 +1,7 @@
-import { useEffect, useMemo, useRef, useState  } from 'react';
+import { useRef, useState  } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
-import { SearchOutlined } from '@mui/icons-material';
-import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
-import { Avatar, Button, Dialog, DialogContent, FormControl, Grid, IconButton, InputBase, InputLabel, Menu, MenuItem, Paper, Select, styled, useTheme } from '@mui/material';
+import { Avatar, Button, Dialog, DialogContent, Grid, IconButton, InputBase, Paper, styled, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -14,9 +12,6 @@ import { ArrowBackFilled, ContentCopyOutlined, EmailOutlined, FileDownloadOutlin
 import { Facebook, Instagram, LINE, Telegram, Twitter, WhatsApp } from '@nxweb/icons/simple';
 
 import { routes } from '@config/routes';
-import { useAuth } from '@hooks/use-auth';
-import { ChannelCommand } from '@models/halaman-resto/reducers';
-import { useStore } from '@models/store';
 
 import type { SelectChangeEvent } from '@mui/material/Select';
 
@@ -33,13 +28,6 @@ const ContentWrapper = styled('main')(({ theme }) => ({
     paddingRight: theme.spacing(4)
   }
 }));
-
-const DUMMY_MENU = [
-
-  { id: 1, category_name: 'Paket Kombo', active: true, category_description: 'Paket Kombo' },
-  { id: 2, category_name: 'Paket Hemat', active: true, category_description: 'Paket Hemat' },
-  { id: 3, category_name: 'Paket Komplit', active: true, category_description: 'Paket Komplit' }
-];
 
 const SESSION_STORAGE_CHECKOUT = 'CheckoutId';
 

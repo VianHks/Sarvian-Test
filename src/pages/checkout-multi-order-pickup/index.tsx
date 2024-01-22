@@ -1,6 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable jsx-a11y/prefer-tag-over-role */
-/* eslint-disable linebreak-style */
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -48,13 +45,13 @@ import Bike from '@assets/images/Bike.svg';
 import Cake from '@assets/images/Cake.svg';
 import Vodka from '@assets/images/Dessert.png';
 import DineIn from '@assets/images/DineIn.svg';
+import TelponLogo from '@assets/images/FotoTelpon.svg';
 import MieBaso from '@assets/images/MieBaso.png';
 import PesanAntar from '@assets/images/PesanAntar.svg';
 import PickUp from '@assets/images/PickUp.svg';
 import Pisan from '@assets/images/Pisan.png';
 import Roti from '@assets/images/Roti.png';
 import TokoHw from '@assets/images/TokoHw.svg';
-import TelponLogo from '@assets/images/FotoTelpon.svg';
 
 import type { Dayjs } from 'dayjs';
 

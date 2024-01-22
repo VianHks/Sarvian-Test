@@ -1,9 +1,5 @@
-/* eslint-disable multiline-ternary */
-/* eslint-disable @typescript-eslint/indent */
-/* eslint-disable @typescript-eslint/no-redeclare */
-/* eslint-disable linebreak-style */
 import type { ChangeEvent } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import {
   Box,
@@ -21,49 +17,49 @@ import {
 } from '@mui/material';
 
 import {
-    AttachmentFilled,
-    CameraAltFilled,
-    SendFilled
-  } from '@nxweb/icons/material';
+  AttachmentFilled,
+  CameraAltFilled,
+  SendFilled
+} from '@nxweb/icons/material';
 
 import Message from './message-style';
 
 import ProductImage from '@assets/images/Bakar.png';
 import SellerImage from '@assets/images/MieBaso.png';
 
-  interface ChatListDetail {
-    id: number
-    date: string
-    text: string
-    sender: 'bot' | 'user'
-  }
+interface ChatListDetail {
+  id: number
+  date: string
+  text: string
+  sender: 'bot' | 'user'
+}
 
 const chatOutput: ChatListDetail[] = [
-    {
-        id: 1,
-        date: '10:00, 02 Agustus 2023',
-        text: 'WOIIIIIII!',
-        sender: 'bot'
-      },
-      {
-        id: 2,
-        date: '10:05, 02 Agustus 2023',
-        text: 'Pesanan saya gmn?',
-        sender: 'user'
-      },
-      {
-        id: 3,
-        date: '10:07, 02 Agustus 2023',
-        text: 'Mohon Bersabar',
-        sender: 'bot'
-      },
-      {
-        id: 4,
-        date: '10:10, 02 Agustus 2023',
-        text: 'Ok',
-        sender: 'user'
-      }
-  ];
+  {
+    id: 1,
+    date: '10:00, 02 Agustus 2023',
+    text: 'WOIIIIIII!',
+    sender: 'bot'
+  },
+  {
+    id: 2,
+    date: '10:05, 02 Agustus 2023',
+    text: 'Pesanan saya gmn?',
+    sender: 'user'
+  },
+  {
+    id: 3,
+    date: '10:07, 02 Agustus 2023',
+    text: 'Mohon Bersabar',
+    sender: 'bot'
+  },
+  {
+    id: 4,
+    date: '10:10, 02 Agustus 2023',
+    text: 'Ok',
+    sender: 'user'
+  }
+];
 
 const ChatUI: React.FC = () => {
   const theme = useTheme();
@@ -228,10 +224,10 @@ const ChatUI: React.FC = () => {
                   <Grid
                     container={true}
                     sx={{
-                    justifyContent: 'space-between',
-                    marginBottom: '0.75rem',
-                    marginTop: '-0.25rem'
-                  }}
+                      justifyContent: 'space-between',
+                      marginBottom: '0.75rem',
+                      marginTop: '-0.25rem'
+                    }}
                   >
                   <Grid item={true} sx={{ marginRight: '1rem' }} xs="auto">
                     <img alt="Profile" src={ProductImage} />
@@ -276,7 +272,7 @@ const ChatUI: React.FC = () => {
   <div key={message.id} style={{ paddingInline: '10px' }}>
     <Message message={message} />
   </div>
-))}
+      ))}
       </Box>
       <Paper
         component="form"
