@@ -11,7 +11,7 @@ export interface ChannelsDataModel {
     hashtag: string
     isHalal: string
     media: string
-    operationalTime: string
+    operationalHour: string
     pickUp: string
     preparationTime: string
     rating: string
