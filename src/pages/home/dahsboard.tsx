@@ -329,7 +329,9 @@ const Home: PageComponent = () => {
   const sortedDataMenu = useMemo(() => {
     const distances = calculateDistances();
 
-    return [...dataMenu].sort((a, b) => {
+    const activeData = dataMenu.filter((item) => item.isActive);
+
+    return [...activeData].sort((a, b) => {
       const distanceA = distances.find((item) => item.location.id === a.id)?.distance || 0;
       const distanceB = distances.find((item) => item.location.id === b.id)?.distance || 0;
 
@@ -337,20 +339,37 @@ const Home: PageComponent = () => {
     });
   }, [dataMenu]);
 
-  const getOpenAndClosedValues = (data: any, day: string) => {
+  const getOpenAndClosedValues = (data: ChannelsDataModel[], day: string) => {
     const openingHours = [];
 
     for (const restaurant of data) {
-      const operationalHours = JSON.parse(restaurant.metafields.operationalHour);
+      if (restaurant?.metafields?.operationalHour !== '') {
+        const operationalHours = JSON.parse(restaurant?.metafields?.operationalHour);
 
-      for (const schedule of operationalHours) {
-        if (schedule.day.toLowerCase() === day.toLowerCase()) {
+        let shouldAddDefault = false;
+        if (!operationalHours || operationalHours.length === 0) {
+          shouldAddDefault = true;
+        }
+
+        if (!shouldAddDefault) {
+          for (const schedule of operationalHours) {
+            if (schedule.day.toLowerCase() === day.toLowerCase()) {
+              openingHours.push({
+                closed: schedule.closed,
+                open: schedule.open,
+                restaurantName: restaurant.name
+              });
+              break;
+            }
+          }
+        }
+
+        if (shouldAddDefault) {
           openingHours.push({
-            closed: schedule.closed,
-            open: schedule.open,
+            closed: '',
+            open: '',
             restaurantName: restaurant.name
           });
-          break;
         }
       }
     }
