@@ -16,8 +16,10 @@ import type { PageComponent } from '@nxweb/react';
 
 import { Card, Grid, Typography } from '@components/material.js';
 import { useAuth } from '@hooks/use-auth';
-import { personalizedRecCommand } from '@models/personalized-recomendation/commands';
+import { PersonalizedRecomendationCommand } from '@models/personalized-recomendation/reducers';
 import { useStore } from '@models/store';
+
+import { ColorlibConnector, ColorlibStepIcon } from './stepper';
 
 interface FoodsDataModel {
   id: string
@@ -42,46 +44,29 @@ const DEFAULT_FOODS_LIST: FoodsListDataModel = {
 
 const PersonalizedRecomendation: PageComponent = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
+
   const [store, dispatch] = useStore((state) => state?.personalizedRec);
-  const navigate = useNavigate();
-  const [foodsList, setFoodsList] =
-    useState<FoodsListDataModel>(DEFAULT_FOODS_LIST);
+  const [foodsList, setFoodsList] = useState<FoodsListDataModel>(DEFAULT_FOODS_LIST);
+  const userId = 'VXNlcjoyMDUwMjQwNjE5';
+
   const [activeStep, setActiveStep] = useState(0);
 
-  const handleStep = (step: number) => () => {
-    setActiveStep(step);
+  const getFoodsList = (mealType: string) => {
+    switch (mealType) {
+      case 'breakfast':
+        return foodsList.breakfast;
+      case 'lunch':
+        return foodsList.lunch;
+      case 'dinner':
+        return foodsList.dinner;
+
+      default:
+        return [];
+    }
   };
-
-  /*
-   * Const handleFoodItemClick = (clickedItem: FoodsDataModel, mealType: string) => {
-   *   setFoodsList((prevFoodsList) => {
-   *     switch (mealType) {
-   *       case 'breakfast':
-   *         return {
-   *           ...prevFoodsList,
-   *           breakfast: [...prevFoodsList.breakfast, clickedItem]
-   *         };
-   *       case 'lunch':
-   *         return {
-   *           ...prevFoodsList,
-   *           lunch: [...prevFoodsList.lunch, clickedItem]
-   *         };
-   *       case 'dinner':
-   *         return {
-   *           ...prevFoodsList,
-   *           dinner: [...prevFoodsList.dinner, clickedItem]
-   *         };
-   */
-
-  /*
-   *       default:
-   *         return prevFoodsList;
-   *     }
-   *   });
-   * };
-   */
 
   const handleFoodItemClick = (clickedItem: FoodsDataModel, mealType: string) => {
     setFoodsList((prevFoodsList) => {
@@ -93,8 +78,8 @@ const PersonalizedRecomendation: PageComponent = () => {
       if (isItemAlreadySelected) {
         updatedFoodsList[mealType] = selectedItems.filter((item) => item.id !== clickedItem.id);
       } else {
-        const selectedItem = store?.personalizedRecOutput?.find(
-          (item) => item.id === clickedItem.id
+        const selectedItem = store?.recomendationList?.find(
+          (item: FoodsDataModel) => item.id === clickedItem.id
         );
 
         if (selectedItem) {
@@ -102,43 +87,31 @@ const PersonalizedRecomendation: PageComponent = () => {
         }
       }
 
-      // Console.log('Updated foods list:', updatedFoodsList);
-
       return updatedFoodsList;
     });
   };
 
   useEffect(() => {
-    if (token) {
-      dispatch(personalizedRecCommand.personalizedRecLoad(token))
-
-        .catch((err: unknown) => {
-          console.error(err);
-        });
-
-      return () => {
-        dispatch(personalizedRecCommand.personalizedRecClear());
-      };
-    }
-  }, []);
-
-  /*
-   * UseEffect(() => {
-   *   if (token) {
-   *     setFoodsList(store?.personalizedRecOutput || );
-   *   }
-   */
-
-  // }, []);
-
-  // console.log('cekstore', store);
+    dispatch(
+      PersonalizedRecomendationCommand.getPersonalizeRecomendation()
+    );
+  }, [dispatch]);
 
   const handleNext = () => {
+    const payload = {
+      id: userId,
+      metadataInput: [
+        { key: 'breakfast', value: JSON.stringify(foodsList.breakfast) },
+        { key: 'lunch', value: JSON.stringify(foodsList.lunch) },
+        { key: 'dinner', value: JSON.stringify(foodsList.dinner) }
+      ]
+    };
     if (activeStep === 0) {
       setActiveStep(1);
     } else if (activeStep === 1) {
       setActiveStep(2);
     } else {
+      PersonalizedRecomendationCommand.postPersonalizeRecomendation(payload, token || '');
       setTimeout(() => {
         navigate('/location-by-gps');
       });
@@ -154,6 +127,69 @@ const PersonalizedRecomendation: PageComponent = () => {
     } else if (activeStep === 2) {
       setActiveStep(1);
     }
+  };
+
+  const renderCard = (mealType: string) => {
+    const selectedFoodsList = getFoodsList(mealType);
+
+    return (
+      <Box>
+        <Grid container={true} spacing={2}>
+          {store?.recomendationList?.map((obj: FoodsDataModel) => {
+            const isItemSelected = selectedFoodsList.some(
+              (item) => Number(item.id) === Number(obj.id)
+            );
+
+            return (
+              <Grid
+                item={true}
+                key={obj.id}
+                sx={{ display: 'flex', justifyContent: 'center' }}
+                xs={4}
+              >
+                <Card
+                  sx={{
+                    alignItems: 'center',
+                    border: isItemSelected
+                      ? '2px solid #3f51b5'
+                      : '2px solid transparent',
+                    borderRadius: '8px',
+                    boxShadow: isItemSelected
+                      ? '0px 0px 15px rgba(0, 0, 0, 0.3)'
+                      : '0px 0px 5px rgba(16, 24, 40, 0.1)',
+                    cursor: isItemSelected ? 'not-allowed' : 'pointer',
+                    display: 'block',
+                    justifyContent: 'center',
+                    marginBottom: '0.625rem',
+                    opacity: isItemSelected ? 0.7 : 1,
+                    padding: '0.5rem 1rem'
+                  }}
+                  onClick={() => handleFoodItemClick(obj, mealType)}
+                >
+                  <Avatar
+                    src={obj.photo}
+                    sx={{
+                      height: '66px',
+                      marginBottom: '0.5rem',
+                      width: '66px'
+                    }} />
+                  <Typography
+                    sx={{
+                      fontSize: '10px',
+                      fontWeight: 'bold',
+                      lineHeight: '15px',
+                      textAlign: 'center'
+                    }}
+                  >
+                    {obj.title}
+                  </Typography>
+                </Card>
+              </Grid>
+            );
+          })}
+        </Grid>
+      </Box>
+    );
   };
 
   return (
@@ -178,16 +214,16 @@ const PersonalizedRecomendation: PageComponent = () => {
         <Stepper
           activeStep={activeStep}
           alternativeLabel={true}
-          // Connector={<StepConnector style={{ backgroundColor: theme.palette.secondary.main }} />} // Ganti warna garis antara langkah-langkah
+          connector={<ColorlibConnector />}
           nonLinear={true}
         >
           {STEPS.map((label, index) => (
             <Step active={index === activeStep} completed={index < activeStep} key={label}>
-              <StepLabel>
+              <StepLabel StepIconComponent={ColorlibStepIcon}>
                 <Typography
                   sx={{
-                    color: index === activeStep ? theme.palette.primary.main : index < activeStep ? theme.palette.primary.main : theme.palette.grey[600],
-                    fontFamily: theme.typography.fontFamily?.split(',')[1].trim()
+                    color: index === activeStep ? theme.palette.primary.main : index < activeStep ? theme.palette.primary.main : theme.palette.grey[600]
+                    // FontFamily: theme.typography.fontFamily?.split(',')[1].trim()
                   }}
                   variant="body1"
                 >
@@ -198,182 +234,9 @@ const PersonalizedRecomendation: PageComponent = () => {
           ))}
         </Stepper>
       </Box>
-      {activeStep === 0
-        ? (
-          <Box>
-            <Grid container={true} spacing={2}>
-              {store?.personalizedRecOutput?.map((obj) => {
-                const isItemSelected = foodsList.breakfast.some(
-                  (item) => Number(item.id) === Number(obj.id)
-                );
-
-                return (
-                  <Grid
-                    item={true}
-                    key={obj.id}
-                    sx={{ display: 'flex', justifyContent: 'center' }}
-                    xs={4}
-                  >
-                    <Card
-                      sx={{
-                        alignItems: 'center',
-                        border: isItemSelected
-                          ? '2px solid #3f51b5'
-                          : '2px solid transparent',
-                        borderRadius: '8px',
-                        boxShadow: isItemSelected
-                          ? '0px 0px 15px rgba(0, 0, 0, 0.3)'
-                          : '0px 0px 5px rgba(0, 0, 0, 0.3)',
-                        cursor: isItemSelected ? 'not-allowed' : 'pointer',
-                        display: 'block',
-                        justifyContent: 'center',
-                        marginBottom: '0.625rem',
-                        opacity: isItemSelected ? 0.7 : 1,
-                        padding: '0.5rem 1rem'
-                      }}
-                      onClick={() => handleFoodItemClick(obj, 'breakfast')}
-                    >
-                      <Avatar
-                        src={obj.photo}
-                        sx={{
-                          height: '66px',
-                          marginBottom: '0.5rem',
-                          width: '66px'
-                        }} />
-                      <Typography
-                        sx={{
-                          fontSize: '10px',
-                          fontWeight: 'bold',
-                          lineHeight: '15px',
-                          textAlign: 'center'
-                        }}
-                      >
-                        {obj.title}
-                      </Typography>
-                    </Card>
-                  </Grid>
-                );
-              })}
-            </Grid>
-          </Box>
-        )
-        : activeStep === 1
-          ? (
-            <Box>
-              <Grid container={true} spacing={2}>
-                {store?.personalizedRecOutput?.map((obj) => {
-                  const isItemSelected = foodsList.lunch.some(
-                    (item) => Number(item.id) === Number(obj.id)
-                  );
-
-                  return (
-                    <Grid
-                      item={true}
-                      key={obj.id}
-                      sx={{ display: 'flex', justifyContent: 'center' }}
-                      xs={4}
-                    >
-                      <Card
-                        sx={{
-                          alignItems: 'center',
-                          border: isItemSelected
-                            ? '2px solid #3f51b5'
-                            : '2px solid transparent',
-                          borderRadius: '8px',
-                          boxShadow: isItemSelected
-                            ? '0px 0px 15px rgba(0, 0, 0, 0.3)'
-                            : '0px 0px 5px rgba(0, 0, 0, 0.3)',
-                          cursor: isItemSelected ? 'not-allowed' : 'pointer',
-                          display: 'block',
-                          justifyContent: 'center',
-                          marginBottom: '0.625rem',
-                          opacity: isItemSelected ? 0.7 : 1,
-                          padding: '0.5rem 1rem'
-                        }}
-                        onClick={() => handleFoodItemClick(obj, 'lunch')}
-                      >
-                        <Avatar
-                          src={obj.photo}
-                          sx={{
-                            height: '66px',
-                            marginBottom: '0.5rem',
-                            width: '66px'
-                          }} />
-                        <Typography
-                          sx={{
-                            fontSize: '10px',
-                            fontWeight: 'bold',
-                            lineHeight: '15px',
-                            textAlign: 'center'
-                          }}
-                        >
-                          {obj.title}
-                        </Typography>
-                      </Card>
-                    </Grid>
-                  );
-                })}
-              </Grid>
-            </Box>
-          )
-          : (
-            <Box>
-              <Grid container={true} spacing={2}>
-                {store?.personalizedRecOutput?.map((obj) => {
-                  const isItemSelected = foodsList.dinner.some(
-                    (item) => Number(item.id) === Number(obj.id)
-                  );
-
-                  return (
-                    <Grid
-                      item={true}
-                      key={obj.id}
-                      sx={{ display: 'flex', justifyContent: 'center' }}
-                      xs={4}
-                    >
-                      <Card
-                        sx={{
-                          alignItems: 'center',
-                          border: isItemSelected
-                            ? '2px solid #3f51b5'
-                            : '2px solid transparent',
-                          borderRadius: '8px',
-                          boxShadow: isItemSelected
-                            ? '0px 0px 15px rgba(0, 0, 0, 0.3)'
-                            : '0px 0px 5px rgba(0, 0, 0, 0.3)',
-                          cursor: isItemSelected ? 'not-allowed' : 'pointer',
-                          display: 'block',
-                          justifyContent: 'center',
-                          marginBottom: '0.625rem',
-                          opacity: isItemSelected ? 0.7 : 1,
-                          padding: '0.5rem 1rem'
-                        }}
-                        onClick={() => handleFoodItemClick(obj, 'dinner')}
-                      >
-                        <Avatar
-                          src={obj.photo}
-                          sx={{
-                            height: '66px',
-                            marginBottom: '0.5rem',
-                            width: '66px'
-                          }} />
-                        <Typography
-                          sx={{
-                            fontSize: '10px',
-                            fontWeight: 'bold',
-                            lineHeight: '15px',
-                            textAlign: 'center'
-                          }}
-                        >
-                          {obj.title}
-                        </Typography>
-                      </Card>
-                    </Grid>
-                  );
-                })}
-              </Grid>
-            </Box>
-          )}
+      {activeStep === 0 && renderCard('breakfast')}
+      {activeStep === 1 && renderCard('lunch')}
+      {activeStep === 2 && renderCard('dinner')}
       <Box
         sx={{
           alignItems: 'center',

@@ -6,24 +6,19 @@ import type { RootModel } from '@models/types.js';
 
 import { PersonalizedRecActionType } from './types.js';
 
-import type { PersonalizedRecAction, PersonalizedRecModel } from './types.js';
+import type { PersonalizedRecAction, PersonalRecomendationModel } from './types.js';
 
 const personalizedRecCommand = {
-  personalizedRecClear: (): PersonalizedRecAction => {
-    return {
-      type: PersonalizedRecActionType.PersonalizedRecClear
-    };
-  },
   personalizedRecLoad: (token: string) => {
     return async (dispatch) => {
       try {
         const res = await getPersonalizedRecMenu(token);
 
         if (res) {
-          const value = res as PersonalizedRecModel;
+          const value = res as PersonalRecomendationModel;
 
           dispatch({
-            type: PersonalizedRecActionType.PersonalizedRecLoad,
+            type: PersonalizedRecActionType.GetPersonalizedRecomendation,
             value
           });
         }

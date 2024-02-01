@@ -1,6 +1,3 @@
-/* eslint-disable sort-keys */
-/* eslint-disable no-console */
-/* eslint-disable linebreak-style */
 import { apiFetch } from '@api/base.js';
 import type { TAction, TDispatch } from '@models/types';
 

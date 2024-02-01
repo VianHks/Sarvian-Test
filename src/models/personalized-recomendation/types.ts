@@ -4,29 +4,22 @@ interface PersonalizedRecMenu {
   id: string
   photo: string
   title: string
-
 }
 
-interface PersonalizedRecModel {
-
-  personalizedRecOutput?: PersonalizedRecMenu[]
-
+interface PersonalRecomendationModel {
+  recomendationList?: PersonalizedRecMenu[]
 }
 
 enum PersonalizedRecActionType {
-  PersonalizedRecLoad = 'PersonalizedRec-load',
-  PersonalizedRecClear = 'PersonalizedRec-clear'
+  GetPersonalizedRecomendation = '⌘➝PersonalizedRecomendation➝GetPersonalizedRecomendation'
 }
 
-  type PersonalizedRecAction = {
+type PersonalizedRecAction = {
 
-    type: PersonalizedRecActionType.PersonalizedRecLoad
-    value?: PersonalizedRecModel
+  data?: PersonalRecomendationModel
+  type: PersonalizedRecActionType.GetPersonalizedRecomendation
 
-  } | {
-    type: PersonalizedRecActionType.PersonalizedRecClear
-
-  };
+};
 
 export { PersonalizedRecActionType };
-export type { PersonalizedRecModel, PersonalizedRecAction };
+export type { PersonalRecomendationModel, PersonalizedRecAction };

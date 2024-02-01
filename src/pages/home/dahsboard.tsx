@@ -259,9 +259,9 @@ const Home: PageComponent = () => {
     setShipmentMethode(method);
 
     switch (method) {
-      case 'Pesan Antar':
-        setDataMenu([...deliveryData]);
-        break;
+      // case 'Pesan Antar':
+      //   setDataMenu([...deliveryData]);
+      //   break;
       case 'Pick Up':
         setDataMenu([...pickUpData]);
         break;
@@ -431,7 +431,7 @@ const Home: PageComponent = () => {
         onClick={handleSearch} />
       <Grid container={true} spacing={1} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: shipmentMethode === 'Pesan Antar' ? '1rem' : '2rem' }}>
         <Grid item={true}>
-          <Chip color={shipmentMethode === 'Pesan Antar' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={pesanAntarIcon} />} label="Pesan Antar" sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} onClick={() => handleShipmentMethodChange('Pesan Antar')} />
+          <Chip color={shipmentMethode === 'Pesan Antar' ? 'primary' : 'default'} disabled={true} icon={<img alt="icon" sizes="large" src={pesanAntarIcon} />} label="Pesan Antar" sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} onClick={() => handleShipmentMethodChange('Pesan Antar')} />
         </Grid>
         <Grid item={true}>
           <Chip color={shipmentMethode === 'Pick Up' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={pickUpIcon} />} label="Pick Up" sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} onClick={() => handleShipmentMethodChange('Pick Up')} />

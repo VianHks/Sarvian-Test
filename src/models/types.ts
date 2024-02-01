@@ -7,7 +7,7 @@ import type { FAQAction, FAQModel } from './faq/types.js';
 import type { HalamanRestoAction, HalamanRestoModel } from './halaman-resto/types.js';
 import type { HomeAction, HomeModel } from './home/types.js';
 import type { OrderAction, OrderModel } from './order/types.js';
-import type { PersonalizedRecAction, PersonalizedRecModel } from './personalized-recomendation/types.js';
+import type { PersonalizedRecAction, PersonalRecomendationModel } from './personalized-recomendation/types.js';
 import type { ProductViewsAction, ProductViewsModel } from './product-view/types.js';
 import type { ProductsAction, ProductsModel } from './products/types.js';
 import type { RatingAction, RatingModel } from './rating/types.js';
@@ -35,7 +35,6 @@ export interface PagedModel<T> {
 export interface RootModel {
   /*
    * Checkout?: CheckoutModel
-  
    * halamanResto?: HalamanRestoModel
    */
   home?: HomeModel
@@ -48,7 +47,7 @@ export interface RootModel {
   productView?: ProductViewsModel
   halamanResto?: HalamanRestoModel
   checkout?: CheckoutModel
-  personalizedRec?: PersonalizedRecModel
+  personalizedRec?: PersonalRecomendationModel
   // Beranda?: BerandaModel
   order?: OrderModel
   rating?: RatingModel

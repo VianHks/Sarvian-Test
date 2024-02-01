@@ -655,7 +655,7 @@ interface OrderModel {
   cart?: CartDataModel
   checkoutDetails?: CheckoutDetailsDataModel
   orderDetails?: OrderDetailsDataModel
- 
+
   orderOutput?: Order[]
   orderDetailOutput?: OrderListDetail
   orderListOutput?: OrderList
@@ -678,18 +678,6 @@ type OrderAction =
     type: OrderActionType.GetCart
   } | {
     data: OrderModel
-    type: OrderActionType.GetCheckoutDetails
-  } | {
-    data: OrderModel
-    type: OrderActionType.GetOrderDetails
-  } | {
-    type: OrderActionType.OrderClear
-  } | {
-    data: OrderModel
-    type: OrderActionType.OrderLoad
-
-  } | {
-    data: OrderModel
     type: OrderActionType.GetCart
   } | {
     data: OrderModel
@@ -697,14 +685,25 @@ type OrderAction =
 
   } | {
     data: OrderModel
+    type: OrderActionType.GetCheckoutDetails
+  } | {
+    data: OrderModel
     type: OrderActionType.GetOrderDetails
 
+  } | {
+    data: OrderModel
+    type: OrderActionType.GetOrderDetails
   } | {
     data: OrderModel
     type: OrderActionType.OrderDetailLoad
   } | {
     data: OrderModel
     type: OrderActionType.OrderList
+  } | {
+    data: OrderModel
+    type: OrderActionType.OrderLoad
+  } | {
+    type: OrderActionType.OrderClear
   } | {
     type: OrderActionType.OrderClear
   } | {

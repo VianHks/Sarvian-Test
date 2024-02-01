@@ -14,15 +14,14 @@ import { homeCommand } from './home/commands.js';
 import { homeCommands, HomeReducer } from './home/reducers.js';
 import { orderCommand } from './order/commands.js';
 import { OrderReducer } from './order/reducers.js';
-import { personalizedRecCommand } from './personalized-recomendation/commands.js';
-import { PersonalizedRecReducer } from './personalized-recomendation/reducers.js';
+import { PersonalizedRecomendationCommand, PersonalizedRecReducer, PersonalRecomendationDefault } from './personalized-recomendation/reducers.js';
 import { ProductViewReducer, ProductViewsCommand, ProductViewsDefault } from './product-view/reducers.js';
 import { productsCommand } from './products/commands.js';
 import { productsReducer } from './products/reducers.js';
-
-import type { RootAction, RootModel } from './types.js';
 import { RatingCommand } from './rating/commands.js';
 import { RatingReducer } from './rating/reducers.js';
+
+import type { RootAction, RootModel } from './types.js';
 
 // ** Init reducers
 const rootReducer = combineReducers({
@@ -40,9 +39,9 @@ const rootReducer = combineReducers({
 
 // ** Init models
 const rootModel: RootModel = {
-  rating: {},
-
-  productView: ProductViewsDefault
+  personalizedRec: PersonalRecomendationDefault,
+  productView: ProductViewsDefault,
+  rating: {}
 };
 
 // ** Init commands
@@ -52,7 +51,7 @@ const rootCommand = {
   halamanResto: halamanRestoCommand,
   home: homeCommands,
   order: orderCommand,
-  personalizedRec: personalizedRecCommand,
+  personalizedRec: PersonalizedRecomendationCommand,
   products: productsCommand,
   productView: ProductViewsCommand,
   rating: RatingCommand

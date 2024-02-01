@@ -10,6 +10,7 @@ interface BlankLayoutProps extends PropsWithChildren {
 // Styled component for Blank Layout component
 const BlankLayoutWrapper = styled(Box)<BoxProps>(({ theme }) => ({
   height: '100vh',
+  backgroundColor: '#F9FAFB',
 
   // For V1 Blank layout pages
   '& .content-center': {
