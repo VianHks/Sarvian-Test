@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
@@ -34,12 +34,14 @@ import {
 import type { PageComponent } from '@nxweb/react';
 
 import { useAuth } from '@hooks/use-auth';
+import { halamanRestoCommand } from '@models/halaman-resto/commands';
 import { ChannelCommand } from '@models/halaman-resto/reducers';
 import { OrderCommand } from '@models/order/reducers';
 import { RatingCommand } from '@models/rating/commands';
 import { useStore } from '@models/store';
 
 import FloatingShoppingButton from './floatingshopping-button';
+import ListMenu from './listmenu';
 import Rating from './rating';
 
 import ProfilFoto from '@assets/images/Orang.svg';
@@ -128,6 +130,11 @@ interface LinesModel {
   isAvailableForPurchase: boolean
 }
 
+const SESSION_STORAGE_KEYS = {
+  CHECKOUT: 'CheckoutId',
+  COLIDS: 'ColIds'
+};
+
 const DefaultLines: LinesModel = {
   metadata: [
     {
@@ -156,7 +163,6 @@ interface PayloadDataModel {
   lines: LinesModel[]
   userId: string
 }
-
 const DATA: PayloadDataModel = {
   after: '',
   channel: 'makan',
@@ -166,11 +172,6 @@ const DATA: PayloadDataModel = {
   userId: 'string'
 };
 
-const SESSION_STORAGE_KEYS = {
-  CHECKOUT: 'CheckoutId',
-  COLIDS: 'ColIds'
-};
-
 const HalamanResto: PageComponent = () => {
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
@@ -178,10 +179,16 @@ const HalamanResto: PageComponent = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const navigate = useNavigate();
+
+  const [formData, setFormData] = useState(DATA);
+  const [colIds, setColIds] = useState<{ id: string, name: string }[]>([]);
   const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_KEYS.CHECKOUT) ?? '';
-  const colIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_KEYS.COLIDS) ?? '';
+  // Const colIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_KEYS.COLIDS) ?? '';
   const [isLoading, setIsLoading] = useState(false);
-  const channelId = 'Q2hhbm5lbDo0';
+
+  const [searchParams] = useSearchParams();
+  const channelId = searchParams.get('id');
+  const channelName = 'makan';
   const daysOfWeek = [
     'minggu',
     'senin',
@@ -201,7 +208,7 @@ const HalamanResto: PageComponent = () => {
   const filteredJadwal = jadwalOperasional.filter((resto: RestoSchedule) => {
     return resto.day.toLowerCase() === currentDay;
   });
-  const [colIds, setColIds] = useState<{ id: string, name: string }[]>([]);
+
   const [selectedValue, setSelectedValue] = useState<string>('');
   const [showAlert, setShowAlert] = useState(true);
   const filteredCategories =
@@ -209,78 +216,12 @@ const HalamanResto: PageComponent = () => {
       (category) => category.products.totalCount > 0
     ) || [];
 
-  const [formData, setFormData] = useState(DATA);
-
-  const calculateTotalAmount = (lines: LinesModel[] | undefined): number => {
-    if (!lines) {
-      return 0;
-    }
-
-    return lines.reduce((total, line) => {
-      const price = parseFloat(line.price) || 0;
-      const lineTotal = price * line.quantity;
-
-      return total + lineTotal;
-    }, 0);
-  };
-
-  const calculateTotalItems = (lines: LinesModel[] | undefined): number => {
-    if (!lines) {
-      return 0;
-    }
-
-    return lines.reduce((total, line) => {
-      return total + line.quantity;
-    }, 0);
-  };
-
-  const handleIncrement = (id: string) => {
-    setFormData((prevFormData) => {
-      const updatedFormData = { ...prevFormData };
-
-      const lineToUpdate = updatedFormData.lines.find(
-        (line) => line.variantId === id
-      );
-
-      if (lineToUpdate) {
-        lineToUpdate.quantity = Math.max(lineToUpdate.quantity + 1, 0);
-
-        setTotalItems((prevTotalItems) => prevTotalItems + 1);
-      }
-
-      const newTotalAmount = calculateTotalAmount(updatedFormData.lines);
-
-      setTotalAmount(newTotalAmount);
-
-      return updatedFormData;
-    });
-  };
-
-  const handleDecrement = (id: string) => {
-    setFormData((prevFormData) => {
-      const updatedFormData = { ...prevFormData };
-
-      if (updatedFormData.lines) {
-        const lineToUpdate = updatedFormData.lines.find(
-          (line) => line.variantId === id
-        );
-
-        if (lineToUpdate && lineToUpdate.quantity > 0) {
-          lineToUpdate.quantity = Math.max(lineToUpdate.quantity - 1, 0);
-          setTotalItems((prevTotalItems) => Math.max(prevTotalItems - 1, 0));
-        }
-      }
-
-      const newTotalAmount = calculateTotalAmount(updatedFormData.lines);
-
-      setTotalAmount(newTotalAmount);
-
-      return updatedFormData;
-    });
-  };
-
   const handleLihatSemuaClick = () => {
-    navigate('./ulasan-rating');
+    navigate(`./ulasan-rating?id=${channelId}`);
+  };
+
+  const handleBack = () => {
+    navigate(-1);
   };
 
   const handleResponse = (res: string | null | undefined) => {
@@ -301,24 +242,59 @@ const HalamanResto: PageComponent = () => {
     }
   };
 
+  const calculateTotal = (lines: LinesModel[]) => {
+    let totalAmount = 0;
+    let totalQuantity = 0;
+
+    lines.forEach((line) => {
+      const price = parseFloat(line.price);
+      const quantity = line.quantity || 0;
+
+      totalAmount += price * quantity;
+      totalQuantity += quantity;
+    });
+
+    return { totalAmount, totalQuantity };
+  };
+
+  useEffect(() => {
+    if (store?.halamanResto?.linesOutput) {
+      const { totalAmount, totalQuantity } = calculateTotal(store.halamanResto.linesOutput);
+
+      setTotalAmount(totalAmount);
+      setTotalItems(totalQuantity);
+    }
+  }, [store?.halamanResto?.linesOutput]);
+
   const handleShoppingButtonClick = () => {
     navigate('/keranjang');
   };
 
-  const handleCardClick = (variantId: string, productId: string) => {
-    navigate(`/product-view?productId=${productId}&variantId?=${variantId}`);
-  };
-
   const handleLanjutPembayaranClick = () => {
     setIsLoading(true);
-    const filteredLines = formData.lines.filter(
-      (line) => line.quantity > 0 && !line.lineId
-    );
+    const filteredPutLines = (store?.halamanResto?.linesOutput || []).map(
+      (line) => {
+        return {
+          metadata: line?.metadata || [],
+          lineId: line?.lineId || '',
+          note: line?.note || '',
+          price: line?.price || '0',
+          quantity: line?.quantity || 0,
+          variantId: line?.variantId || '',
+          update: line?.update || '',
+          colectionId: line?.colectionId || '',
+          productId: line?.productId || '',
+          thumbnail: line?.thumbnail || '',
+          name: line?.name || '',
+          isAvailableForPurchase: line?.isAvailableForPurchase || false
+        };
+      }
+    ).filter((line) => line.quantity > 0 && line.lineId);
 
-    // Const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
+    const checkoutIdFromStorage = sessionStorage.getItem('CheckoutId');
 
     if (checkoutIdFromStorage) {
-      const linesToUpdate = formData.lines.filter((line) => line.lineId);
+      const linesToUpdate = filteredPutLines.filter((line) => line.lineId);
       const paramUpdate = {
         checkoutId: checkoutIdFromStorage,
         lines: linesToUpdate.map((line) => ({
@@ -329,19 +305,40 @@ const HalamanResto: PageComponent = () => {
         }))
       };
 
+      console.log('cekparamupdate', paramUpdate);
+
       ChannelCommand.putCheckoutLines(paramUpdate, token || '').then((res) => {
         handleResponse(res);
       });
     }
 
-    if (filteredLines.length > 0) {
+    const filteredPostLines = (store?.halamanResto?.linesOutput || []).map(
+      (line) => {
+        return {
+          metadata: line?.metadata || [],
+          lineId: line?.lineId || '',
+          note: line?.note || '',
+          price: line?.price || '0',
+          quantity: line?.quantity || 0,
+          variantId: line?.variantId || '',
+          update: line?.update || '',
+          colectionId: line?.colectionId || '',
+          productId: line?.productId || '',
+          thumbnail: line?.thumbnail || '',
+          name: line?.name || '',
+          isAvailableForPurchase: line?.isAvailableForPurchase || false
+        };
+      }
+    ).filter((line) => line.quantity > 0 && !line.lineId);
+
+    if (filteredPostLines.length > 0) {
       const paramCreate = {
         after: '',
         channel: 'makan',
         deliveryMethodId:
-          'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
+            'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
         first: 100,
-        lines: filteredLines.map((line) => ({
+        lines: filteredPostLines.map((line) => ({
           metadata: line.metadata,
           price: line.price,
           quantity: line.quantity,
@@ -349,6 +346,8 @@ const HalamanResto: PageComponent = () => {
         })),
         userId: 'VXNlcjoyMDUwMjQwNjE5'
       };
+
+      console.log('cekparamPost', paramCreate);
 
       ChannelCommand.postCreateCheckout(paramCreate, token || '').then(
         (res) => {
@@ -369,148 +368,43 @@ const HalamanResto: PageComponent = () => {
     };
 
     dispatch(ChannelCommand.getCollections(param, token || ''));
+
     const paramMetadata = {
       after: '',
       channel: 'makan',
       filterKey: 'recomendation',
       filterValue: 'true',
-      first: 100
+      first: 10
     };
 
     dispatch(
       ChannelCommand.getCollectionsbyMetadata(paramMetadata, token || '')
     );
 
-    // Const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
-    if (checkoutIdFromStorage !== null) {
+    const emailUser = 'ridwan.azis@navcore.com';
+    const paramChekoutList = {
+      channel: channelName,
+      customer: emailUser
+    };
+
+    if (emailUser) {
       dispatch(
-        OrderCommand.getCheckoutDetails(checkoutIdFromStorage, token || '')
+        ChannelCommand.getCheckoutList(paramChekoutList, token || '')
       );
     }
 
-    dispatch(ChannelCommand.getChannelDetail(channelId, token || ''));
-    dispatch(RatingCommand.RatingLoad(channelId)).catch((err: unknown) => {
-      console.error(err);
-    });
+    if (channelId) {
+      dispatch(ChannelCommand.getChannelDetail(channelId, token || ''));
+
+      dispatch(RatingCommand.RatingLoad(channelId)).catch((err: unknown) => {
+        console.error(err);
+      });
+    }
 
     return () => {
       dispatch(RatingCommand.RatingClear());
     };
   }, [dispatch, token]);
-
-  useEffect(() => {
-    const collectionIds = (store?.halamanResto?.productListOutput?.data || [])
-      .filter((category) => category.products.totalCount > 0)
-      .map((category) => ({
-        id: category.id.toString(),
-        name: category.name
-      }));
-
-    setColIds(collectionIds);
-
-    const colIdsOnly = colIds.map((colObj) => colObj.id);
-    if (colIds.length > 0) {
-      const paramCollection = {
-        after: '',
-        channel: 'makan',
-        collection: colIdsOnly,
-        direction: 'ASC',
-        field: 'NAME',
-        first: 100
-      };
-
-      dispatch(
-        ChannelCommand.getproductbyCollection(paramCollection, token || '')
-      );
-    }
-  }, [store?.halamanResto?.productListOutput?.data]);
-
-  useEffect(() => {
-    if (store?.halamanResto?.productByCollectionsOutput) {
-      const linesUpdate = Array.from(
-        { length: store?.halamanResto?.productByCollectionsOutput.totalCount },
-        (_, index) => {
-          const matchingColId = colIds.find((colId) => store?.halamanResto?.productByCollectionsOutput?.data[
-            index
-          ]?.collections.some((collection) => collection.id === colId.id));
-
-          const colectionIds = matchingColId?.id || '';
-          const targetId = matchingColId
-            ? store?.halamanResto?.productByCollectionsOutput?.data[index]
-              ?.variants[0].id || ''
-            : '';
-          const matchingProduct =
-            store?.halamanResto?.productByCollectionsOutput?.data.find(
-              (product) => product.variants[0].id === targetId
-            );
-
-          const productIds =
-            store?.halamanResto?.productByCollectionsOutput?.data[index].id ||
-            '';
-          const defaultPrice =
-            matchingProduct?.pricing?.priceRange?.start?.net?.amount || 0;
-
-          const defaultName = matchingProduct?.name || '';
-          const defaultThumbnail = matchingProduct?.thumbnail.url || '';
-          const defaultAvailableforPurchase =
-            matchingProduct?.channelListings[0]?.isAvailableForPurchase ||
-            false;
-
-          const initialQuantity =
-            store?.order?.checkoutDetails?.data?.checkout?.lines &&
-            store.order.checkoutDetails.data.checkout &&
-            store.order.checkoutDetails.data.checkout.lines &&
-            store.order.checkoutDetails.data.checkout.lines.length > 0
-              ? store.order.checkoutDetails.data.checkout.lines.find(
-                (line) => line.variant.id === targetId
-              )?.quantity || 0
-              : 0;
-
-          const initialLineId =
-            store?.order?.checkoutDetails?.data?.checkout?.lines &&
-            store.order.checkoutDetails.data.checkout.lines.length > 0
-              ? store.order.checkoutDetails.data.checkout.lines.find(
-                (line) => line?.variant?.id === targetId
-              )?.id || ''
-              : '';
-          const initialNote =
-            store?.order?.checkoutDetails?.data?.checkout?.lines &&
-            store.order.checkoutDetails.data.checkout.lines.length > 0
-              ? store.order.checkoutDetails.data.checkout.lines.find(
-                (line) => line.variant.id === targetId
-              )?.metafields?.note || ''
-              : '';
-
-          return {
-            ...DefaultLines,
-            variantId: targetId,
-            price: String(defaultPrice),
-            quantity: initialQuantity,
-            lineId: initialLineId,
-            note: initialNote,
-            colectionId: colectionIds,
-            productId: productIds,
-            thumbnail: defaultThumbnail,
-            name: defaultName,
-            isAvailableForPurchase: defaultAvailableforPurchase
-          };
-        }
-      );
-
-      setFormData({ ...formData, lines: linesUpdate });
-    }
-  }, [
-    store?.halamanResto?.productByCollectionsOutput,
-    store?.order?.checkoutDetails?.data?.checkout
-  ]);
-
-  useEffect(() => {
-    const initialTotalAmount = calculateTotalAmount(formData.lines);
-    const initialTotalItems = calculateTotalItems(formData.lines);
-
-    setTotalAmount(initialTotalAmount);
-    setTotalItems(initialTotalItems);
-  }, [formData]);
 
   const scrollToKategoriMenu = (event: SelectChangeEvent<string>) => {
     const selectedCategory = event.target.value as string;
@@ -531,6 +425,10 @@ const HalamanResto: PageComponent = () => {
     }
   }, [isLoading, showAlert]);
 
+  console.log('STOREMAIN', store);
+
+  console.log('cekChannelIddariParam', channelId);
+
   return (
     <>
       <div>
@@ -542,13 +440,14 @@ const HalamanResto: PageComponent = () => {
             size="large"
             sx={{ mr: -2, marginTop: '0.2rem' }}
           >
-            <ArrowBackFilled />
+            <ArrowBackFilled onClick={handleBack}/>
           </IconButton>
           <Box
             sx={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between'
+              justifyContent: 'space-between',
+              marginLeft: '0.5rem'
             }}
           >
             <FormControl size="small" sx={{ backgroundColor: '#D5ECFE' }}>
@@ -688,7 +587,7 @@ const HalamanResto: PageComponent = () => {
                           ? (
                           <Typography
                             color="neutral-70"
-                            sx={{ marginBottom: '0.125' }}
+                            sx={{ marginBottom: '0.125', fontSize: '0.75rem' }}
                             variant="body2"
                           >
                             Verified by TokoRumahan
@@ -905,198 +804,7 @@ const HalamanResto: PageComponent = () => {
           >
             Menu
           </Typography>
-          {colIds.map((colId, colIndex) => (
-            <Fragment key={colIndex}>
-              <Typography
-                id="tes"
-                sx={{
-                  fontWeight: 'medium',
-                  textAlign: 'start',
-                  marginBottom: '0.25rem'
-                }}
-                variant="h5"
-              >
-                {colId.name}
-              </Typography>
-              {formData?.lines
-                ?.filter((obj) => (Array.isArray(obj.colectionId)
-                  ? obj.colectionId.some(
-                    (collection) => collection === colId.id
-                  )
-                  : true))
-                .map((obj) => {
-                  return (
-                    <div key={obj.productId} style={{ marginBottom: '0.5rem' }}>
-                      <Card sx={{ paddingInline: '0.5rem' }}>
-                        <Grid
-                          container={true}
-                          spacing={2}
-                          sx={{
-                            alignItems: 'center',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            marginBottom: '0.5rem'
-                          }}
-                        >
-                          <Grid item={true} xs={3}>
-                            <div
-                              style={{
-                                width: '100%',
-                                height: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}
-                            >
-                              <img
-                                alt={obj.name}
-                                src={obj.thumbnail}
-                                style={{
-                                  maxHeight: '100%',
-                                  maxWidth: '100%',
-                                  marginTop: '0.5rem',
-                                  borderRadius: '8px'
-                                }} />
-                            </div>
-                          </Grid>
-                          <Grid
-                            item={true}
-                            sx={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              justifyContent: 'space-between'
-                            }}
-                            xs={9}
-                          >
-                            <Box
-                              sx={{
-                                marginTop: obj.isAvailableForPurchase
-                                  ? '2.5rem'
-                                  : '1rem',
-                                alignItems: 'center',
-                                display: 'flex',
-                                justifyContent: 'space-between'
-                              }}
-                              onClick={() => handleCardClick(
-                                obj?.variantId,
-                                obj?.productId || ''
-                              )}
-                            >
-                              <Typography
-                                sx={{
-                                  fontWeight: 'bold',
-                                  textAlign: 'start',
-                                  marginTop: '-2rem',
-                                  color: 'black'
-                                }}
-                                variant="body2"
-                              >
-                                {obj.name}
-                              </Typography>
-                            </Box>
-                            {!obj.isAvailableForPurchase && (
-                              <Typography
-                                sx={{
-                                  fontWeight: 'bold',
-                                  textAlign: 'start',
-                                  color: 'red'
-                                }}
-                                variant="body2"
-                              >
-                                Persediaan Habis
-                              </Typography>
-                            )}
-                            {obj.isAvailableForPurchase
-                              ? (
-                              <div>
-                                <Grid
-                                  container={true}
-                                  justifyContent="space-between"
-                                  spacing={2}
-                                  sx={{ marginBottom: '1rem' }}
-                                >
-                                  <Grid item={true} xs={6}>
-                                    <Typography
-                                      sx={{
-                                        fontWeight: 'bold',
-                                        textAlign: 'start',
-                                        color: '#1f66d0'
-                                      }}
-                                      variant="body2"
-                                    >
-                                      Rp. {obj?.price?.toLocaleString()}
-                                    </Typography>
-                                  </Grid>
-                                  <Grid item={true} xs={6}>
-                                    <Typography
-                                      sx={{
-                                        fontWeight: 'medium',
-                                        marginLeft: '2.5rem'
-                                      }}
-                                      variant="body2"
-                                    >
-                                      Terjual 4
-                                    </Typography>
-                                  </Grid>
-                                </Grid>
-                                <Box
-                                  sx={{
-                                    alignItems: 'center',
-                                    display: 'flex',
-                                    justifyContent: 'end',
-                                    marginTop: '-1rem'
-                                  }}
-                                >
-                                  <Grid
-                                    item={true}
-                                    sx={{
-                                      display: 'flex',
-                                      justifyContent: 'end'
-                                    }}
-                                    xs="auto"
-                                  >
-                                    <IconButton
-                                      aria-label="min"
-                                      size="small"
-                                      sx={{ color: 'black' }}
-                                      onClick={() => handleDecrement(obj.variantId)}
-                                    >
-                                      <IndeterminateCheckBoxFilled size={24} />
-                                    </IconButton>
-                                    <Typography
-                                      key={obj.productId}
-                                      style={{
-                                        display: 'inline-block',
-                                        margin: '0 0.5rem',
-                                        marginTop: '0.5rem'
-                                      }}
-                                      variant="body2"
-                                    >
-                                      {obj?.quantity || 0}
-                                    </Typography>
-
-                                    <IconButton
-                                      aria-label="plus"
-                                      size="small"
-                                      sx={{ color: 'black' }}
-                                      onClick={() => handleIncrement(obj.variantId)}
-                                    >
-                                      <AddBoxFilled size={24} />
-                                    </IconButton>
-                                  </Grid>
-                                </Box>
-                              </div>
-                              )
-                              : null}
-                          </Grid>
-                        </Grid>
-                      </Card>
-                    </div>
-                  );
-                })}
-            </Fragment>
-          ))}
-
+          <ListMenu />
           {!checkoutIdFromStorage &&
             <FloatingShoppingButton onClick={handleShoppingButtonClick} />}
         </Box>
