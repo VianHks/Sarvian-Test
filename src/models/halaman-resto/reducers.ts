@@ -4,9 +4,32 @@ import type { TAction, TDispatch } from '@models/types';
 
 import { HalamanRestoActionType } from './types.js';
 
-import type { ChannelDetailDataModel, CheckoutListByEmail, HalamanRestoAction, HalamanRestoModel, LinesModel, ProductbyCollectionsDataModel, ProductByMetadataDataModel, ProductListDataModel } from './types.js';
+import type { ChannelDetailDataModel, CheckoutListByEmail, HalamanRestoAction, HalamanRestoModel, LinesMetadataModel, LinesModel, ProductbyCollectionsDataModel, ProductByMetadataDataModel, ProductListDataModel } from './types.js';
 
 const DefaultLines: LinesModel[] =
+[
+  {
+    metadata: [
+      {
+        key: 'note',
+        value: ''
+      }
+    ],
+    lineId: '',
+    note: '',
+    price: '',
+    quantity: 0,
+    variantId: '',
+    update: '',
+    colectionId: '',
+    productId: '',
+    thumbnail: '',
+    name: '',
+    isAvailableForPurchase: false
+  }
+];
+
+const DefaultLinesMetadata: LinesMetadataModel[] =
 [
   {
     metadata: [
@@ -250,7 +273,8 @@ const ChannelDefault: HalamanRestoModel = {
   productByMetadataOutput: DefaultCollectionsbyMetadata,
   productByCollectionsOutput: DefaultProductbyCollection,
   checkoutListOutput: DefaultCheckoutList,
-  linesOutput: DefaultLines
+  linesOutput: DefaultLines,
+  linesMetadataOutput: DefaultLinesMetadata
 };
 const HalamanRestoReducer = (
   state: HalamanRestoModel = ChannelDefault,
@@ -271,6 +295,8 @@ const HalamanRestoReducer = (
       return { ...state, ...action.data };
     case HalamanRestoActionType.LinesLoad:
       return { ...state, ...action.data };
+    case HalamanRestoActionType.LinesMetadataLoad:
+      return { ...state, ...action.data };
 
     default:
       return state;
@@ -280,10 +306,6 @@ const HalamanRestoReducer = (
 export const ChannelCommand = {
   storeLines: (lines: LinesModel[]) => {
     return (dispatch: TDispatch<HalamanRestoAction>) => {
-      // Const updatedData: PhotoEditorModel[] = [];
-
-      console.log('cekUpdatedatadariStore', lines);
-
       const linesData: HalamanRestoModel = {
         linesOutput: lines
       };
@@ -294,6 +316,19 @@ export const ChannelCommand = {
       });
     };
   },
+  storeLinesMetadata: (lines: LinesMetadataModel[]) => {
+    return (dispatch: TDispatch<HalamanRestoAction>) => {
+      const linesMetaData: HalamanRestoModel = {
+        linesMetadataOutput: lines
+      };
+
+      dispatch({
+        data: linesMetaData,
+        type: HalamanRestoActionType.LinesMetadataLoad
+      });
+    };
+  },
+
   getCheckoutList: (params: unknown, token: string): TAction<HalamanRestoAction, void> => {
     return (dispatch: TDispatch<HalamanRestoAction>) => {
       return apiFetch(token)

@@ -223,6 +223,8 @@ const Home: PageComponent = () => {
       const pickUpChannels: ChannelsDataModel[] = store?.HomeRestoOutput?.data?.channels.filter((channel) => channel.metafields.pickUp === 'true');
       const dineInChannels: ChannelsDataModel[] = store?.HomeRestoOutput?.data?.channels.filter((channel) => channel.metafields.dineIn === 'true');
 
+      console.log('cekpickupchannel', pickUpChannels);
+
       setDeliveryData((prevDeliveryData) => {
         const uniqueDeliveryData = Array.from(new Set([...prevDeliveryData, ...deliveryChannels].map((item) => item.id)))
           .map((id) => deliveryChannels.find((item) => item.id === id))
@@ -235,6 +237,8 @@ const Home: PageComponent = () => {
         const uniquePickUpData = Array.from(new Set([...prevPickUpChannels, ...pickUpChannels].map((item) => item.id)))
           .map((id) => pickUpChannels.find((item) => item.id === id))
           .filter(Boolean) as ChannelsDataModel[];
+
+        console.log('cekuniqepickup', uniquePickUpData);
 
         return uniquePickUpData;
       });
@@ -259,9 +263,11 @@ const Home: PageComponent = () => {
     setShipmentMethode(method);
 
     switch (method) {
-      // case 'Pesan Antar':
-      //   setDataMenu([...deliveryData]);
-      //   break;
+      /*
+       * Case 'Pesan Antar':
+       *   setDataMenu([...deliveryData]);
+       *   break;
+       */
       case 'Pick Up':
         setDataMenu([...pickUpData]);
         break;
@@ -338,6 +344,8 @@ const Home: PageComponent = () => {
       return distanceA - distanceB;
     });
   }, [dataMenu]);
+
+  console.log({ sortedDataMenu });
 
   const getOpenAndClosedValues = (data: ChannelsDataModel[], day: string) => {
     const openingHours = [];

@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
@@ -24,9 +24,7 @@ import {
 
 import {
   AccessTimeFilled,
-  AddBoxFilled,
   ArrowBackFilled,
-  IndeterminateCheckBoxFilled,
   LocationOnFilled,
   SearchOutlined,
   StarFilled
@@ -34,9 +32,7 @@ import {
 import type { PageComponent } from '@nxweb/react';
 
 import { useAuth } from '@hooks/use-auth';
-import { halamanRestoCommand } from '@models/halaman-resto/commands';
 import { ChannelCommand } from '@models/halaman-resto/reducers';
-import { OrderCommand } from '@models/order/reducers';
 import { RatingCommand } from '@models/rating/commands';
 import { useStore } from '@models/store';
 
@@ -47,6 +43,7 @@ import Rating from './rating';
 import ProfilFoto from '@assets/images/Orang.svg';
 
 import type { SelectChangeEvent } from '@mui/material/Select';
+import ListMenuRecomendation from './list-menu-recomendation';
 
 interface RestoItem {
   id: number
@@ -135,43 +132,6 @@ const SESSION_STORAGE_KEYS = {
   COLIDS: 'ColIds'
 };
 
-const DefaultLines: LinesModel = {
-  metadata: [
-    {
-      key: 'note',
-      value: ''
-    }
-  ],
-  lineId: '',
-  note: '',
-  price: '',
-  quantity: 0,
-  variantId: '',
-  update: '',
-  colectionId: '',
-  productId: '',
-  thumbnail: '',
-  name: '',
-  isAvailableForPurchase: false
-};
-
-interface PayloadDataModel {
-  after: string
-  channel: string
-  deliveryMethodId: string
-  first: number
-  lines: LinesModel[]
-  userId: string
-}
-const DATA: PayloadDataModel = {
-  after: '',
-  channel: 'makan',
-  deliveryMethodId: 'string',
-  first: 100,
-  lines: [DefaultLines],
-  userId: 'string'
-};
-
 const HalamanResto: PageComponent = () => {
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
@@ -180,10 +140,8 @@ const HalamanResto: PageComponent = () => {
   const [totalItems, setTotalItems] = useState(0);
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState(DATA);
   const [colIds, setColIds] = useState<{ id: string, name: string }[]>([]);
   const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_KEYS.CHECKOUT) ?? '';
-  // Const colIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_KEYS.COLIDS) ?? '';
   const [isLoading, setIsLoading] = useState(false);
 
   const [searchParams] = useSearchParams();
@@ -208,7 +166,6 @@ const HalamanResto: PageComponent = () => {
   const filteredJadwal = jadwalOperasional.filter((resto: RestoSchedule) => {
     return resto.day.toLowerCase() === currentDay;
   });
-
   const [selectedValue, setSelectedValue] = useState<string>('');
   const [showAlert, setShowAlert] = useState(true);
   const filteredCategories =
@@ -305,8 +262,6 @@ const HalamanResto: PageComponent = () => {
         }))
       };
 
-      console.log('cekparamupdate', paramUpdate);
-
       ChannelCommand.putCheckoutLines(paramUpdate, token || '').then((res) => {
         handleResponse(res);
       });
@@ -346,8 +301,6 @@ const HalamanResto: PageComponent = () => {
         })),
         userId: 'VXNlcjoyMDUwMjQwNjE5'
       };
-
-      console.log('cekparamPost', paramCreate);
 
       ChannelCommand.postCreateCheckout(paramCreate, token || '').then(
         (res) => {
@@ -425,9 +378,7 @@ const HalamanResto: PageComponent = () => {
     }
   }, [isLoading, showAlert]);
 
-  console.log('STOREMAIN', store);
-
-  console.log('cekChannelIddariParam', channelId);
+  console.log('MAINPAGESTORE', store);
 
   return (
     <>
@@ -440,7 +391,7 @@ const HalamanResto: PageComponent = () => {
             size="large"
             sx={{ mr: -2, marginTop: '0.2rem' }}
           >
-            <ArrowBackFilled onClick={handleBack}/>
+            <ArrowBackFilled onClick={handleBack} />
           </IconButton>
           <Box
             sx={{
@@ -653,6 +604,8 @@ const HalamanResto: PageComponent = () => {
             );
           })}
 
+{store?.rating?.data && store.rating.data.length > 0
+  ? <>
           <Grid
             container={true}
             justifyContent="space-between"
@@ -784,6 +737,9 @@ const HalamanResto: PageComponent = () => {
               </Box>
             </Card>
           </Box>
+    </>
+  : null}
+
           <Grid container={true} justifyContent="center">
             {isLoading
               ? (
@@ -804,6 +760,7 @@ const HalamanResto: PageComponent = () => {
           >
             Menu
           </Typography>
+          <ListMenuRecomendation />
           <ListMenu />
           {!checkoutIdFromStorage &&
             <FloatingShoppingButton onClick={handleShoppingButtonClick} />}
@@ -855,7 +812,7 @@ const HalamanResto: PageComponent = () => {
             justifyContent: 'space-between'
           }}
         >
-          <Button
+          {/* <Button
             color="primary"
             size="small"
             sx={{ textTransform: 'none', width: '20%', marginBottom: '0.5rem' }}
@@ -873,11 +830,11 @@ const HalamanResto: PageComponent = () => {
               </Grid>
               <Grid item={true} />
             </Grid>
-          </Button>
+          </Button> */}
           <Button
             color="primary"
             size="medium"
-            sx={{ textTransform: 'none', width: '80%', marginBottom: '0.5rem' }}
+            sx={{ textTransform: 'none', width: '100%', marginBottom: '0.5rem' }}
             variant="contained"
             onClick={handleLanjutPembayaranClick}
           >

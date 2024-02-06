@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -81,44 +82,63 @@ const DATA: PayloadDataModel = {
   userId: 'string'
 };
 
-const ListMenu: PageComponent = () => {
+const ListMenuRecomendation: PageComponent = () => {
   const { auth } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const token = useMemo(() => auth?.token.accessToken, [auth]);
   const [store, dispatch] = useStore((state) => state);
 
-  const navigate = useNavigate();
 
-  const [colIds, setColIds] = useState<{ id: string, name: string }[]>([]);
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState(DATA);
 
   useEffect(() => {
-    const collectionIds = (store?.halamanResto?.productListOutput?.data || [])
-      .filter((category) => category.products.totalCount > 0)
-      .map((category) => ({
-        id: category.id.toString(),
-        name: category.name
-      }));
+    const paramMetadata = {
+      after: '',
+      channel: 'makan',
+      filterKey: 'recomendation',
+      filterValue: 'true',
+      first: 10
+    };
 
-    setColIds(collectionIds);
+    dispatch(
+      ChannelCommand.getCollectionsbyMetadata(paramMetadata, token || '')
+    );
+  }, [dispatch, token]);
 
-    const colIdsOnly = colIds.map((colObj) => colObj.id);
-    if (colIds.length > 0) {
-      const paramCollection = {
-        after: '',
-        channel: 'makan',
-        collection: colIdsOnly,
-        direction: 'ASC',
-        field: 'NAME',
-        first: 100
-      };
+  /*
+   * UseEffect(() => {
+   *   const collectionIds = (store?.halamanResto?.productListOutput?.data || [])
+   *     .filter((category) => category.products.totalCount > 0)
+   *     .map((category) => ({
+   *       id: category.id.toString(),
+   *       name: category.name
+   *     }));
+   */
 
-      dispatch(
-        ChannelCommand.getproductbyCollection(paramCollection, token || '')
-      );
-    }
-  }, [store?.halamanResto?.productListOutput?.data]);
+  //   setColIds(collectionIds);
+
+  /*
+   *   const colIdsOnly = colIds.map((colObj) => colObj.id);
+   *   if (colIds.length > 0) {
+   *     const paramCollection = {
+   *       after: '',
+   *       channel: 'makan',
+   *       collection: colIdsOnly,
+   *       direction: 'ASC',
+   *       field: 'NAME',
+   *       first: 100
+   *     };
+   */
+
+  /*
+   *     dispatch(
+   *       ChannelCommand.getproductbyCollection(paramCollection, token || '')
+   *     );
+   *   }
+   * }, [store?.halamanResto?.productListOutput?.data]);
+   */
 
   useEffect(() => {
     const checkoutIdfromStore = store?.halamanResto?.checkoutListOutput?.data?.checkouts?.edges[0]?.node?.id || '';
@@ -131,35 +151,25 @@ const ListMenu: PageComponent = () => {
   }, [store?.halamanResto?.checkoutListOutput]);
 
   useEffect(() => {
-    if (store?.halamanResto?.productByCollectionsOutput) {
-      const linesUpdate = Array.from(
-        { length: store?.halamanResto?.productByCollectionsOutput.totalCount },
-        (_, index) => {
-          const matchingColId = colIds.find((colId) => store?.halamanResto?.productByCollectionsOutput?.data[
-            index
-          ]?.collections.some((collection) => collection.id === colId.id));
-
-          const colectionIds = matchingColId?.id || '';
-          const targetId = matchingColId
-            ? store?.halamanResto?.productByCollectionsOutput?.data[index]
-              ?.variants[0].id || ''
-            : '';
+    if (store?.halamanResto?.productByMetadataOutput) {
+      const linesUpdate = store.halamanResto.productByMetadataOutput.data
+        .filter((product) => product.metafields.recomendation === 'true')
+        .map((product) => {
+          const targetId = product.variants[0].id || '';
           const matchingProduct =
-            store?.halamanResto?.productByCollectionsOutput?.data.find(
+            store?.halamanResto?.productByMetadataOutput?.data.find(
               (product) => product.variants[0].id === targetId
             );
 
           const productIds =
-            store?.halamanResto?.productByCollectionsOutput?.data[index].id ||
-            '';
+            matchingProduct?.id || '';
           const defaultPrice =
             matchingProduct?.pricing?.priceRange?.start?.net?.amount || 0;
 
           const defaultName = matchingProduct?.name || '';
           const defaultThumbnail = matchingProduct?.thumbnail.url || '';
           const defaultAvailableforPurchase =
-            matchingProduct?.channelListings[0]?.isAvailableForPurchase ||
-            false;
+          Boolean(matchingProduct?.metafields?.recomendation === 'true');
 
           const initialQuantity =
             store?.order?.checkoutDetails?.data?.checkout?.lines &&
@@ -193,29 +203,26 @@ const ListMenu: PageComponent = () => {
             quantity: initialQuantity,
             lineId: initialLineId,
             note: initialNote,
-            colectionId: colectionIds,
+            colectionId: '',
             productId: productIds,
             thumbnail: defaultThumbnail,
             name: defaultName,
-            isAvailableForPurchase: defaultAvailableforPurchase
+            isAvailableForPurchase: defaultAvailableforPurchase === true
           };
-        }
-      );
+        });
 
       setFormData({ ...formData, lines: linesUpdate });
-      dispatch(ChannelCommand.storeLines(linesUpdate));
+
+      dispatch(ChannelCommand.storeLinesMetadata(linesUpdate));
       setIsLoading(false);
     }
-  }, [
-    store?.halamanResto?.productByCollectionsOutput,
-    store?.order?.checkoutDetails?.data?.checkout
-  ]);
-
-  console.log('cekstore', store);
+  }, [store?.halamanResto?.productByMetadataOutput, store?.order?.checkoutDetails?.data?.checkout]);
 
   const handleCardClick = (variantId: string, productId: string) => {
     navigate(`/product-view?productId=${productId}&variantId?=${variantId}`);
   };
+
+  console.log('cekformdatarecomend', formData);
 
   return (
     <>
@@ -225,11 +232,6 @@ const ListMenu: PageComponent = () => {
       : (
 
         <>
-        {colIds.map((colId) => {
-          const filteredLines = formData?.lines.filter((line) => line.colectionId === colId.id) || [];
-
-          return (
-            <Fragment key={colId.id}>
               <Typography
                 id="tes"
                 sx={{
@@ -239,9 +241,9 @@ const ListMenu: PageComponent = () => {
                 }}
                 variant="h5"
               >
-                {colId.name}
+                Menu Rekomendasi
               </Typography>
-              {filteredLines.map((obj) => (
+              {formData.lines.map((obj) => (
                 <div key={obj.productId} style={{ marginBottom: '0.5rem' }}>
                 <Card sx={{ paddingInline: '0.5rem' }}>
                   <Grid
@@ -340,7 +342,6 @@ const ListMenu: PageComponent = () => {
                                 variant="body2"
                               >
                                 Rp. {Number(obj?.price)?.toLocaleString()}
-
                               </Typography>
                             </Grid>
                             <Grid item={true} xs={6}>
@@ -410,16 +411,12 @@ const ListMenu: PageComponent = () => {
                 </div>
               ))}
 
-            </Fragment>
-
-          );
-        })}
         </>
       )}
     </>
   );
 };
 
-ListMenu.displayName = 'ListMenu';
+ListMenuRecomendation.displayName = 'ListMenuRecomendation';
 
-export default ListMenu;
+export default ListMenuRecomendation;

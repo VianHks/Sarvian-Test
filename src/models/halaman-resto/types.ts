@@ -355,6 +355,26 @@ export interface LinesModel {
   isAvailableForPurchase: boolean
 }
 
+export interface LinesMetadataModel {
+  metadata: [
+    {
+      key: string
+      value: string
+    }
+  ]
+  lineId: string
+  note: string
+  price: string
+  quantity: number
+  variantId: string
+  update: string
+  colectionId: string
+  productId: string
+  thumbnail: string
+  name: string
+  isAvailableForPurchase: boolean
+}
+
 interface HalamanRestoModel {
 
   ulasanRatingOutput?: UlasanAndRating[]
@@ -369,6 +389,7 @@ interface HalamanRestoModel {
   checkoutDetailOutput?: CheckoutDetailsDataModel
   checkoutListOutput?: CheckoutListByEmail
   linesOutput?: LinesModel[]
+  linesMetadataOutput?: LinesMetadataModel[]
 
 }
 
@@ -387,7 +408,8 @@ enum HalamanRestoActionType {
   ProductbyCollectionLoad = 'productbyCollection-load',
   CheckoutLoad = 'checkout-load',
   CheckoutListByEmail = 'checkoutlistbyemail-load',
-  LinesLoad = 'lines-load'
+  LinesLoad = 'lines-load',
+  LinesMetadataLoad = 'linesmetadata-load'
 }
 
   type HalamanRestoAction = {
@@ -406,6 +428,9 @@ enum HalamanRestoActionType {
   } | {
     data: HalamanRestoModel
     type: HalamanRestoActionType.LinesLoad
+  } | {
+    data: HalamanRestoModel
+    type: HalamanRestoActionType.LinesMetadataLoad
   } | {
     data: HalamanRestoModel
     type: HalamanRestoActionType.ProductbyCollectionLoad
