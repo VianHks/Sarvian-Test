@@ -55,52 +55,6 @@ interface RestoItem {
   restoName: string
   verified: boolean
 }
-
-const DUMMY_MENU_RECOMDATION = [
-  {
-    id: 1,
-    userName: 'Jatnika',
-    rating: '4',
-    comment: 'Ngenah weh pokokna mah'
-  },
-  {
-    id: 2,
-    userName: 'Rere',
-    rating: '2',
-    comment: 'Endol'
-  },
-  {
-    id: 3,
-    userName: 'Udin',
-    rating: '4',
-    comment: 'Enak banget'
-  },
-  {
-    id: 1,
-    userName: 'Jatnika',
-    rating: '5',
-    comment: 'Mantab'
-  },
-  {
-    id: 4,
-    userName: 'Retno',
-    rating: '3',
-    comment: 'Kurang enak g ada rasa'
-  }
-];
-
-const DUMMY_RESTO = [
-  {
-    id: 1,
-    location: 1.5,
-    open: '9.00 - 12.00 WIB',
-    orderMethode: 'Pesan Antar, Pick Up',
-    rating: '4.9',
-    restoName: 'Resto Sunda Gila 1',
-    verified: true
-  }
-];
-
 interface RestoSchedule {
   day: string
   open: string
