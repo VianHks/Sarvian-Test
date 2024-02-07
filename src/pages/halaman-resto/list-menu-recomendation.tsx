@@ -233,7 +233,6 @@ const ListMenuRecomendation: PageComponent = () => {
 
         <>
               <Typography
-                id="tes"
                 sx={{
                   fontWeight: 'medium',
                   textAlign: 'start',

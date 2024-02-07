@@ -397,6 +397,7 @@ const Home: PageComponent = () => {
 
   return (
     <Box sx={{ margin: '1rem 1.5rem' }}>
+      
       <Typography color="neutral-90" sx={{ marginBottom: '0.5rem' }} variant="body2">
         Antar ke:
       </Typography>
@@ -437,6 +438,9 @@ const Home: PageComponent = () => {
         value={searchValue}
         variant="outlined"
         onClick={handleSearch} />
+        <Card>
+        
+        </Card>
       <Grid container={true} spacing={1} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: shipmentMethode === 'Pesan Antar' ? '1rem' : '2rem' }}>
         <Grid item={true}>
           <Chip color={shipmentMethode === 'Pesan Antar' ? 'primary' : 'default'} disabled={true} icon={<img alt="icon" sizes="large" src={pesanAntarIcon} />} label="Pesan Antar" sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} onClick={() => handleShipmentMethodChange('Pesan Antar')} />
@@ -462,7 +466,7 @@ const Home: PageComponent = () => {
           })}
           </Grid>
         : null}
-      <Card sx={{ backgroundColor: '#D5ECFE', borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '1rem', marginInline: '-1.5rem', padding: '1rem 1.5rem' }}>
+      {/* <Card sx={{ backgroundColor: '#D5ECFE', borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '1rem', marginInline: '-1.5rem', padding: '1rem 1.5rem' }}>
         <Box gap={1} sx={{ display: 'flex', marginBottom: '0.875rem' }}>
           <img alt="test" src={recomendationIcon} />
           <Typography color="neutral-90" fontWeight="bold" variant="h5">
@@ -534,7 +538,7 @@ const Home: PageComponent = () => {
             </Grid>
           </Grid>
         </Box>
-      </Card>
+      </Card> */}
       <Card sx={{ backgroundColor: 'transparent', borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '-1rem', marginInline: '-1.5rem', padding: '1rem 1.5rem' }}>
         <Box gap={1} sx={{ display: 'flex', marginBottom: '1rem' }}>
           <img alt="test" src={shipmentMethode === 'Pick Up' ? pickUpIcon : shipmentMethode === 'Dine In' ? dineInIcon : jajananLokalIcon} />

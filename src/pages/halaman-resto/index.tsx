@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -146,6 +146,8 @@ const HalamanResto: PageComponent = () => {
   const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_KEYS.CHECKOUT) ?? '';
   const [isLoading, setIsLoading] = useState(false);
 
+
+  
   const [searchParams] = useSearchParams();
   const channelId = searchParams.get('id');
   const channelName = 'makan';
@@ -200,6 +202,19 @@ const HalamanResto: PageComponent = () => {
       setIsLoading(true);
     }
   };
+
+  // const scrollToTesElement = () => {
+  //   const tesElement = tesElementRef.current;
+  
+  //   // Check if tesElement is not null or undefined before accessing its properties
+  //   if (tesElement) {
+  //     tesElement.scrollTop = tesElement.scrollHeight;
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   scrollToTesElement();
+  // }, []);
 
   const calculateTotal = (lines: LinesModel[]) => {
     let totalAmount = 0;
@@ -311,6 +326,25 @@ const HalamanResto: PageComponent = () => {
       );
     }
   };
+  // const handleScroll = () => {
+  //   const tesElement = tesElementRef.current;
+  //   const listMenuElement = listMenuElementRef.current;
+
+  //   if (tesElement && listMenuElement) {
+  //     listMenuElement.scrollTop = tesElement.scrollTop;
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   handleScroll();
+
+  //   const tesElement = tesElementRef.current;
+  //   tesElement?.addEventListener('scroll', handleScroll);
+
+  //   return () => {
+  //     tesElement?.removeEventListener('scroll', handleScroll);
+  //   };
+  // }, []);
 
   useEffect(() => {
     const param = {
@@ -365,13 +399,11 @@ const HalamanResto: PageComponent = () => {
 
   const scrollToKategoriMenu = (event: SelectChangeEvent<string>) => {
     const selectedCategory = event.target.value as string;
+    const listMenuElement = document.getElementById(selectedCategory);
 
-    const footerElement = document.getElementById('tes');
-
-    footerElement?.scrollIntoView({ behavior: 'smooth' });
+    listMenuElement?.scrollIntoView({ behavior: 'smooth' });
     setSelectedValue(selectedCategory);
-  };
-
+};
   useEffect(() => {
     if (isLoading) {
       const timeoutId = setTimeout(() => {
@@ -776,7 +808,7 @@ const HalamanResto: PageComponent = () => {
             Menu
           </Typography>
           <ListMenuRecomendation />
-          <ListMenu />
+          <ListMenu scrollToKategoriMenu={scrollToKategoriMenu}/>
           {!checkoutIdFromStorage &&
             <FloatingShoppingButton onClick={handleShoppingButtonClick} />}
         </Box>
