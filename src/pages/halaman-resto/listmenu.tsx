@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -8,6 +8,7 @@ import {
   CircularProgress,
   Grid,
   IconButton,
+  SelectChangeEvent,
   Typography
 } from '@mui/material';
 
@@ -81,17 +82,38 @@ const DATA: PayloadDataModel = {
   userId: 'string'
 };
 
-const ListMenu: PageComponent = () => {
+interface ListMenuProps {
+  scrollToKategoriMenu: (event: SelectChangeEvent<string>) => void;
+}
+
+const ListMenu: React.FC<ListMenuProps> = ({ scrollToKategoriMenu }) => {
   const { auth } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const token = useMemo(() => auth?.token.accessToken, [auth]);
   const [store, dispatch] = useStore((state) => state);
-
+  const listMenuElementRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
 
   const [colIds, setColIds] = useState<{ id: string, name: string }[]>([]);
 
   const [formData, setFormData] = useState(DATA);
+
+
+  useEffect(() => {
+    // Menambahkan event listener untuk meng-handle perubahan selectedValue
+    const handleScroll = (event: Event) => {
+      console.log('cekEvent', event);
+      scrollToKategoriMenu(event as SelectChangeEvent<string>);
+    };
+  
+    // Mendengarkan event scroll pada elemen listMenuElement
+    listMenuElementRef.current?.addEventListener('scroll', handleScroll);
+  
+    // Membersihkan event listener saat komponen unmount
+    return () => {
+      listMenuElementRef.current?.removeEventListener('scroll', handleScroll);
+    };
+  }, [scrollToKategoriMenu]);
 
   useEffect(() => {
     const collectionIds = (store?.halamanResto?.productListOutput?.data || [])
@@ -225,13 +247,14 @@ const ListMenu: PageComponent = () => {
       : (
 
         <>
+
         {colIds.map((colId) => {
           const filteredLines = formData?.lines.filter((line) => line.colectionId === colId.id) || [];
 
           return (
             <Fragment key={colId.id}>
               <Typography
-                id="tes"
+                id={colId.name}
                 sx={{
                   fontWeight: 'medium',
                   textAlign: 'start',
@@ -415,6 +438,7 @@ const ListMenu: PageComponent = () => {
           );
         })}
         </>
+        
       )}
     </>
   );
