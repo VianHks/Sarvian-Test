@@ -6,12 +6,16 @@ import {
   Box,
   Button,
   Card,
+  Checkbox,
+  FormControlLabel,
   IconButton,
+  Radio,
   TextField,
   Typography,
   useTheme
 } from '@mui/material';
 
+import { ConsoleLogger } from '@nxweb/core';
 import {
   AddBoxFilled,
   IndeterminateCheckBoxFilled,
@@ -102,6 +106,7 @@ const ProductView = () => {
   const channel = searchParams.get('channel');
   const productId = searchParams.get('productId');
   const variantId = searchParams.get('variantId') || 'UHJvZHVjdFZhcmlhbnQ6NDEy';
+  const idUser = 'VXNlcjoyMDUwMjQwNjE5';
   const command = useCommand((cmd) => cmd);
 
   const [store, dispatch] = useStore((state) => state);
@@ -110,9 +115,14 @@ const ProductView = () => {
   const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '';
   const productPrice = useMemo(() => store?.productView?.productDetails?.data?.product.variants[0]?.channelListings[0]?.price?.amount, [store]);
   const [total, setTotal] = useState(0);
+  const [value, setValue] = useState<string>('0');
+  const [selectedCheckboxes, setSelectedCheckboxes] = useState<string[]>([]);
+  const itemPrice = parseInt(value, 10);
+  const addOnPrice = selectedCheckboxes.map((itm) => parseInt(itm, 10));
+  const totalAddOn = addOnPrice.reduce((acc, num) => acc + num, 0);
 
   const [isLoad, setIsLoad] = useState(false);
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(1);
   const calculateTotalPrice = (count: number, productPrice: number): string => {
     const totalPrice = (count * productPrice).toString();
 
@@ -129,6 +139,18 @@ const ProductView = () => {
     }
   };
 
+  const handleAddOn = (value: string) => {
+    if (selectedCheckboxes.includes(value)) {
+      const valNumber = parseInt(value, 10);
+
+      setSelectedCheckboxes(selectedCheckboxes.filter((item) => item !== value));
+
+      setTotal(total - valNumber);
+    } else {
+      setSelectedCheckboxes([...selectedCheckboxes, value]);
+    }
+  };
+
   useEffect(() => {
     dispatch(
       command.productView?.getProductDetails(
@@ -137,6 +159,17 @@ const ProductView = () => {
       )
     );
   }, [dispatch]);
+
+  useEffect(() => {
+    if (store?.productView?.productDetails?.data?.product?.productType?.hasVariants === true) {
+      dispatch(
+        command.productView?.getProductTypeDetails(
+          store?.productView?.productDetails?.data?.product?.productType?.id,
+          token || ''
+        )
+      );
+    }
+  }, [store?.productView?.productDetails?.data?.product?.productType, dispatch, token]);
 
   useEffect(() => {
     if (checkoutIdFromStorage !== '') {
@@ -155,7 +188,7 @@ const ProductView = () => {
         setFormData({
           ...formData,
           channel: channel || 'makan',
-          userId: 'VXNlcjoyMDUwMjQwNjE5',
+          userId: idUser,
           variantId: variantId || ''
         });
       }
@@ -163,7 +196,7 @@ const ProductView = () => {
       setFormData({
         ...formData,
         channel: channel || 'makan',
-        userId: 'VXNlcjoyMDUwMjQwNjE5',
+        userId: idUser,
         variantId: variantId || 'UHJvZHVjdFZhcmlhbnQ6NDEy'
       });
 
@@ -184,7 +217,7 @@ const ProductView = () => {
           lineId: lines[variantIndex]?.id,
           price: lines[variantIndex]?.totalPrice?.gross?.amount.toString() || '',
           quantity: lines[variantIndex]?.quantity || 0,
-          userId: 'VXNlcjoyMDUwMjQwNjE5',
+          userId: idUser,
           value: lines[variantIndex]?.metafields?.note || '',
           variantId: variantId || ''
         };
@@ -197,7 +230,7 @@ const ProductView = () => {
   }, [checkoutIdFromStorage, store?.order]);
 
   useEffect(() => {
-    if (count !== 0 && productPrice) {
+    if (productPrice) {
       setTotal(count * productPrice);
       setFormData({
         ...formData,
@@ -207,6 +240,18 @@ const ProductView = () => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count, productPrice]);
+
+  useEffect(() => {
+    if (store?.productView?.productDetails?.data?.product?.productType?.hasVariants === true && productPrice) {
+      setTotal((count * productPrice) + (count * itemPrice) + (count * totalAddOn));
+      setFormData({
+        ...formData,
+        price: calculateTotalPrice(count, productPrice),
+        quantity: count
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [count, productPrice, itemPrice, totalAddOn]);
 
   const handleAddToCart = () => {
     setIsLoad(true);
@@ -253,7 +298,7 @@ const ProductView = () => {
             variantId: formData.variantId
           }
         ],
-        userId: 'VXNlcjoyMDUwMjQwNjE5'
+        userId: idUser
       };
 
       command.productView.postCreateCheckout(payload, token || '')
@@ -285,150 +330,279 @@ const ProductView = () => {
         </IconButton>
       </Box>
         <SwipeableTextMobileStepper images={store?.productView?.productDetails?.data?.product?.media || []} />
-        <Card sx={{ borderRadius: '1rem', bottom: 0, height: '650px', left: 0, padding: '1rem 1.5rem', position: 'fixed', right: 0 }}>
-        <Typography sx={{ fontWeight: 'bold', marginBottom: '0.5rem' }} variant="h3">
-          {store?.productView?.productDetails?.data?.product?.name}
-        </Typography>
-        <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '0.5rem' }}>
-          <Grid item={true} xs={6}>
-            <Typography
-              sx={{ color: theme?.palette?.primary?.main, fontWeight: 'bold', marginBottom: '0.25rem' }}
-              variant="h5"
-            >
-              Rp {store?.productView?.productDetails?.data?.product?.variants[0]?.channelListings[0]?.price?.amount.toLocaleString('id-ID')}
-            </Typography>
-          </Grid>
-          <Grid item={true} xs="auto">
-            <Typography sx={{ marginBottom: '0.25rem' }} variant="body2">
-              Terjual 24 (hard code)
-            </Typography>
-          </Grid>
-        </Grid>
-        <Box>
-          <Typography
-            sx={{ marginBottom: '2rem', textAlign: 'left' }}
-            variant="body1"
-          >
-            {description.blocks[0]?.data?.text}
+        <Card sx={{ borderRadius: '1rem', bottom: 0, height: '650px', left: 0, padding: '1rem 1.5rem', position: 'fixed', right: 0, overflowY: 'auto' }}>
+          <Typography sx={{ fontWeight: 'bold', marginBottom: '0.5rem' }} variant="h3">
+            {store?.productView?.productDetails?.data?.product?.name}
           </Typography>
-          <Typography
-            sx={{
-              color: 'black',
-              fontWeight: 'bold',
-              marginBottom: '0.5rem',
-              textAlign: 'left'
-            }}
-            variant="h5"
-          >
-            Catatan
-          </Typography>
-          <TextField
-            hiddenLabel={true}
-            id="outlined-basic"
-            placeholder="Tambahkan catatan ke menumu"
-            size="small"
-            sx={{ marginBottom: '1rem', width: '100%' }}
-            type="text"
-            value={formData?.value}
-            variant="outlined"
-            onChange={(e) => setFormData({ ...formData, value: e.target.value })} />
-          <Grid
-            container={true}
-            spacing={2}
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginBottom: '1rem'
-            }}
-          >
-            <Grid item={true} xs={3}>
-              <Typography
-                sx={{
-                  color: 'black',
-                  fontWeight: 'bold',
-                  marginBottom: '0.25rem',
-                  textAlign: 'left'
-                }}
-                variant="h5"
-              >
-                Jumlah
-              </Typography>
-            </Grid>
-            <Grid
-              item={true}
-              sx={{ display: 'flex', justifyContent: 'end' }}
-              xs={9}
-            >
-              <Box>
-                <IconButton
-                  aria-label="min"
-                  size="small"
-                  sx={{ color: 'black' }}
-                  onClick={() => handleDecrement()}
-                >
-                  <IndeterminateCheckBoxFilled size={24} />
-                </IconButton>
-                <Typography
-                  style={{
-                    display: 'inline-block',
-                    margin: '0 0.5rem'
-                  }}
-                  variant="body1"
-                >
-                  {count}
-                </Typography>
-                <IconButton
-                  aria-label="plus"
-                  size="small"
-                  sx={{ color: 'black' }}
-                  onClick={() => handleIncrement()}
-                >
-                  <AddBoxFilled size={24} />
-                </IconButton>
-              </Box>
-            </Grid>
-          </Grid>
-          <Grid
-            container={true}
-            justifyContent="space-between"
-            spacing={2}
-            sx={{ marginBottom: '1rem' }}
-          >
+          <Grid container={true} justifyContent="space-between" spacing={2} sx={{ marginBottom: '0.5rem' }}>
             <Grid item={true} xs={6}>
-              <Typography
-                sx={{
-                  color: 'black',
-                  fontWeight: 'bold',
-                  marginBottom: '0.25rem',
-                  textAlign: 'left'
-                }}
-                variant="h5"
-              >
-                Harga Menu
-              </Typography>
-            </Grid>
-            <Grid item={true} xs="auto">
               <Typography
                 sx={{ color: theme?.palette?.primary?.main, fontWeight: 'bold', marginBottom: '0.25rem' }}
                 variant="h5"
               >
-                Rp {total.toLocaleString('id-ID')}
+                Rp {store?.productView?.productDetails?.data?.product?.variants[0]?.channelListings[0]?.price?.amount.toLocaleString('id-ID')}
+              </Typography>
+            </Grid>
+            <Grid item={true} xs="auto">
+              <Typography sx={{ marginBottom: '0.25rem' }} variant="body2">
+                Terjual 24 (hard code)
               </Typography>
             </Grid>
           </Grid>
-          <Box sx={{ bottom: 0, left: 0, padding: '1rem 1.5rem', position: 'fixed', right: 0, width: '100%' }}>
+          <Box>
+            <Typography
+              sx={{ marginBottom: '2rem', textAlign: 'left' }}
+              variant="body1"
+            >
+              {description.blocks[0]?.data?.text}
+            </Typography>
+            {store?.productView?.productDetails?.data?.product?.productType?.hasVariants === true
+              ? (
+              <>
+                <Typography
+                  sx={{
+                    color: theme?.palette?.grey[900],
+                    fontWeight: 'bold',
+                    textAlign: 'left'
+                  }}
+                  variant="h5"
+                >
+                  Ganti Item
+                </Typography>
+                <hr style={{ marginTop: '0rem !important' }} />
+                {store?.productView?.productTypeDetails?.data?.productType?.variantAttributes?.filter((type) => type?.inputType === 'DROPDOWN').map((obj) => {
+                  return (
+                    <div key={obj.id}>
+                      <Typography
+                        sx={{
+                          color: theme?.palette?.grey[900],
+                          fontWeight: 'bold',
+                          marginBottom: '0.25rem',
+                          textAlign: 'left'
+                        }}
+                        variant="h6"
+                      >
+                      {obj.name}
+                      </Typography>
+                      {obj?.choices?.edges?.map((item) => {
+                        const nameParts = item?.node?.name.split(':');
+                        if (nameParts.length === 3) {
+                          const name = nameParts[0].trim();
+                          const price = nameParts[1].trim();
+
+                          return (
+                            <Grid container={true} key={item?.node?.id} sx={{ alignItem: 'center', display: 'flex', justifyContent: 'space-between' }}>
+                              <Grid item={true} xs={8}>
+                                <FormControlLabel
+                                  control={
+                                    <Radio
+                                      checked={value === price}
+                                      onChange={() => setValue(value === price ? '' : price)} />
+                                  }
+                                  label={
+                                    <Typography fontWeight="bold" variant="h6">
+                                      {name}
+                                    </Typography>
+                                  }
+                                  value={price} />
+                              </Grid>
+                              <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'end' }} xs={4}>
+                                  <Typography fontWeight="bold">
+                                  {price === '0' ? 'Gratis' : `+ Rp. ${Number(price).toLocaleString('id-ID')}`}
+                                  </Typography>
+                              </Grid>
+                            </Grid>
+                          );
+                        }
+
+                        return null;
+                      })}
+                    </div>
+                  );
+                })}
+                <Typography
+                  sx={{
+                    color: theme?.palette?.grey[900],
+                    fontWeight: 'bold',
+                    textAlign: 'left'
+                  }}
+                  variant="h5"
+                >
+                    Tambahan
+                </Typography>
+                <hr style={{ marginTop: '0rem !important' }} />
+                {store?.productView?.productTypeDetails?.data?.productType?.variantAttributes?.filter((type) => type?.inputType === 'MULTISELECT').map((obj) => {
+                  return (
+                    <div key={obj.id}>
+                      <Typography
+                        sx={{
+                          color: theme?.palette?.grey[900],
+                          fontWeight: 'bold',
+                          marginBottom: '0.25rem',
+                          textAlign: 'left'
+                        }}
+                        variant="h6"
+                      >
+                      {obj.name}
+                      </Typography>
+                      {obj?.choices?.edges?.map((item) => {
+                        const nameParts = item?.node?.name.split(':');
+                        if (nameParts.length === 3) {
+                          const name = nameParts[0].trim();
+                          const price = nameParts[1].trim();
+
+                          return (
+                            <Grid container={true} key={item?.node?.id} sx={{ alignItem: 'center', display: 'flex', justifyContent: 'space-between' }}>
+                              <Grid item={true} xs={8}>
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      checked={selectedCheckboxes.includes(price)}
+                                      onChange={() => handleAddOn(price)} />
+                                  }
+                                  label={
+                                    <Typography fontWeight="bold" variant="h6">
+                                      {name}
+                                    </Typography>
+                                  }
+                                  sx={{ fontWeight: 'bold' }}
+                                  value={price} />
+                              </Grid>
+                              <Grid item={true} sx={{ alignItems: 'center', display: 'flex', fontWeight: 'bold', justifyContent: 'end' }} xs={4}>
+                                  <Typography fontWeight="bold">
+                                    {price === '0' ? 'Gratis' : `+ Rp. ${Number(price).toLocaleString('id-ID')}`}
+                                  </Typography>
+                              </Grid>
+                            </Grid>
+                          );
+                        }
+
+                        return null;
+                      })}
+                    </div>
+                  );
+                })}
+              </>
+              )
+              : null}
+            <Typography
+              sx={{
+                color: theme?.palette?.grey[900],
+                fontWeight: 'bold',
+                marginBottom: '0.5rem',
+                marginTop: '1rem',
+                textAlign: 'left'
+              }}
+              variant="h5"
+            >
+              Catatan
+            </Typography>
+            <TextField
+              hiddenLabel={true}
+              id="outlined-basic"
+              placeholder="Tambahkan catatan ke menumu"
+              size="small"
+              sx={{ marginBottom: '1rem', width: '100%' }}
+              type="text"
+              value={formData?.value}
+              variant="outlined"
+              onChange={(e) => setFormData({ ...formData, value: e.target.value })} />
+            <Grid
+              container={true}
+              spacing={2}
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '1rem'
+              }}
+            >
+              <Grid item={true} xs={3}>
+                <Typography
+                  sx={{
+                    color: theme?.palette?.grey[900],
+                    fontWeight: 'bold',
+                    marginBottom: '0.25rem',
+                    textAlign: 'left'
+                  }}
+                  variant="h5"
+                >
+                  Jumlah
+                </Typography>
+              </Grid>
+              <Grid
+                item={true}
+                sx={{ display: 'flex', justifyContent: 'end' }}
+                xs={9}
+              >
+                <Box>
+                  <IconButton
+                    aria-label="min"
+                    size="small"
+                    sx={{ color: 'black' }}
+                    onClick={() => handleDecrement()}
+                  >
+                    <IndeterminateCheckBoxFilled size={24} />
+                  </IconButton>
+                  <Typography
+                    style={{
+                      display: 'inline-block',
+                      margin: '0 0.5rem'
+                    }}
+                    variant="body1"
+                  >
+                    {count}
+                  </Typography>
+                  <IconButton
+                    aria-label="plus"
+                    size="small"
+                    sx={{ color: 'black' }}
+                    onClick={() => handleIncrement()}
+                  >
+                    <AddBoxFilled size={24} />
+                  </IconButton>
+                </Box>
+              </Grid>
+            </Grid>
+            <hr />
+            <Grid
+              container={true}
+              justifyContent="space-between"
+              spacing={2}
+              sx={{ marginBottom: '1rem' }}
+            >
+              <Grid item={true} xs={6}>
+                <Typography
+                  sx={{
+                    color: theme?.palette?.grey[900],
+                    fontWeight: 'bold',
+                    marginBottom: '0.25rem',
+                    textAlign: 'left'
+                  }}
+                  variant="h5"
+                >
+                  Harga Menu
+                </Typography>
+              </Grid>
+              <Grid item={true} xs="auto">
+                <Typography
+                  sx={{ color: theme?.palette?.primary?.main, fontWeight: 'bold', marginBottom: '0.25rem' }}
+                  variant="h5"
+                >
+                  Rp {total.toLocaleString('id-ID')}
+                </Typography>
+              </Grid>
+            </Grid>
             <Button
               color="primary"
               disabled={isLoad === true}
               fullWidth={true}
-              size="medium"
+              size="large"
               variant="contained"
               onClick={handleAddToCart}
             >
               {isLoad === true ? <Loader /> : 'Tambah Keranjang' }
             </Button>
           </Box>
-        </Box>
         </Card>
 
     </Box>
