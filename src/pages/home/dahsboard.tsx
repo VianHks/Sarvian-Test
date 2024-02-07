@@ -11,7 +11,9 @@ import {
   Grid,
   InputAdornment,
   TextField,
-  Typography
+  Typography,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 
 import {
@@ -208,11 +210,12 @@ const DUMMY_RESTO = [
 ];
 
 const Home: PageComponent = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
   const command = useCommand((cmd) => cmd);
-
+  const isSmallScreen = useMediaQuery('(max-width: 380px)');
   const today = new Date();
   const dayOfWeek = today.getDay();
   const daysOfWeek = [
@@ -551,30 +554,63 @@ const Home: PageComponent = () => {
             Hubungkan
           </Typography>
         </Box>
-      <Grid container={true} spacing={1} sx={{ display: 'flex', justifyContent: 'space-evenly', marginBottom: shipmentMethode === 'Pesan Antar' ? '1rem' : '1rem' }}>
+      <Grid container={true} spacing={1} sx={{ display: isSmallScreen ? 'grid' : 'flex', justifyContent: 'space-evenly', marginBottom: shipmentMethode === 'Pesan Antar' ? '1rem' : '1rem' }}>
         {/* <Grid item={true}>
           <Chip
-            color={shipmentMethode === 'Pesan Antar' ? 'primary' : 'default'}
             disabled={true}
             icon={<img alt="icon" sizes="large" src={pesanAntarIcon} />}
             label="Pesan Antar"
-            sx={{ borderRadius: '0.5rem', padding: '0.5rem', width: '100%' }}
+            sx={{
+              background:
+                shipmentMethode === 'Pesan Antar'
+                  ? theme.palette.primary.gradient
+                  : 'default',
+              borderRadius: '0.5rem',
+              color:
+                shipmentMethode === 'Pesan Antar'
+                  ? theme.palette.grey[100]
+                  : 'default',
+              padding: '0.5rem',
+              width: isSmallScreen ? '100%' : 'none'
+            }}
             onClick={() => handleShipmentMethodChange('Pesan Antar')} />
         </Grid> */}
         <Grid item={true}>
           <Chip
-            color={shipmentMethode === 'Pick Up' ? 'primary' : 'default'}
             icon={<img alt="icon" sizes="large" src={pickUpIcon} />}
             label="Pick Up"
-            sx={{ borderRadius: '0.5rem', padding: '0.5rem', width: '100%' }}
+            sx={{
+              background:
+                shipmentMethode === 'Pick Up'
+                  ? theme.palette.primary.gradient
+                  : 'default',
+              borderRadius: '0.5rem',
+              color:
+                shipmentMethode === 'Pick Up'
+                  ? theme.palette.grey[100]
+                  : 'default',
+              padding: '0.5rem',
+              width: isSmallScreen ? '100%' : 'none'
+            }}
             onClick={() => handleShipmentMethodChange('Pick Up')} />
         </Grid>
         <Grid item={true}>
           <Chip
-            color={shipmentMethode === 'Dine In' ? 'primary' : 'default'}
             icon={<img alt="icon" sizes="large" src={dineInIcon} />}
             label="Dine In"
-            sx={{ borderRadius: '0.5rem', padding: '0.5rem', width: '100%' }}
+            sx={{
+              background:
+                shipmentMethode === 'Dine In'
+                  ? theme.palette.primary.gradient
+                  : 'default',
+              borderRadius: '0.5rem',
+              color:
+                shipmentMethode === 'Dine In'
+                  ? theme.palette.grey[100]
+                  : 'default',
+              padding: '0.5rem',
+              width: isSmallScreen ? '100%' : 'none'
+            }}
             onClick={() => handleShipmentMethodChange('Dine In')} />
         </Grid>
       </Grid>

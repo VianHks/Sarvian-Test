@@ -51,6 +51,8 @@ const PersonalizedRecomendation: PageComponent = () => {
   const [store, dispatch] = useStore((state) => state?.personalizedRec);
   const [foodsList, setFoodsList] =
     useState<FoodsListDataModel>(DEFAULT_FOODS_LIST);
+  const [foodsList, setFoodsList] =
+    useState<FoodsListDataModel>(DEFAULT_FOODS_LIST);
   const userId = 'VXNlcjoyMDUwMjQwNjE5';
 
   const [activeStep, setActiveStep] = useState(0);
@@ -112,17 +114,7 @@ const PersonalizedRecomendation: PageComponent = () => {
   };
 
   useEffect(() => {
-    if (token) {
-      dispatch(
-        PersonalizedRecomendationCommand.getCustomerProfile(userId, token)
-      );
-      dispatch(
-        PersonalizedRecomendationCommand.getPersonalizeRecomendation()
-      );
-      dispatch(
-        PersonalizedRecomendationCommand.getMenuRecomendation(token)
-      );
-    }
+    dispatch(PersonalizedRecomendationCommand.getPersonalizeRecomendation());
   }, [dispatch]);
 
   useEffect(() => {
