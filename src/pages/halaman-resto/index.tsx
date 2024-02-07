@@ -19,7 +19,8 @@ import {
   Select,
   TextField,
   Toolbar,
-  Typography
+  Typography,
+  styled
 } from '@mui/material';
 
 import {
@@ -54,6 +55,7 @@ interface RestoItem {
   restoName: string
   verified: boolean
 }
+
 
 const DUMMY_MENU_RECOMDATION = [
   {
@@ -349,7 +351,9 @@ const HalamanResto: PageComponent = () => {
     if (channelId) {
       dispatch(ChannelCommand.getChannelDetail(channelId, token || ''));
 
-      dispatch(RatingCommand.RatingLoad(channelId)).catch((err: unknown) => {
+      const dummyId = 'Q2hhbm5lbDo0';
+
+      dispatch(RatingCommand.RatingLoad(dummyId)).catch((err: unknown) => {
         console.error(err);
       });
     }
@@ -383,7 +387,7 @@ const HalamanResto: PageComponent = () => {
   return (
     <>
       <div>
-        <Toolbar sx={{ backgroundColor: '#D5ECFE', paddingInline: '1rem' }}>
+        <Toolbar sx={{ backgroundColor: '#D5ECFE', paddingInline: '1rem', position: 'fixed', top: 0, left: 0, zIndex: 100 }}>
           <IconButton
             aria-label="back"
             color="default"
@@ -445,7 +449,7 @@ const HalamanResto: PageComponent = () => {
           </Box>
         </Toolbar>
 
-        <Box sx={{ margin: '0.5rem 0.5rem', paddingInline: '1rem' }}>
+        <Box sx={{ margin: '0.5rem 0.5rem', paddingInline: '1rem', marginTop: '5rem', marginBottom: '7rem' }}>
           {filteredJadwal.map((resto: RestoSchedule) => {
             const currentHour = new Date().getHours();
 
@@ -511,7 +515,8 @@ const HalamanResto: PageComponent = () => {
                       sx={{
                         alignItems: 'center',
                         display: 'flex',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        marginLeft: '0.25rem'
                       }}
                       xs={2}
                     >
@@ -538,7 +543,7 @@ const HalamanResto: PageComponent = () => {
                           ? (
                           <Typography
                             color="neutral-70"
-                            sx={{ marginBottom: '0.125', fontSize: '0.75rem' }}
+                            sx={{ marginTop: '0.5rem', fontSize: '0.75rem', marginLeft: '0.25rem' }}
                             variant="body2"
                           >
                             Verified by TokoRumahan
@@ -546,7 +551,7 @@ const HalamanResto: PageComponent = () => {
                           )
                           : null}
                         <Typography
-                          sx={{ fontWeight: 'bold', textAlign: 'start' }}
+                          sx={{ fontWeight: 'bold', textAlign: 'start', marginLeft: '0.25rem', marginTop: '0.5rem' }}
                           variant="h4"
                         >
                           {
@@ -604,7 +609,7 @@ const HalamanResto: PageComponent = () => {
             );
           })}
 
-{store?.rating?.data && store.rating.data.length > 0
+{store?.rating?.data && store?.rating?.data.length > 0
   ? <>
           <Grid
             container={true}
@@ -636,6 +641,8 @@ const HalamanResto: PageComponent = () => {
               <Button
                 size="small"
                 sx={{
+                  border: 'none',
+                  fontWeight: 'bold',
                   paddingInline: '0.5rem',
                   backgroundColor: '#FBD600',
                   fontSize: '0.75rem',
@@ -644,7 +651,7 @@ const HalamanResto: PageComponent = () => {
                 variant="outlined"
                 onClick={handleLihatSemuaClick}
               >
-                Lihat Semua
+                Lihat semua
               </Button>
             </Grid>
           </Grid>
@@ -652,12 +659,12 @@ const HalamanResto: PageComponent = () => {
             <Card
               sx={{
                 borderColor: 'transparent',
-                borderRadius: 0,
+                borderRadius: '10px',
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
                 marginBottom: '1rem',
                 marginInline: '-1.5rem',
                 position: 'relative',
-                zIndex: 100
+                zIndex: 20
               }}
             >
               <Box sx={{ overflowX: 'auto' }}>
@@ -675,7 +682,6 @@ const HalamanResto: PageComponent = () => {
                           key={obj.id}
                           sx={{
                             borderColor: 'transparent',
-                            marginBottom: '1rem',
                             padding: '0.5rem'
                           }}
                         >
@@ -685,7 +691,8 @@ const HalamanResto: PageComponent = () => {
                               sx={{
                                 alignItems: 'center',
                                 display: 'flex',
-                                justifyContent: 'center'
+                                justifyContent: 'center',
+                                marginLeft: '-0.25rem'
                               }}
                               xs={2}
                             >
@@ -699,7 +706,8 @@ const HalamanResto: PageComponent = () => {
                                 alignItems: 'center',
                                 display: 'flex',
                                 justifyContent: 'start',
-                                paddingTop: '0rem!important'
+                                paddingTop: '0rem!important',
+                                marginTop: '0.85rem'
                               }}
                               xs={8}
                             >
@@ -707,25 +715,32 @@ const HalamanResto: PageComponent = () => {
                                 <Typography
                                   sx={{
                                     fontWeight: 'bold',
-                                    textAlign: 'start',
-                                    marginLeft: '0.5rem'
+                                    textAlign: 'start'
                                   }}
                                   variant="h6"
                                 >
                                   {obj.customerId}
                                 </Typography>
-                                <Box sx={{ marginLeft: '0.5rem' }}>
+                                <Box sx={{ marginTop: '0.25rem' }}>
                                   {obj.rating
                                     ? <Rating rating={obj.rating.toString()} />
                                     : null}
                                 </Box>
                               </Box>
                             </Grid>
-                            <Box sx={{ marginTop: '10px', width: '80%' }}>
+                            <Box sx={{ marginTop: '10px', width: '83%', paddingInline: '1rem', marginLeft: '-0.5rem' }}>
                               <TextField
                                 fullWidth={true}
-                                placeholder={obj.review}
+                                value={obj.review}
                                 size="small"
+                                multiline
+                                InputProps={{
+                                  readOnly: true,
+                                  style: { maxHeight: 'none' }
+                                }}
+                                sx={{
+                                  color: 'black'
+                                }}
                                 variant="outlined" />
                             </Box>
                           </Grid>
@@ -770,13 +785,15 @@ const HalamanResto: PageComponent = () => {
         sx={{
           borderRadius: '12px 12px 0 0',
           bottom: 0,
+          left: 0,
           marginTop: '1rem',
           paddingInline: '1rem',
-          position: 'sticky'
+          position: 'fixed',
+          width: '100%'
         }}
       >
         <Typography
-          sx={{ color: '#1F66D0', fontWeight: 'medium', textAlign: 'start' }}
+          sx={{ color: '#1F66D0', fontWeight: 'medium', textAlign: 'start', marginTop: '0.5rem' }}
           variant="body2"
         >
           {totalItems} Item
