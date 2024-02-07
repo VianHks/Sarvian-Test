@@ -243,5 +243,13 @@ export const routes: Route[] = [
     meta: { description: 'Pesanan Berlangsung' },
     path: '/inprogress/multi-order/pesan-antar',
     search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/user-profile/index.js')),
+    hash: true,
+    layout: 'bottomnav',
+    path: '/profile',
+    search: true
   }
 ];
