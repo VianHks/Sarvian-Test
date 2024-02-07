@@ -223,6 +223,8 @@ const Home: PageComponent = () => {
       const pickUpChannels: ChannelsDataModel[] = store?.HomeRestoOutput?.data?.channels.filter((channel) => channel.metafields.pickUp === 'true');
       const dineInChannels: ChannelsDataModel[] = store?.HomeRestoOutput?.data?.channels.filter((channel) => channel.metafields.dineIn === 'true');
 
+      console.log('cekpickupchannel', pickUpChannels);
+
       setDeliveryData((prevDeliveryData) => {
         const uniqueDeliveryData = Array.from(new Set([...prevDeliveryData, ...deliveryChannels].map((item) => item.id)))
           .map((id) => deliveryChannels.find((item) => item.id === id))
@@ -235,6 +237,8 @@ const Home: PageComponent = () => {
         const uniquePickUpData = Array.from(new Set([...prevPickUpChannels, ...pickUpChannels].map((item) => item.id)))
           .map((id) => pickUpChannels.find((item) => item.id === id))
           .filter(Boolean) as ChannelsDataModel[];
+
+        console.log('cekuniqepickup', uniquePickUpData);
 
         return uniquePickUpData;
       });
@@ -259,9 +263,11 @@ const Home: PageComponent = () => {
     setShipmentMethode(method);
 
     switch (method) {
-      // case 'Pesan Antar':
-      //   setDataMenu([...deliveryData]);
-      //   break;
+      /*
+       * Case 'Pesan Antar':
+       *   setDataMenu([...deliveryData]);
+       *   break;
+       */
       case 'Pick Up':
         setDataMenu([...pickUpData]);
         break;
@@ -339,6 +345,8 @@ const Home: PageComponent = () => {
     });
   }, [dataMenu]);
 
+  console.log({ sortedDataMenu });
+
   const getOpenAndClosedValues = (data: ChannelsDataModel[], day: string) => {
     const openingHours = [];
 
@@ -383,8 +391,8 @@ const Home: PageComponent = () => {
     navigate(`/pencarian`);
   };
 
-  const handleCardToRestoClick = () => {
-    navigate('/page-resto');
+  const handleCardToRestoClick = (restoId: string) => {
+    navigate(`/page-resto?id=${restoId}`);
   };
 
   return (
@@ -466,7 +474,7 @@ const Home: PageComponent = () => {
             <Grid item={true} sx={{ display: 'flex', justifyContent: 'space-between' }}>
               {store?.menuBerandaOutput?.map((obj) => {
                 return (
-                  <Card key={obj.id} sx={{ borderColor: 'transparent', marginRight: '0.5rem', padding: '0.5rem', width: '9.25rem' }} onClick={handleCardToRestoClick}>
+                  <Card key={obj.id} sx={{ borderColor: 'transparent', marginRight: '0.5rem', padding: '0.5rem', width: '9.25rem' }}>
                     <CardMedia
                       image={recomendationImage}
                       sx={{ height: '6rem', marginBottom: '0.5' }}
@@ -603,7 +611,7 @@ const Home: PageComponent = () => {
           : null} */}
       </Card>
       {shipmentMethode !== 'Pesan Antar' && sortedDataMenu.map((resto, index) => (
-        <Card key={resto.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem' }}>
+        <Card key={resto.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem' }} onClick={() => { handleCardToRestoClick(resto.id); }}>
           <Grid container={true} spacing={2}>
             <Grid item={true} xs={4}>
               <div

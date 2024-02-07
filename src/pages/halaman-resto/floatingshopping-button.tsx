@@ -15,10 +15,10 @@ const FloatingShoppingButton: React.FC<FloatingShoppingButtonProps> = ({ onClick
       color="primary"
       sx={{
         borderRadius: '100%',
-        bottom: '3rem',
+        bottom: '8rem',
         height: '65px',
         position: 'fixed',
-        right: '3rem',
+        right: '2.75rem',
         width: '60px',
         zIndex: 100
       }}

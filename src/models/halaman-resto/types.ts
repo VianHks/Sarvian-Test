@@ -1,6 +1,29 @@
 /* eslint-disable import/exports-last */
 /* eslint-disable linebreak-style */
 
+import { linesDataModel } from "@models/order/types"
+
+export interface CheckoutListByEmail {
+  data: {
+    checkouts: {
+      edges: [
+        {
+          node: {
+            id: string
+          }
+        }
+      ]
+      totalCount: number
+    }
+  }
+  extensions: {
+    cost: {
+      maximumAvailable: number
+      requestedQueryCost: number
+    }
+  }
+}
+
 export interface ChannelDetailDataModel {
   avgRating: string
   data: {
@@ -116,6 +139,11 @@ export interface ProductByMetadataDataModel {
         alt: string
         url: string
       }
+      variants: [
+        {
+          id: string
+        }
+      ]
     }
   ]
   pageInfo: {
@@ -307,6 +335,45 @@ interface CheckoutDetailsDataModel {
     }
   }
 }
+export interface LinesModel {
+  metadata: [
+    {
+      key: string
+      value: string
+    }
+  ]
+  lineId: string
+  note: string
+  price: string
+  quantity: number
+  variantId: string
+  update: string
+  colectionId: string
+  productId: string
+  thumbnail: string
+  name: string
+  isAvailableForPurchase: boolean
+}
+
+export interface LinesMetadataModel {
+  metadata: [
+    {
+      key: string
+      value: string
+    }
+  ]
+  lineId: string
+  note: string
+  price: string
+  quantity: number
+  variantId: string
+  update: string
+  colectionId: string
+  productId: string
+  thumbnail: string
+  name: string
+  isAvailableForPurchase: boolean
+}
 
 interface HalamanRestoModel {
 
@@ -320,6 +387,9 @@ interface HalamanRestoModel {
   productByCollectionsOutput?: ProductbyCollectionsDataModel
   checkoutOutput?: CheckoutDataModel
   checkoutDetailOutput?: CheckoutDetailsDataModel
+  checkoutListOutput?: CheckoutListByEmail
+  linesOutput?: LinesModel[]
+  linesMetadataOutput?: LinesMetadataModel[]
 
 }
 
@@ -336,7 +406,10 @@ enum HalamanRestoActionType {
   ProductListLoad = 'productlist-load',
   ProductbyMetadataLoad = 'productbyMetadata-load',
   ProductbyCollectionLoad = 'productbyCollection-load',
-  CheckoutLoad = 'checkout-load'
+  CheckoutLoad = 'checkout-load',
+  CheckoutListByEmail = 'checkoutlistbyemail-load',
+  LinesLoad = 'lines-load',
+  LinesMetadataLoad = 'linesmetadata-load'
 }
 
   type HalamanRestoAction = {
@@ -348,7 +421,16 @@ enum HalamanRestoActionType {
     type: HalamanRestoActionType.ChannelDetailLoad
   } | {
     data: HalamanRestoModel
+    type: HalamanRestoActionType.CheckoutListByEmail
+  } | {
+    data: HalamanRestoModel
     type: HalamanRestoActionType.CheckoutLoad
+  } | {
+    data: HalamanRestoModel
+    type: HalamanRestoActionType.LinesLoad
+  } | {
+    data: HalamanRestoModel
+    type: HalamanRestoActionType.LinesMetadataLoad
   } | {
     data: HalamanRestoModel
     type: HalamanRestoActionType.ProductbyCollectionLoad
