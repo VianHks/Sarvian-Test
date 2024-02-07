@@ -4,7 +4,13 @@ import type { TAction, TDispatch } from '@models/types.js';
 
 import { ProductViewsActionType } from './types.js';
 
-import type { CreateCheckoutDataModel, ProductDetailsDataModel, ProductViewsAction, ProductViewsModel } from './types.js';
+import type {
+  CreateCheckoutDataModel,
+  ProductDetailsDataModel,
+  ProductTypeModel,
+  ProductViewsAction,
+  ProductViewsModel
+} from './types.js';
 
 const DEFAULT_PRODUCT_DETAILS = {
   data: {
@@ -31,8 +37,36 @@ const DEFAULT_RESPONSE_CREATE_CHECKOUT = {
   checkout_id: ''
 };
 
+const DEFAULT_PRODUCT_TYPE: ProductTypeModel = {
+  data: {
+    productType: {
+      name: '',
+      variantAttributes: [
+        {
+          choices: {
+            edges: [
+              {
+                node: {
+                  id: '',
+                  name: '',
+                  slug: '',
+                  value: ''
+                }
+              }
+            ]
+          },
+          id: '',
+          inputType: '',
+          name: ''
+        }
+      ]
+    }
+  }
+};
+
 const ProductViewsDefault: ProductViewsModel = {
   productDetails: DEFAULT_PRODUCT_DETAILS,
+  productTypeDetails: DEFAULT_PRODUCT_TYPE,
   responseCreateCheckout: DEFAULT_RESPONSE_CREATE_CHECKOUT
 };
 
@@ -45,6 +79,8 @@ const ProductViewReducer = (
       return { ...state, ...action.data };
     case ProductViewsActionType.GetCheckoutId:
       return { ...state, ...action.data };
+    case ProductViewsActionType.GetProductTypeDetails:
+      return { ...state, ...action.data };
 
     default:
       return state;
@@ -52,84 +88,131 @@ const ProductViewReducer = (
 };
 
 const ProductViewsCommand = {
-  getProductDetails: (productId: string, token: string): TAction<ProductViewsAction, void> => {
+  getProductDetails: (
+    productId: string,
+    token: string
+  ): TAction<ProductViewsAction, void> => {
     return (dispatch: TDispatch<ProductViewsAction>) => {
-      return apiFetch(token).get(`/foodbuyer/0.1/product/${productId}`).then((response) => {
-        if (response.status === 200) {
-          if (response.data !== null) {
-            const productViews: ProductViewsModel = {
-              productDetails: (response.data as ProductDetailsDataModel)
-            };
+      return apiFetch(token)
+        .get(`/foodbuyer/0.1/product/${productId}`)
+        .then((response) => {
+          if (response.status === 200) {
+            if (response.data !== null) {
+              const productViews: ProductViewsModel = {
+                productDetails: response.data as ProductDetailsDataModel
+              };
 
-            dispatch({
-              data: productViews,
-              type: ProductViewsActionType.GetProductDetails
-            });
-          } else {
-            dispatch({
-              data: ProductViewsDefault,
-              type: ProductViewsActionType.GetProductDetails
-            });
+              dispatch({
+                data: productViews,
+                type: ProductViewsActionType.GetProductDetails
+              });
+            } else {
+              dispatch({
+                data: ProductViewsDefault,
+                type: ProductViewsActionType.GetProductDetails
+              });
+            }
           }
-        }
-      });
+        });
+    };
+  },
+  getProductTypeDetails: (
+    productTypeId: string,
+    token: string
+  ): TAction<ProductViewsAction, void> => {
+    return (dispatch: TDispatch<ProductViewsAction>) => {
+      return apiFetch(token)
+        .get(`/foodbuyer/0.1/product-type/${productTypeId}`)
+        .then((response) => {
+          if (response.status === 200) {
+            if (response.data !== null) {
+              const productViews: ProductViewsModel = {
+                productTypeDetails: response.data as ProductTypeModel
+              };
+
+              dispatch({
+                data: productViews,
+                type: ProductViewsActionType.GetProductTypeDetails
+              });
+            } else {
+              dispatch({
+                data: ProductViewsDefault,
+                type: ProductViewsActionType.GetProductTypeDetails
+              });
+            }
+          }
+        });
     };
   },
   postCreateCheckout: (payload: unknown, token: string): Promise<string> => {
-    return apiFetch(token).post(`/foodbuyer/0.1/checkout`, payload)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .then((response: any) => {
-        const id: string = response?.data?.checkout_id;
+    return (
+      apiFetch(token)
+        .post(`/foodbuyer/0.1/checkout`, payload)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .then((response: any) => {
+          const id: string = response?.data?.checkout_id;
 
-        if (response.status === 200) {
-          return id;
-        }
-
-        return 'err';
-      }).catch(() => {
-        return 'err';
-      });
-  },
-  putCheckout: (payload: unknown, token: string): Promise<string> => {
-    return apiFetch(token).put(`/foodbuyer/0.1/checkout`, payload)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .then((response: any) => {
-        const id: string = response?.data?.checkoutId;
-
-        if (response.status === 200) {
-          if (id) {
-            return 'ok';
+          if (response.status === 200) {
+            return id;
           }
 
           return 'err';
-        }
-
-        return 'err';
-      }).catch(() => {
-        return 'err';
-      });
+        })
+        .catch(() => {
+          return 'err';
+        })
+    );
   },
-  getCheckoutId: (payload: unknown, token: string): TAction<ProductViewsAction, void> => {
-    return (dispatch: TDispatch<ProductViewsAction>) => {
-      return apiFetch(token).post(`/foodbuyer/0.1/checkout`, payload).then((response) => {
-        if (response.status === 200) {
-          if (response.data !== null) {
-            const productViews: ProductViewsModel = {
-              responseCreateCheckout: (response.data as CreateCheckoutDataModel)
-            };
+  putCheckout: (payload: unknown, token: string): Promise<string> => {
+    return (
+      apiFetch(token)
+        .put(`/foodbuyer/0.1/checkout`, payload)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .then((response: any) => {
+          const id: string = response?.data?.checkoutId;
 
-            dispatch({
-              data: productViews,
-              type: ProductViewsActionType.GetProductDetails
-            });
-          } else {
-            dispatch({
-              data: ProductViewsDefault,
-              type: ProductViewsActionType.GetProductDetails
-            });
+          if (response.status === 200) {
+            if (id) {
+              return 'ok';
+            }
+
+            return 'err';
           }
-        }
-      });
+
+          return 'err';
+        })
+        .catch(() => {
+          return 'err';
+        })
+    );
+  },
+  getCheckoutId: (
+    payload: unknown,
+    token: string
+  ): TAction<ProductViewsAction, void> => {
+    return (dispatch: TDispatch<ProductViewsAction>) => {
+      return apiFetch(token)
+        .post(`/foodbuyer/0.1/checkout`, payload)
+        .then((response) => {
+          if (response.status === 200) {
+            if (response.data !== null) {
+              const productViews: ProductViewsModel = {
+                responseCreateCheckout:
+                  response.data as CreateCheckoutDataModel
+              };
+
+              dispatch({
+                data: productViews,
+                type: ProductViewsActionType.GetProductDetails
+              });
+            } else {
+              dispatch({
+                data: ProductViewsDefault,
+                type: ProductViewsActionType.GetProductDetails
+              });
+            }
+          }
+        });
     };
   }
 };
