@@ -1,9 +1,27 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Box, Card, CardContent, CardMedia, Chip, Divider, Grid, InputAdornment, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardContent,
+  CardMedia,
+  Chip,
+  Divider,
+  Grid,
+  InputAdornment,
+  TextField,
+  Typography
+} from '@mui/material';
 
-import { AccessTimeFilled, ExpandMoreFilled, FilterAltFilled, LocationOnFilled, SearchFilled, StarFilled } from '@nxweb/icons/material';
+import {
+  AccessTimeFilled,
+  ExpandMoreFilled,
+  FilterAltFilled,
+  LocationOnFilled,
+  SearchFilled,
+  StarFilled
+} from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
 
 import { useAuth } from '@hooks/use-auth';
@@ -197,7 +215,15 @@ const Home: PageComponent = () => {
 
   const today = new Date();
   const dayOfWeek = today.getDay();
-  const daysOfWeek = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const daysOfWeek = [
+    'Minggu',
+    'Senin',
+    'Selasa',
+    'Rabu',
+    'Kamis',
+    'Jumat',
+    'Sabtu'
+  ];
   const thisDay = daysOfWeek[dayOfWeek].toLowerCase();
 
   const [store, dispatch] = useStore((state) => state?.home);
@@ -212,20 +238,31 @@ const Home: PageComponent = () => {
 
   useEffect(() => {
     if (token) {
-      dispatch(
-        command.home.getHomeMenu(token || '')
-      );
+      dispatch(command.home.getHomeMenu(token || ''));
     }
   }, [dispatch]);
 
   useEffect(() => {
     if (store?.HomeRestoOutput?.data?.channels) {
-      const deliveryChannels: ChannelsDataModel[] = store?.HomeRestoOutput?.data?.channels.filter((channel) => channel.metafields.delivery === 'true');
-      const pickUpChannels: ChannelsDataModel[] = store?.HomeRestoOutput?.data?.channels.filter((channel) => channel.metafields.pickUp === 'true');
-      const dineInChannels: ChannelsDataModel[] = store?.HomeRestoOutput?.data?.channels.filter((channel) => channel.metafields.dineIn === 'true');
+      const deliveryChannels: ChannelsDataModel[] =
+        store?.HomeRestoOutput?.data?.channels.filter(
+          (channel) => channel.metafields.delivery === 'true'
+        );
+      const pickUpChannels: ChannelsDataModel[] =
+        store?.HomeRestoOutput?.data?.channels.filter(
+          (channel) => channel.metafields.pickUp === 'true'
+        );
+      const dineInChannels: ChannelsDataModel[] =
+        store?.HomeRestoOutput?.data?.channels.filter(
+          (channel) => channel.metafields.dineIn === 'true'
+        );
 
       setDeliveryData((prevDeliveryData) => {
-        const uniqueDeliveryData = Array.from(new Set([...prevDeliveryData, ...deliveryChannels].map((item) => item.id)))
+        const uniqueDeliveryData = Array.from(
+          new Set(
+            [...prevDeliveryData, ...deliveryChannels].map((item) => item.id)
+          )
+        )
           .map((id) => deliveryChannels.find((item) => item.id === id))
           .filter(Boolean) as ChannelsDataModel[];
 
@@ -233,7 +270,11 @@ const Home: PageComponent = () => {
       });
 
       setPickUpData((prevPickUpChannels) => {
-        const uniquePickUpData = Array.from(new Set([...prevPickUpChannels, ...pickUpChannels].map((item) => item.id)))
+        const uniquePickUpData = Array.from(
+          new Set(
+            [...prevPickUpChannels, ...pickUpChannels].map((item) => item.id)
+          )
+        )
           .map((id) => pickUpChannels.find((item) => item.id === id))
           .filter(Boolean) as ChannelsDataModel[];
 
@@ -241,7 +282,9 @@ const Home: PageComponent = () => {
       });
 
       setDineInData((prevDineInData) => {
-        const uniqueDineInData = Array.from(new Set([...prevDineInData, ...dineInChannels].map((item) => item.id)))
+        const uniqueDineInData = Array.from(
+          new Set([...prevDineInData, ...dineInChannels].map((item) => item.id))
+        )
           .map((id) => dineInChannels.find((item) => item.id === id))
           .filter(Boolean) as ChannelsDataModel[];
 
@@ -265,6 +308,11 @@ const Home: PageComponent = () => {
        *   setDataMenu([...deliveryData]);
        *   break;
        */
+      /*
+       * Case 'Pesan Antar':
+       *   setDataMenu([...deliveryData]);
+       *   break;
+       */
       case 'Pick Up':
         setDataMenu([...pickUpData]);
         break;
@@ -282,14 +330,22 @@ const Home: PageComponent = () => {
     return deg * (Math.PI / 180);
   };
 
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ) => {
     const R = 6371;
     const dLat = deg2rad(lat2 - lat1);
     const dLon = deg2rad(lon2 - lon1);
 
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.cos(deg2rad(lat1)) *
+        Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
@@ -298,11 +354,15 @@ const Home: PageComponent = () => {
     return distance;
   };
 
-  const tokrumCoords = tokrumCoordinate.split(',').map((coord) => parseFloat(coord.trim()));
+  const tokrumCoords = tokrumCoordinate
+    .split(',')
+    .map((coord) => parseFloat(coord.trim()));
   const coordinate1 = { latitude: tokrumCoords[0], longitude: tokrumCoords[1] };
 
   dataMenu.forEach((location) => {
-    const coords = location.metafields.coordinate.split(',').map((coord) => parseFloat(coord.trim()));
+    const coords = location.metafields.coordinate
+      .split(',')
+      .map((coord) => parseFloat(coord.trim()));
     const coordinate2 = { latitude: coords[0], longitude: coords[1] };
 
     const distance = calculateDistance(
@@ -315,7 +375,9 @@ const Home: PageComponent = () => {
 
   const calculateDistances = () => {
     return dataMenu.map((location) => {
-      const coords = location.metafields.coordinate.split(',').map((coord) => parseFloat(coord.trim()));
+      const coords = location.metafields.coordinate
+        .split(',')
+        .map((coord) => parseFloat(coord.trim()));
       const coordinate2 = { latitude: coords[0], longitude: coords[1] };
 
       const distance = calculateDistance(
@@ -335,8 +397,10 @@ const Home: PageComponent = () => {
     const activeData = dataMenu.filter((item) => item.isActive);
 
     return [...activeData].sort((a, b) => {
-      const distanceA = distances.find((item) => item.location.id === a.id)?.distance || 0;
-      const distanceB = distances.find((item) => item.location.id === b.id)?.distance || 0;
+      const distanceA =
+        distances.find((item) => item.location.id === a.id)?.distance || 0;
+      const distanceB =
+        distances.find((item) => item.location.id === b.id)?.distance || 0;
 
       return distanceA - distanceB;
     });
@@ -347,7 +411,9 @@ const Home: PageComponent = () => {
 
     for (const restaurant of data) {
       if (restaurant?.metafields?.operationalHour !== '') {
-        const operationalHours = JSON.parse(restaurant?.metafields?.operationalHour);
+        const operationalHours = JSON.parse(
+          restaurant?.metafields?.operationalHour
+        );
 
         let shouldAddDefault = false;
         if (!operationalHours || operationalHours.length === 0) {
@@ -401,13 +467,20 @@ const Home: PageComponent = () => {
 
   return (
     <Box sx={{ margin: '1rem 1.5rem' }}>
-      
-      <Typography color="neutral-90" sx={{ marginBottom: '0.5rem' }} variant="body2">
+      <Typography
+        color="neutral-90"
+        sx={{ marginBottom: '0.5rem' }}
+        variant="body2"
+      >
         Antar ke:
       </Typography>
-      <Grid container={true} gap={1} sx={{ alignItems: 'center', marginBottom: '1rem' }}>
+      <Grid
+        container={true}
+        gap={2}
+        sx={{ alignItems: 'center', display: 'flex', marginBottom: '1rem' }}
+      >
         <Grid item={true}>
-          <LocationOnFilled size={16} style={{ color: 'red' }} />
+          <LocationOnFilled size={17} style={{ color: '#F97066' }} />
         </Grid>
         <Grid item={true}>
           <Typography color="neutral-90" fontWeight="bold" variant="h5">
@@ -422,12 +495,12 @@ const Home: PageComponent = () => {
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
-              <FilterAltFilled style={{ color: '#317FF2' }} />
+              <FilterAltFilled size={20} style={{ color: '#317FF2' }} />
             </InputAdornment>
           ),
           startAdornment: (
             <InputAdornment position="start">
-              <SearchFilled />
+              <SearchFilled size={20} />
             </InputAdornment>
           )
         }}
@@ -436,6 +509,8 @@ const Home: PageComponent = () => {
         size="small"
         sx={{
           '& input::placeholder': { color: 'blue' },
+          borderColor: '#D5ECFE', // Atur nilai sesuai kebutuhan Anda
+          borderRadius: '8px', // Atur nilai sesuai kebutuhan Anda
           boxShadow: '0px 4px 8px 0px rgba(49, 127, 242, 0.08)',
           marginBottom: '1rem'
         }}
@@ -478,30 +553,74 @@ const Home: PageComponent = () => {
         </Box>
       <Grid container={true} spacing={1} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: shipmentMethode === 'Pesan Antar' ? '1rem' : '2rem' }}>
         <Grid item={true}>
-          <Chip color={shipmentMethode === 'Pesan Antar' ? 'primary' : 'default'} disabled={true} icon={<img alt="icon" sizes="large" src={pesanAntarIcon} />} label="Pesan Antar" sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} onClick={() => handleShipmentMethodChange('Pesan Antar')} />
+          <Chip
+            color={shipmentMethode === 'Pesan Antar' ? 'primary' : 'default'}
+            disabled={true}
+            icon={<img alt="icon" sizes="large" src={pesanAntarIcon} />}
+            label="Pesan Antar"
+            sx={{ borderRadius: '0.5rem', padding: '0.5rem', width: '100%' }}
+            onClick={() => handleShipmentMethodChange('Pesan Antar')} />
         </Grid>
         <Grid item={true}>
-          <Chip color={shipmentMethode === 'Pick Up' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={pickUpIcon} />} label="Pick Up" sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} onClick={() => handleShipmentMethodChange('Pick Up')} />
+          <Chip
+            color={shipmentMethode === 'Pick Up' ? 'primary' : 'default'}
+            icon={<img alt="icon" sizes="large" src={pickUpIcon} />}
+            label="Pick Up"
+            sx={{ borderRadius: '0.5rem', padding: '0.5rem', width: '100%' }}
+            onClick={() => handleShipmentMethodChange('Pick Up')} />
         </Grid>
         <Grid item={true}>
-          <Chip color={shipmentMethode === 'Dine In' ? 'primary' : 'default'} icon={<img alt="icon" sizes="large" src={dineInIcon} />} label="Dine In" sx={{ borderRadius: '0.5rem', padding: '0.4rem' }} onClick={() => handleShipmentMethodChange('Dine In')} />
+          <Chip
+            color={shipmentMethode === 'Dine In' ? 'primary' : 'default'}
+            icon={<img alt="icon" sizes="large" src={dineInIcon} />}
+            label="Dine In"
+            sx={{ borderRadius: '0.5rem', padding: '0.5rem', width: '100%' }}
+            onClick={() => handleShipmentMethodChange('Dine In')} />
         </Grid>
       </Grid>
       {shipmentMethode === 'Pesan Antar'
-        ? <Grid container={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+        ? (
+        <Grid
+          container={true}
+          sx={{
+            alignItems: 'center',
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginBottom: '1.5rem'
+          }}
+        >
           {CARD_PESAN_ANTAR.map((obj) => {
             return (
               <Grid item={true} key={obj.title} xs="auto">
-                <Card sx={{ padding: '0.8rem' }} onClick={() => navigate(`./search-result?query=${obj.path}`)}>
+                <Card
+                  sx={{ padding: '0.8rem' }}
+                  onClick={() => navigate(`./search-result?query=${obj.path}`)}
+                >
                   <img alt={obj.title} src={obj.icon} />
                 </Card>
-                <Typography sx={{ fontWeight: 'bold', textAlign: 'center' }} variant="body2">{obj.title}</Typography>
+                <Typography
+                  sx={{ fontWeight: 'bold', textAlign: 'center' }}
+                  variant="body2"
+                >
+                  {obj.title}
+                </Typography>
               </Grid>
             );
           })}
-          </Grid>
+        </Grid>
+        )
         : null}
-      {/* <Card sx={{ backgroundColor: '#D5ECFE', borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '1rem', marginInline: '-1.5rem', padding: '1rem 1.5rem' }}>
+      <Card
+        sx={{
+          backgroundColor: '#D5ECFE',
+          borderColor: 'transparent',
+          borderRadius: 0,
+          boxShadow: 'none',
+          marginBottom: '1rem',
+          marginInline: '-1.5rem',
+          padding: '1rem 1.5rem'
+        }}
+      >
         <Box gap={1} sx={{ display: 'flex', marginBottom: '0.875rem' }}>
           <img alt="test" src={recomendationIcon} />
           <Typography color="neutral-90" fontWeight="bold" variant="h5">
@@ -510,10 +629,22 @@ const Home: PageComponent = () => {
         </Box>
         <Box sx={{ overflowX: 'auto' }}>
           <Grid container={true} sx={{ width: '28.75rem' }}>
-            <Grid item={true} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Grid
+              item={true}
+              sx={{ display: 'flex', justifyContent: 'space-between' }}
+            >
               {store?.menuBerandaOutput?.map((obj) => {
                 return (
-                  <Card key={obj.id} sx={{ borderColor: 'transparent', marginRight: '0.5rem', padding: '0.5rem', width: '9.25rem' }}>
+                  <Card
+                    key={obj.id}
+                    sx={{
+                      borderColor: 'transparent',
+                      marginRight: '0.5rem',
+                      padding: '0.5rem',
+                      width: '9.25rem'
+                    }}
+                    onClick={handleCardToRestoClick}
+                  >
                     <CardMedia
                       image={recomendationImage}
                       sx={{ height: '6rem', marginBottom: '0.5' }}
@@ -544,14 +675,21 @@ const Home: PageComponent = () => {
                       >
                         {obj.restoName}
                       </Typography>
-                      <Typography color="primary" fontWeight="bold" sx={{ marginBottom: '0.125' }} variant="h6">
+                      <Typography
+                        color="primary"
+                        fontWeight="bold"
+                        sx={{ marginBottom: '0.125' }}
+                        variant="h6"
+                      >
                         Rp. {obj.itemPrice.toLocaleString('id-ID')}
                       </Typography>
                       <Grid container={true} justifyContent="space-between">
                         <Box>
                           <Grid container={true}>
                             <Grid item={true}>
-                              <LocationOnFilled size={12} style={{ color: 'red' }} />
+                              <LocationOnFilled
+                                size={12}
+                                style={{ color: 'red' }} />
                             </Grid>
                             <Grid item={true}>
                               <Typography color="neutral-90" variant="caption">
@@ -573,12 +711,34 @@ const Home: PageComponent = () => {
             </Grid>
           </Grid>
         </Box>
-      </Card> */}
-      <Card sx={{ backgroundColor: 'transparent', borderColor: 'transparent', borderRadius: 0, boxShadow: 'none', marginBottom: '-1rem', marginInline: '-1.5rem', padding: '1rem 1.5rem' }}>
+      </Card>
+      <Card
+        sx={{
+          backgroundColor: 'transparent',
+          borderColor: 'transparent',
+          borderRadius: 0,
+          boxShadow: 'none',
+          marginBottom: '-1rem',
+          marginInline: '-1.5rem',
+          padding: '1rem 1.5rem'
+        }}
+      >
         <Box gap={1} sx={{ display: 'flex', marginBottom: '1rem' }}>
-          <img alt="test" src={shipmentMethode === 'Pick Up' ? pickUpIcon : shipmentMethode === 'Dine In' ? dineInIcon : jajananLokalIcon} />
+          <img
+            alt="test"
+            src={
+              shipmentMethode === 'Pick Up'
+                ? pickUpIcon
+                : shipmentMethode === 'Dine In'
+                  ? dineInIcon
+                  : jajananLokalIcon
+            } />
           <Typography color="neutral-90" fontWeight="bold" variant="h5">
-            {shipmentMethode === 'Pesan Antar' ? 'Eksplor Jajanan Lokal' : shipmentMethode === 'Dine In' ? 'Dine-In di Resto' : 'Resto yang bisa Pickup'}
+            {shipmentMethode === 'Pesan Antar'
+              ? 'Eksplor Jajanan Lokal'
+              : shipmentMethode === 'Dine In'
+                ? 'Dine-In di Resto'
+                : 'Resto yang bisa Pickup'}
           </Typography>
         </Box>
         {/* {shipmentMethode === 'Pesan Antar'
@@ -649,77 +809,99 @@ const Home: PageComponent = () => {
             </Box>
           : null} */}
       </Card>
-      {shipmentMethode !== 'Pesan Antar' && sortedDataMenu.map((resto, index) => (
-        <Card key={resto.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem' }} onClick={() => { handleCardToRestoClick(resto.id); }}>
-          <Grid container={true} spacing={2}>
-            <Grid item={true} xs={4}>
-              <div
-                style={{
-                  alignItems: 'center',
-                  display: 'flex',
-                  height: '100%',
-                  justifyContent: 'center',
-                  position: 'relative',
-                  width: '100%'
-                }}
-              >
-                <img
-                  alt="test"
-                  src={resto.metafields.media}
-                  style={{ maxHeight: '100%', maxWidth: '100%' }} />
-                {resto.metafields.verified === 'true' &&
+      {shipmentMethode !== 'Pesan Antar' &&
+        sortedDataMenu.map((resto, index) => (
+          <Card
+            key={resto.id}
+            sx={{
+              borderColor: 'transparent',
+              marginBottom: '1rem',
+              padding: '0.5rem'
+            }}
+          >
+            <Grid container={true} spacing={2}>
+              <Grid item={true} xs={4}>
+                <div
+                  style={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    height: '100%',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    width: '100%'
+                  }}
+                >
                   <img
-                    alt="Verified"
-                    src={verifyIcon}
-                    style={{
-                      maxHeight: '1.5rem',
-                      maxWidth: '1.5rem',
-                      position: 'absolute',
-                      right: '5px',
-                      top: '5px'
-                    }} />}
-              </div>
+                    alt="test"
+                    src={resto.metafields.media}
+                    style={{ maxHeight: '100%', maxWidth: '100%' }} />
+                  {resto.metafields.verified === 'true' && (
+                    <img
+                      alt="Verified"
+                      src={verifyIcon}
+                      style={{
+                        maxHeight: '1.5rem',
+                        maxWidth: '1.5rem',
+                        position: 'absolute',
+                        right: '5px',
+                        top: '5px'
+                      }} />
+                  )}
+                </div>
+              </Grid>
+              <Grid item={true} xs={8}>
+                {resto.metafields.verified === 'true'
+                  ? (
+                  <Typography
+                    color="neutral-70"
+                    sx={{ marginBottom: '0.125' }}
+                    variant="body2"
+                  >
+                    Verified by TokoRumahan
+                  </Typography>
+                  )
+                  : null}
+                <Typography
+                  color="neutral-90"
+                  fontWeight="bold"
+                  sx={{ marginBottom: '0.125' }}
+                  variant="h6"
+                >
+                  {resto.name}
+                </Typography>
+                <Box gap={1} sx={{ display: 'flex' }}>
+                  <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
+                    <StarFilled size={10} style={{ color: 'yellow' }} />
+                    <Typography color="neutral-90" variant="caption">
+                      {resto.metafields.rating}
+                    </Typography>
+                  </Box>
+                  <Divider flexItem={true} orientation="vertical" />
+                  <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
+                    <LocationOnFilled size={10} style={{ color: 'red' }} />
+                    <Typography color="neutral-90" variant="caption">
+                      {calculateDistance(
+                        coordinate1.latitude,
+                        coordinate1.longitude,
+                        parseFloat(resto.metafields.coordinate.split(',')[0]),
+                        parseFloat(resto.metafields.coordinate.split(',')[1])
+                      ).toFixed(2)}{' '}
+                      km
+                    </Typography>
+                  </Box>
+                  <Divider flexItem={true} orientation="vertical" />
+                  <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
+                    <AccessTimeFilled size={10} />
+                    <Typography color="neutral-90" variant="caption">
+                      {operationalHour[index].open} -{' '}
+                      {operationalHour[index].closed}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
             </Grid>
-            <Grid item={true} xs={8}>
-              {resto.metafields.verified === 'true'
-                ? <Typography color="neutral-70" sx={{ marginBottom: '0.125' }} variant="body2">
-                  Verified by TokoRumahan
-                  </Typography>
-                : null}
-              <Typography color="neutral-90" fontWeight="bold" sx={{ marginBottom: '0.125' }} variant="h6">
-                {resto.name}
-              </Typography>
-              <Box gap={1} sx={{ display: 'flex' }}>
-                <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
-                  <StarFilled size={10} style={{ color: 'yellow' }} />
-                  <Typography color="neutral-90" variant="caption">
-                    {resto.metafields.rating}
-                  </Typography>
-                </Box>
-                <Divider flexItem={true} orientation="vertical" />
-                <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
-                  <LocationOnFilled size={10} style={{ color: 'red' }} />
-                  <Typography color="neutral-90" variant="caption">
-                  {calculateDistance(
-                    coordinate1.latitude,
-                    coordinate1.longitude,
-                    parseFloat(resto.metafields.coordinate.split(',')[0]),
-                    parseFloat(resto.metafields.coordinate.split(',')[1])
-                  ).toFixed(2)} km
-                  </Typography>
-                </Box>
-                <Divider flexItem={true} orientation="vertical" />
-                <Box gap={1} sx={{ alignItems: 'center', display: 'flex' }}>
-                  <AccessTimeFilled size={10} />
-                  <Typography color="neutral-90" variant="caption">
-                    {operationalHour[index].open} - {operationalHour[index].closed}
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
-        </Card>
-      ))}
+          </Card>
+        ))}
       {/* {shipmentMethode === 'Pesan Antar' &&
         <Box>
           <Grid container={true} spacing={2} sx={{ marginTop: '1.5rem' }}>

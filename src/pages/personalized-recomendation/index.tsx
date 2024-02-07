@@ -49,7 +49,8 @@ const PersonalizedRecomendation: PageComponent = () => {
   const token = useMemo(() => auth?.token.accessToken, [auth]);
 
   const [store, dispatch] = useStore((state) => state?.personalizedRec);
-  const [foodsList, setFoodsList] = useState<FoodsListDataModel>(DEFAULT_FOODS_LIST);
+  const [foodsList, setFoodsList] =
+    useState<FoodsListDataModel>(DEFAULT_FOODS_LIST);
   const userId = 'VXNlcjoyMDUwMjQwNjE5';
 
   const [activeStep, setActiveStep] = useState(0);
@@ -68,15 +69,22 @@ const PersonalizedRecomendation: PageComponent = () => {
     }
   };
 
-  const handleFoodItemClick = (clickedItem: FoodsDataModel, mealType: string) => {
+  const handleFoodItemClick = (
+    clickedItem: FoodsDataModel,
+    mealType: string
+  ) => {
     setFoodsList((prevFoodsList) => {
       const updatedFoodsList = { ...prevFoodsList };
       const selectedItems = updatedFoodsList[mealType];
 
-      const isItemAlreadySelected = selectedItems.some((item) => item.id === clickedItem.id);
+      const isItemAlreadySelected = selectedItems.some(
+        (item) => item.id === clickedItem.id
+      );
 
       if (isItemAlreadySelected) {
-        updatedFoodsList[mealType] = selectedItems.filter((item) => item.id !== clickedItem.id);
+        updatedFoodsList[mealType] = selectedItems.filter(
+          (item) => item.id !== clickedItem.id
+        );
       } else {
         const selectedItem = store?.recomendationList?.find(
           (item: FoodsDataModel) => item.id === clickedItem.id
@@ -92,9 +100,7 @@ const PersonalizedRecomendation: PageComponent = () => {
   };
 
   useEffect(() => {
-    dispatch(
-      PersonalizedRecomendationCommand.getPersonalizeRecomendation()
-    );
+    dispatch(PersonalizedRecomendationCommand.getPersonalizeRecomendation());
   }, [dispatch]);
 
   const handleNext = () => {
@@ -111,7 +117,10 @@ const PersonalizedRecomendation: PageComponent = () => {
     } else if (activeStep === 1) {
       setActiveStep(2);
     } else {
-      PersonalizedRecomendationCommand.postPersonalizeRecomendation(payload, token || '');
+      PersonalizedRecomendationCommand.postPersonalizeRecomendation(
+        payload,
+        token || ''
+      );
       setTimeout(() => {
         navigate('/location-by-gps');
       });
@@ -150,19 +159,20 @@ const PersonalizedRecomendation: PageComponent = () => {
                 <Card
                   sx={{
                     alignItems: 'center',
+                    backgroundColor: isItemSelected ? '#D5ECFE' : 'initial',
                     border: isItemSelected
-                      ? '2px solid #3f51b5'
+                      ? '2px solid #8FBCFF'
                       : '2px solid transparent',
                     borderRadius: '8px',
                     boxShadow: isItemSelected
-                      ? '0px 0px 15px rgba(0, 0, 0, 0.3)'
+                      ? '0px 0px 5px rgba(0, 0, 0, 0.3)'
                       : '0px 0px 5px rgba(16, 24, 40, 0.1)',
                     cursor: isItemSelected ? 'not-allowed' : 'pointer',
                     display: 'block',
                     justifyContent: 'center',
-                    marginBottom: '0.625rem',
-                    opacity: isItemSelected ? 0.7 : 1,
-                    padding: '0.5rem 1rem'
+                    marginBottom: '0.1rem',
+                    opacity: 1,
+                    padding: '1rem'
                   }}
                   onClick={() => handleFoodItemClick(obj, mealType)}
                 >
@@ -195,7 +205,7 @@ const PersonalizedRecomendation: PageComponent = () => {
   return (
     <Container style={{ padding: '3rem 1.5rem' }}>
       <Typography
-        sx={{ fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'center' }}
+        sx={{ fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'left' }}
         variant="h4"
       >
         {activeStep === 0
@@ -205,7 +215,7 @@ const PersonalizedRecomendation: PageComponent = () => {
             : 'Jangan lupa makan malam ya!'}
       </Typography>
       <Typography
-        sx={{ marginBottom: '1rem', textAlign: 'center' }}
+        sx={{ marginBottom: '1rem', textAlign: 'left' }}
         variant="body2"
       >
         Pilih makanan kesukaanmu! (minimal 3 kategori)
@@ -218,11 +228,20 @@ const PersonalizedRecomendation: PageComponent = () => {
           nonLinear={true}
         >
           {STEPS.map((label, index) => (
-            <Step active={index === activeStep} completed={index < activeStep} key={label}>
+            <Step
+              active={index === activeStep}
+              completed={index < activeStep}
+              key={label}
+            >
               <StepLabel StepIconComponent={ColorlibStepIcon}>
                 <Typography
                   sx={{
-                    color: index === activeStep ? theme.palette.primary.main : index < activeStep ? theme.palette.primary.main : theme.palette.grey[600]
+                    color:
+                      index === activeStep
+                        ? theme.palette.primary.main
+                        : index < activeStep
+                          ? theme.palette.primary.main
+                          : theme.palette.grey[600]
                     // FontFamily: theme.typography.fontFamily?.split(',')[1].trim()
                   }}
                   variant="body1"
@@ -248,14 +267,17 @@ const PersonalizedRecomendation: PageComponent = () => {
       >
         <Button
           color="primary"
-          sx={{ display: activeStep === 0 ? 'none' : 'block', width: '50%' }}
+          sx={{
+            display: activeStep === 0 ? 'none' : 'block',
+            padding: '0.6rem',
+            width: '50%'
+          }}
           variant="outlined"
           onClick={() => handleBack()}
         >
           Kembali
         </Button>
         <Button
-          color="primary"
           disabled={
             activeStep === 0
               ? foodsList.breakfast.length < 3
@@ -264,7 +286,11 @@ const PersonalizedRecomendation: PageComponent = () => {
                 : foodsList.dinner.length < 3
           }
           fullWidth={activeStep === 0}
-          sx={{ width: activeStep > 0 ? '50%' : '100%' }}
+          sx={{
+            backgroundColor: 'linear-gradient(180deg, #2B77E7 0%, #6A94A1 25%, #D5ECFE 50%, #C2BC40 75%, #FBD600 100%)',
+            padding: '0.6rem',
+            width: activeStep > 0 ? '50%' : '100%'
+          }}
           variant="contained"
           onClick={() => handleNext()}
         >

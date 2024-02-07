@@ -1,71 +1,93 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { WarningAmber } from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
-import { Alert, Avatar, Box, Card, Grid, Typography } from '@mui/material';
+import { Avatar, Box, Card, Divider, Grid, Typography, useTheme } from '@mui/material';
 
 import type { PageComponent } from '@nxweb/react';
 
 import RestoFoto from '@assets/images/RestoFoto.svg';
 
-const DUMMY_ChatList = [
+interface chatListData {
+  id: string
+  isi: string
+  status: string
+  tanggal: string
+  userName: string
+}
+
+const DUMMY_ChatList: chatListData[] = [
   {
-    id: 1,
-    userName: 'Pa Hasan',
+    id: '1',
     isi: 'Kurang suka sama sambelnya terlalu pedes',
+    status: 'ceklis',
     tanggal: '12 Juni 2023',
-    status: 'ceklis'
+    userName: 'Pa Hasan'
   },
   {
-    id: 2,
-    userName: 'Bu Winda',
+    id: '2',
     isi: 'suka banget rasanya',
+    status: 'send',
     tanggal: '25 Agustus 2023',
-    status: 'send'
+    userName: 'Bu Winda'
   },
   {
-    id: 3,
-    userName: 'Retno',
+    id: '3',
     isi: 'Udah terimakasih',
+    status: 'read',
     tanggal: '7 September 2023',
-    status: 'read'
+    userName: 'Retno'
   }
 ];
 
 const Chat: PageComponent = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
 
-  const [chatList, setChatList] = useState(DUMMY_ChatList);
-
-  const handleClick = () => {
+  const handleClick = (id: string) => {
     // Navigate to your desired route
-    navigate('/chat-detail');
+    navigate(`/chat-detail?id=${id}`);
   };
 
   return (
     <Box sx={{ margin: '1rem 1.5rem' }}>
-      <Grid item={true} xs={12}>
-        <Alert
-          color="warning"
-          severity="warning"
-          sx={{ alignItems: 'center', display: 'flex' }}
-        >
-          <Typography sx={{ fontSize: '12px' }} variant="h5">
-            Chat akan hilang dalam 2x24 jam dan akan dikirim melalui email.
-          </Typography>
-        </Alert>
+      <Typography
+        color={theme.palette.grey[900]}
+        fontWeight="bold"
+        sx={{ marginBlock: '1rem' }}
+        variant="h4"
+      >
+        Chat
+      </Typography>
+      <Grid
+        item={true}
+        sx={{
+          backgroundColor: '#FFE6B1',
+          borderRadius: '0.5rem',
+          display: 'flex',
+          gap: '1rem',
+          justifyContent: 'space-between',
+          padding: '0.5rem'
+        }}
+        xs={12}
+      >
+        <WarningAmber sx={{ color: '#FFA73D' }} />
+        <Typography sx={{ fontSize: '12px' }} variant="h5">
+          Chat akan hilang dalam 2x24 jam dan akan dikirim melalui email.
+        </Typography>
       </Grid>
-      {chatList.map((obj) => (
-        <Card
+      {DUMMY_ChatList.map((obj) => (
+        <Box
           key={obj.id}
           sx={{
             borderColor: 'transparent',
             marginBottom: '-1.5rem',
-            padding: '0.5rem',
-            marginTop: '2rem'
+            marginTop: '2rem',
+            padding: '0.5rem'
           }}
-          onClick={handleClick}
+          onClick={() => handleClick(obj.id)}
         >
           <Grid container={true} spacing={1}>
             <Grid
@@ -82,10 +104,10 @@ const Chat: PageComponent = () => {
             <Grid
               item={true}
               sx={{
-                marginLeft: '10px',
                 alignItems: 'center',
                 display: 'flex',
                 justifyContent: 'start',
+                marginLeft: '10px',
                 paddingTop: '0rem!important'
               }}
               xs={6}
@@ -93,10 +115,10 @@ const Chat: PageComponent = () => {
               <Box>
                 <Typography
                   sx={{
-                    marginLeft: '5px',
+                    color: 'black',
                     fontWeight: 'bold',
-                    textAlign: 'start',
-                    color: 'black'
+                    marginLeft: '5px',
+                    textAlign: 'start'
                   }}
                   variant="h6"
                 >
@@ -126,11 +148,11 @@ const Chat: PageComponent = () => {
               <Box>
                 <Typography
                   sx={{
-                    marginLeft: '5px',
-                    fontWeight: 'medium',
-                    textAlign: 'start',
                     fontSize: '0.6rem',
-                    marginTop: '0.25rem'
+                    fontWeight: 'medium',
+                    marginLeft: '5px',
+                    marginTop: '0.25rem',
+                    textAlign: 'start'
                   }}
                   variant="h6"
                 >
@@ -140,8 +162,8 @@ const Chat: PageComponent = () => {
                   <Grid sx={{ marginLeft: '50px' }}>
                     <CheckIcon
                       sx={{
-                        fontSize: '1rem',
                         alignItems: 'end',
+                        fontSize: '1rem',
                         marginTop: '5px'
                       }} />
                   </Grid>
@@ -150,8 +172,8 @@ const Chat: PageComponent = () => {
                   <Grid sx={{ marginLeft: '50px' }}>
                     <DoneAllIcon
                       sx={{
-                        fontSize: '1rem',
                         alignItems: 'end',
+                        fontSize: '1rem',
                         marginTop: '5px'
                       }} />
                   </Grid>
@@ -160,9 +182,9 @@ const Chat: PageComponent = () => {
                   <Grid sx={{ marginLeft: '50px' }}>
                     <DoneAllIcon
                       sx={{
-                        fontSize: '1rem',
-                        color: 'blue',
                         alignItems: 'end',
+                        color: 'blue',
+                        fontSize: '1rem',
                         marginTop: '5px'
                       }} />
                   </Grid>
@@ -170,7 +192,8 @@ const Chat: PageComponent = () => {
               </Box>
             </Grid>
           </Grid>
-        </Card>
+          <Divider sx={{ marginTop: '1rem' }} />
+        </Box>
       ))}
     </Box>
   );
@@ -180,3 +203,4 @@ Chat.displayName = 'Chat';
 
 export default Chat;
 export { DUMMY_ChatList };
+export type { chatListData };
