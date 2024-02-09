@@ -132,7 +132,7 @@ const Orders: PageComponent = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const [searchParams] = useSearchParams();
-  const orderId = searchParams.get('orderId');
+  const orderId = searchParams.get('id');
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
 
@@ -484,7 +484,7 @@ const Orders: PageComponent = () => {
                     fullWidth={true}
                     id="detail"
                     size="small"
-                    value={obj.metadata[0].value}
+                    value={obj.metadata.length > 0 ? obj.metadata[0].value : ''}
                     variant="outlined" />
                 </Box>
               </div>
@@ -503,7 +503,7 @@ const Orders: PageComponent = () => {
               fullWidth={true}
               id="detail"
               size="small"
-              value={detailOrder?.metafields?.note}
+              value={detailOrder?.metafields?.note || ''}
               variant="outlined" />
           </Box>
         </AccordionDetails>
