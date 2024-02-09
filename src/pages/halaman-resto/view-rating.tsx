@@ -55,7 +55,9 @@ const UlasandanRating: PageComponent = () => {
   const token = useMemo(() => auth?.token.accessToken, [auth]);
   const [store, dispatch] = useStore((state) => state?.rating);
   const [searchParams] = useSearchParams();
-  const channelId = searchParams.get('id');
+  // const channelId = searchParams.get('id');
+  const channelId = 'Q2hhbm5lbDo0';
+  
 
   useEffect(() => {
     if (channelId) {
@@ -72,11 +74,13 @@ const UlasandanRating: PageComponent = () => {
     }
   }, [dispatch, token]);
 
+  console.log('cekrating', store);
+
   return (
     <Box sx={{ margin: '0.5rem 0.5rem' }}>
    {store?.data && store.data.length > 0
      ? store.data.map((obj) => (
-      <Card key={obj.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem', marginTop: '2rem' }}>
+      <Card key={obj.id} sx={{ borderColor: 'transparent', marginBottom: '0.5rem', padding: '0.5rem', marginTop: '1rem' }}>
         <Grid container={true} spacing={4} sx={{ display: 'flex', justifyContent: 'space-between' }}>
 
             <Grid item={true} xs={2}>

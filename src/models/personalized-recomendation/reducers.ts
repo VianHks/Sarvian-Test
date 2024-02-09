@@ -17,7 +17,104 @@ import Roti from '@assets/images/Roti.png';
 import Sate from '@assets/images/Sate.png';
 import Sunda from '@assets/images/Sunda.png';
 
-import type { PersonalizedRecAction, PersonalRecomendationModel } from './types.js';
+import type { CustomerProfile, PersonalizedRecAction, PersonalRecomendationModel, RecMenu } from './types.js';
+
+const DefaultMenuRec: RecMenu = {
+  data: [
+    {
+      image: '',
+      name: ''
+    }
+  ]
+};
+
+const DefaultCustProfile: CustomerProfile = {
+  data: {
+    user: {
+      dateJoined: '',
+      defaultBillingAddress: {
+        city: '',
+        cityArea: '',
+        companyName: '',
+        country: {
+          code: '',
+          country: ''
+        },
+        countryArea: '',
+        firstName: '',
+        id: '',
+        lastName: '',
+        phone: '',
+        postalCode: '',
+        streetAddress1: '',
+        streetAddress2: ''
+      },
+      defaultShippingAddress: {
+        city: '',
+        cityArea: '',
+        companyName: '',
+        country: {
+          code: '',
+          country: ''
+        },
+        countryArea: '',
+        firstName: '',
+        id: '',
+        lastName: '',
+        phone: '',
+        postalCode: '',
+        streetAddress1: '',
+        streetAddress2: ''
+      },
+      email: '',
+      firstName: '',
+      id: '',
+      isActive: false,
+      lastName: '',
+      lastPlacedOrder: {
+        edges: [
+          {
+            node: {
+              created: '',
+              id: ''
+            }
+          }
+        ]
+      },
+      metadata: [
+        {
+          key: '',
+          value: ''
+        }
+      ],
+      note: '',
+      orders: {
+        edges: [
+          {
+            node: {
+              created: '',
+              id: '',
+              number: '',
+              paymentStatus: '',
+              total: {
+                gross: {
+                  amount: 0,
+                  currency: ''
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  extensions: {
+    cost: {
+      maximumAvailable: 0,
+      requestedQueryCost: 0
+    }
+  }
+};
 
 const PERSONALIZE_RECOMENDATION = [
   {
@@ -83,7 +180,9 @@ const PERSONALIZE_RECOMENDATION = [
 ];
 
 const PersonalRecomendationDefault: PersonalRecomendationModel = {
-  recomendationList: []
+  recomendationList: [],
+  recomendationMenu: DefaultMenuRec,
+  customerProfile: DefaultCustProfile
 };
 
 const PersonalizedRecReducer = (
@@ -93,6 +192,10 @@ const PersonalizedRecReducer = (
   switch (action.type) {
     case PersonalizedRecActionType.GetPersonalizedRecomendation:
       return { ...state, ...action.data };
+    case PersonalizedRecActionType.GetRecomendationMenu:
+      return { ...state, ...action.data };
+    case PersonalizedRecActionType.GetCustomerProfile:
+      return { ...state, ...action.data };
 
     default:
       return state;
@@ -100,6 +203,56 @@ const PersonalizedRecReducer = (
 };
 
 export const PersonalizedRecomendationCommand = {
+  getMenuRecomendation: (token: string): TAction<PersonalizedRecAction, void> => {
+    return (dispatch: TDispatch<PersonalizedRecAction>) => {
+      return apiFetch(token)
+        .get(`/foodbuyer/0.1/menu-recomendation`)
+        .then((response) => {
+          if (response.status === 200) {
+            if (response.data !== null) {
+              const recMenu: PersonalRecomendationModel = {
+                recomendationMenu: response.data as RecMenu
+              };
+
+              dispatch({
+                data: recMenu,
+                type: PersonalizedRecActionType.GetRecomendationMenu
+              });
+            } else {
+              dispatch({
+                data: PersonalRecomendationDefault,
+                type: PersonalizedRecActionType.GetRecomendationMenu
+              });
+            }
+          }
+        });
+    };
+  },
+  getCustomerProfile: (id: string, token: string): TAction<PersonalizedRecAction, void> => {
+    return (dispatch: TDispatch<PersonalizedRecAction>) => {
+      return apiFetch(token)
+        .get(`/foodbuyer/0.1/customer/${id}`)
+        .then((response) => {
+          if (response.status === 200) {
+            if (response.data !== null) {
+              const custProfile: PersonalRecomendationModel = {
+                customerProfile: response.data as CustomerProfile
+              };
+
+              dispatch({
+                data: custProfile,
+                type: PersonalizedRecActionType.GetCustomerProfile
+              });
+            } else {
+              dispatch({
+                data: PersonalRecomendationDefault,
+                type: PersonalizedRecActionType.GetCustomerProfile
+              });
+            }
+          }
+        });
+    };
+  },
   getPersonalizeRecomendation: (): TAction<PersonalizedRecAction, void> => {
     return (dispatch: TDispatch<PersonalizedRecAction>) => {
       return Promise.resolve().then(() => {

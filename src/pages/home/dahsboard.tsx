@@ -226,7 +226,7 @@ const Home: PageComponent = () => {
   ];
   const thisDay = daysOfWeek[dayOfWeek].toLowerCase();
 
-  const [store, dispatch] = useStore((state) => state?.home);
+  const [store, dispatch] = useStore((state) => state);
   const [shipmentMethode, setShipmentMethode] = useState('Pick Up');
   const [searchValue, setSearchValue] = useState('');
   const [deliveryData, setDeliveryData] = useState<ChannelsDataModel[]>([]);
@@ -243,17 +243,17 @@ const Home: PageComponent = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (store?.HomeRestoOutput?.data?.channels) {
+    if (store?.home?.HomeRestoOutput?.data?.channels) {
       const deliveryChannels: ChannelsDataModel[] =
-        store?.HomeRestoOutput?.data?.channels.filter(
+        store?.home?.HomeRestoOutput?.data?.channels.filter(
           (channel) => channel.metafields.delivery === 'true'
         );
       const pickUpChannels: ChannelsDataModel[] =
-        store?.HomeRestoOutput?.data?.channels.filter(
+        store?.home?.HomeRestoOutput?.data?.channels.filter(
           (channel) => channel.metafields.pickUp === 'true'
         );
       const dineInChannels: ChannelsDataModel[] =
-        store?.HomeRestoOutput?.data?.channels.filter(
+        store?.home?.HomeRestoOutput?.data?.channels.filter(
           (channel) => channel.metafields.dineIn === 'true'
         );
 
@@ -484,7 +484,7 @@ const Home: PageComponent = () => {
         </Grid>
         <Grid item={true}>
           <Typography color="neutral-90" fontWeight="bold" variant="h5">
-            Jl. Hegarmanah No.28
+            {store?.personalizedRec?.customerProfile?.data?.user?.defaultShippingAddress?.streetAddress1}
           </Typography>
         </Grid>
         <Grid item={true}>
@@ -551,8 +551,8 @@ const Home: PageComponent = () => {
             Hubungkan
           </Typography>
         </Box>
-      <Grid container={true} spacing={1} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: shipmentMethode === 'Pesan Antar' ? '1rem' : '2rem' }}>
-        <Grid item={true}>
+      <Grid container={true} spacing={1} sx={{ display: 'flex', justifyContent: 'space-evenly', marginBottom: shipmentMethode === 'Pesan Antar' ? '1rem' : '1rem' }}>
+        {/* <Grid item={true}>
           <Chip
             color={shipmentMethode === 'Pesan Antar' ? 'primary' : 'default'}
             disabled={true}
@@ -560,7 +560,7 @@ const Home: PageComponent = () => {
             label="Pesan Antar"
             sx={{ borderRadius: '0.5rem', padding: '0.5rem', width: '100%' }}
             onClick={() => handleShipmentMethodChange('Pesan Antar')} />
-        </Grid>
+        </Grid> */}
         <Grid item={true}>
           <Chip
             color={shipmentMethode === 'Pick Up' ? 'primary' : 'default'}
@@ -960,7 +960,9 @@ const Home: PageComponent = () => {
             })}
           </Grid>
         </Box>} */}
-      <FloatingShoppingButton onClick={() => navigate('/order')} />
+      {shipmentMethode === 'Pesan Antar'
+        ? <FloatingShoppingButton onClick={() => navigate('/order')} />
+        : null}
     </Box>
   );
 };
