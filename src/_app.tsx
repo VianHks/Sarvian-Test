@@ -30,6 +30,9 @@ const App: FC<LayoutWrapperProps> = ({
         <meta content={`${app.name} — ${app.description}`} name="description" />
         <meta content={app.keywords.join(',')} name="keywords" />
         <meta content="initial-scale=1, width=device-width" name="viewport" />
+        <link href="https://fonts.googleapis.com" rel="preconnect" />
+        <link crossOrigin="anonymous" href="https://fonts.gstatic.com" rel="preconnect" />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins&family=Quicksand&display=swap" rel="stylesheet" />
       </Head>
 
       <AuthProvider

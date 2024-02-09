@@ -77,6 +77,7 @@ export const typography = {
     lineHeight: 0.7
   },
   button: {
+    fontFamily: 'Poppins',
     fontSize: '0.9375rem',
     letterSpacing: '0.43px',
     lineHeight: 1.2

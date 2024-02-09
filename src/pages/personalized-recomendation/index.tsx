@@ -69,6 +69,18 @@ const PersonalizedRecomendation: PageComponent = () => {
     }
   };
 
+  const isButtonDisabled = () => {
+    if (activeStep === 0) {
+      return foodsList.breakfast.length < 3;
+    }
+
+    if (activeStep === 1) {
+      return foodsList.lunch.length < 3;
+    }
+
+    return foodsList.dinner.length < 3;
+  };
+
   const handleFoodItemClick = (
     clickedItem: FoodsDataModel,
     mealType: string
@@ -278,16 +290,17 @@ const PersonalizedRecomendation: PageComponent = () => {
           Kembali
         </Button>
         <Button
-          disabled={
-            activeStep === 0
-              ? foodsList.breakfast.length < 3
-              : activeStep === 1
-                ? foodsList.lunch.length < 3
-                : foodsList.dinner.length < 3
-          }
+          disabled={isButtonDisabled()}
           fullWidth={activeStep === 0}
+          style={{
+            background: isButtonDisabled()
+              ? theme.palette.grey[500]
+              : 'var(--Button-Blue---Light, linear-gradient(180deg, #5698FB 0%, #2B77E7 100%))',
+            boxShadow: isButtonDisabled()
+              ? 'none'
+              : '2px -2px 8px 0px rgba(37, 105, 206, 0.24) inset, 0px 4px 4px 0px #8DBAFF inset'
+          }}
           sx={{
-            backgroundColor: 'linear-gradient(180deg, #2B77E7 0%, #6A94A1 25%, #D5ECFE 50%, #C2BC40 75%, #FBD600 100%)',
             padding: '0.6rem',
             width: activeStep > 0 ? '50%' : '100%'
           }}
