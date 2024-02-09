@@ -10,6 +10,7 @@ import {
   FormControlLabel,
   IconButton,
   Radio,
+  RadioGroup,
   TextField,
   Typography,
   useTheme
@@ -95,6 +96,17 @@ interface Payload {
   userId: string
 }
 
+interface VariantValueModel {
+  name: string
+  id: string
+}
+
+interface VariantModel {
+  choices: VariantValueModel[]
+  id: string
+  variant: string
+}
+
 const SESSION_STORAGE_CHECKOUT = 'CheckoutId';
 
 const ProductView = () => {
@@ -111,13 +123,15 @@ const ProductView = () => {
 
   const [store, dispatch] = useStore((state) => state);
   const [formData, setFormData] = useState<FormData>(DEFAULT_FORM_DATA);
+  const [variants, setVariants] = useState<VariantModel[]>([]);
   const [description, setDescription] = useState<DescriptionDataModel>(DEFAULT_DESCRIPTION);
   const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '';
   const productPrice = useMemo(() => store?.productView?.productDetails?.data?.product.variants[0]?.channelListings[0]?.price?.amount, [store]);
   const [total, setTotal] = useState(0);
-  const [value, setValue] = useState<string>('0');
+  const [value, setValue] = useState<string[]>(['0']);
+  const [selectedChoices, setSelectedChoices] = useState<Record<string, string>>({});
   const [selectedCheckboxes, setSelectedCheckboxes] = useState<string[]>([]);
-  const itemPrice = parseInt(value, 10);
+  const itemPrice = value.map((v) => parseInt(v, 10)).reduce((atr, num) => atr + num, 0);
   const addOnPrice = selectedCheckboxes.map((itm) => parseInt(itm, 10));
   const totalAddOn = addOnPrice.reduce((acc, num) => acc + num, 0);
 
@@ -149,6 +163,52 @@ const ProductView = () => {
     } else {
       setSelectedCheckboxes([...selectedCheckboxes, value]);
     }
+  };
+
+  const updateTotalPrice = () => {
+    let totalPrice = 0;
+
+    variants.forEach((variant) => {
+      variant.choices.forEach((choice) => {
+        const priceParts = choice.name.split(':')[1].trim();
+        const choicePrice = Number(priceParts);
+
+        totalPrice += choicePrice;
+      });
+    });
+
+    // Update the state with an array of values
+    setValue([String(totalPrice)]);
+  };
+
+  const handleVariantChange = (id: string, name: string, choice: { name: string, id: string }, price: string) => {
+    setSelectedChoices((prevSelectedChoices) => ({
+      ...prevSelectedChoices,
+      [`${id}:${name}`]: `${choice.id}:${choice.name}`
+    }));
+
+    setVariants((prevVariants) => {
+      const existingVariantIndex = prevVariants.findIndex((variant) => variant.id === id);
+
+      if (existingVariantIndex !== -1) {
+        const updatedVariants = [...prevVariants];
+        const updatedChoices = [{ id: choice.id, name: choice.name }];
+
+        updatedVariants[existingVariantIndex] = { id, variant: name, choices: updatedChoices };
+
+        return updatedVariants;
+      }
+
+      const newVariant: VariantModel = {
+        id,
+        variant: name,
+        choices: [{ id: choice.id, name: choice.name }]
+      };
+
+      return [...prevVariants, newVariant];
+    });
+
+    setValue([price]);
   };
 
   useEffect(() => {
@@ -291,6 +351,14 @@ const ProductView = () => {
               {
                 key: 'note',
                 value: formData.value
+              },
+              {
+                key: 'variant',
+                value: JSON.stringify(variants)
+              },
+              {
+                key: 'total',
+                value: String(total)
               }
             ],
             price: formData.price,
@@ -308,12 +376,14 @@ const ProductView = () => {
             setIsLoad(false);
             setTimeout(() => {
               setIsLoad(false);
-              navigate(`/keranjang`);
+              navigate(`/checkout-dinein?checkoutId=${response}`);
             }, 1000);
           }
         });
     }
   };
+
+  console.log('variant', variants);
 
   return (
     <Box sx={{ minHeight: '100vh', position: 'relative' }}>
@@ -330,7 +400,7 @@ const ProductView = () => {
         </IconButton>
       </Box>
         <SwipeableTextMobileStepper images={store?.productView?.productDetails?.data?.product?.media || []} />
-        <Card sx={{ borderRadius: '1rem', bottom: 0, height: '650px', left: 0, padding: '1rem 1.5rem', position: 'fixed', right: 0, overflowY: 'auto' }}>
+        <Card sx={{ borderRadius: '1rem', bottom: 0, height: '650px', left: 0, overflowY: 'auto', padding: '1rem 1.5rem', position: 'fixed', right: 0 }}>
           <Typography sx={{ fontWeight: 'bold', marginBottom: '0.5rem' }} variant="h3">
             {store?.productView?.productDetails?.data?.product?.name}
           </Typography>
@@ -393,18 +463,20 @@ const ProductView = () => {
                           return (
                             <Grid container={true} key={item?.node?.id} sx={{ alignItem: 'center', display: 'flex', justifyContent: 'space-between' }}>
                               <Grid item={true} xs={8}>
-                                <FormControlLabel
-                                  control={
-                                    <Radio
-                                      checked={value === price}
-                                      onChange={() => setValue(value === price ? '' : price)} />
-                                  }
-                                  label={
-                                    <Typography fontWeight="bold" variant="h6">
-                                      {name}
-                                    </Typography>
-                                  }
-                                  value={price} />
+                              <FormControlLabel
+                                control={
+                                  <Radio
+                                    checked={selectedChoices[`${obj.id}:${obj.name}`] ===  `${item?.node?.id}:${item?.node?.name}`}
+                                    onChange={() => {
+                                      handleVariantChange(obj.id, obj.name, { id: item?.node?.id, name: item?.node?.name }, price);
+                                    }} />
+                                }
+                                label={
+                                  <Typography fontWeight="bold" variant="h6">
+                                    {name}
+                                  </Typography>
+                                }
+                                value={`${item?.node?.id}:${item?.node?.name}`} />
                               </Grid>
                               <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'end' }} xs={4}>
                                   <Typography fontWeight="bold">
@@ -420,7 +492,7 @@ const ProductView = () => {
                     </div>
                   );
                 })}
-                <Typography
+                {/* <Typography
                   sx={{
                     color: theme?.palette?.grey[900],
                     fontWeight: 'bold',
@@ -481,7 +553,7 @@ const ProductView = () => {
                       })}
                     </div>
                   );
-                })}
+                })} */}
               </>
               )
               : null}
@@ -612,3 +684,4 @@ const ProductView = () => {
 ProductView.displayName = 'ProductView';
 ProductView.layout = 'blank';
 export default ProductView;
+export type { VariantModel, VariantValueModel };

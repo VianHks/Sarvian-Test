@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { Global } from '@emotion/react';
 
@@ -39,6 +39,7 @@ import { Card, CardContent, Grid, Typography } from '@components/material.js';
 import { useAuth } from '@hooks/use-auth';
 import { OrderCommand } from '@models/order/reducers';
 import { useCommand, useStore } from '@models/store';
+import type { VariantModel } from '@pages/product-view';
 
 import DineIn from '@assets/images/DineIn.svg';
 import MieBaso from '@assets/images/MieBaso.png';
@@ -267,13 +268,21 @@ const Checkout: PageComponent = (props: Props) => {
   const token = useMemo(() => auth?.token.accessToken, [auth]);
   const theme = useTheme();
   const { windowProps } = props;
-  const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '';
+  const [searchParams] = useSearchParams();
+  const checkoutId = searchParams.get('checkoutId');
+  const checkoutIdFromStorage = JSON.parse(window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '');
   const command = useCommand((cmd) => cmd);
+  const idUser = 'tokrum:b5bbc271-1cc2-4cc9-9b07-8f0dd92966e1';
+  const userName = 'Ridwan Azis';
 
   const [store, dispatch] = useStore((state) => state?.order);
   const [checkoutDetails, setCheckoutDetails] = useState<ChekoutDetailDataModel>(DEFAULT_CHECKOUT_DETAILS);
   const [formOrder, setFormOrder] = useState<FormOrderDataModel>(DEFAULT_FORM_ORDER);
   const [total, setTotal] = useState(0);
+  const [changeItem, setChangeItem] = useState<string[]>([]);
+
+  const metaDataTotal = checkoutDetails?.lines?.find((obj) => obj?.metadata);
+  const totalHarga = metaDataTotal?.metadata?.find((itm) => itm?.key === 'total')?.value;
 
   const [isLoad, setIsLoad] = useState(false);
   const [alert, setAlert] = useState(false);
@@ -293,7 +302,13 @@ const Checkout: PageComponent = (props: Props) => {
       return acc + lineTotal;
     }, 0);
 
-    setTotal(newTotal);
+    if (totalHarga !== null) {
+      const totalHargaNumber = Number(totalHarga);
+
+      setTotal(newTotal + totalHargaNumber);
+    } else {
+      setTotal(newTotal);
+    }
   };
 
   const toggleDrawer = (newOpen: boolean) => () => {
@@ -380,10 +395,10 @@ const Checkout: PageComponent = (props: Props) => {
     setOpenModal(!openModal);
     setIsLoad(true);
     const payloadOrder = {
-      buyerName: `${checkoutDetails?.user?.firstName} ${checkoutDetails?.user?.lastName}`,
+      buyerName: userName,
       channel: 'makan',
-      checkoutId: checkoutIdFromStorage,
-      customerId: 'tokrum:b5bbc271-1cc2-4cc9-9b07-8f0dd92966e1',
+      checkoutId: checkoutIdFromStorage || checkoutId,
+      customerId: idUser,
       estimation: formOrder.estimation.format('HH:mm'),
       note: formOrder.note,
       orderType: formOrder.orderType,
@@ -391,7 +406,7 @@ const Checkout: PageComponent = (props: Props) => {
     };
     if (store?.checkoutDetails?.data?.checkout !== checkoutDetails) {
       const payload = {
-        checkoutId: checkoutIdFromStorage,
+        checkoutId: checkoutIdFromStorage || checkoutId,
         lines: checkoutDetails?.lines.map((item) => ({
           lineId: item?.id,
           note: item?.metafields?.note,
@@ -449,6 +464,30 @@ const Checkout: PageComponent = (props: Props) => {
 
   useEffect(() => {
     calculateTotal();
+
+    const metaDataVariants = checkoutDetails?.lines
+      ?.flatMap((obj) => obj?.metadata?.filter((meta) => meta?.key === 'variant')?.map((meta) => meta?.value))
+      ?.map((jsonString) => JSON.parse(jsonString || ''));
+
+    const namesArray: string[] = [];
+
+    metaDataVariants?.forEach((variantsArray: VariantModel[]) => {
+      if (variantsArray) {
+        variantsArray.forEach((atr: VariantModel) => {
+          if (atr && atr.choices) {
+            const nameParts = atr.choices[0]?.name.split(':');
+
+            if (nameParts && nameParts.length === 3) {
+              const name = nameParts[0]?.trim();
+
+              namesArray.push(name);
+            }
+          }
+        });
+      }
+    });
+
+    setChangeItem(namesArray);
   }, [checkoutDetails]);
 
   return (
@@ -703,12 +742,21 @@ const Checkout: PageComponent = (props: Props) => {
                             marginBottom: '1rem'
                           }}
                         >
-                          <Typography
-                            sx={{ fontWeight: 'bold', textAlign: 'start' }}
-                            variant="body2"
-                          >
-                            {obj?.variant?.product?.name}
-                          </Typography>
+                          <Box>
+                            <Typography
+                              sx={{ fontWeight: 'bold', textAlign: 'start' }}
+                              variant="body2"
+                            >
+                              {obj?.variant?.product?.name}
+                            </Typography>
+                            <Typography
+                              sx={{ fontWeight: 'bold', textAlign: 'start' }}
+                              variant="body2"
+                            >
+                              Ganti Item : {changeItem.join(', ')}
+                            </Typography>
+                          </Box>
+
                           <Button color="primary" size="small" variant="text">
                             Edit
                           </Button>
