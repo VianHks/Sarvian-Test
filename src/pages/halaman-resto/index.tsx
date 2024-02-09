@@ -898,5 +898,4 @@ const HalamanResto: PageComponent = () => {
 HalamanResto.displayName = 'HalamanResto';
 
 export default HalamanResto;
-export { DUMMY_MENU_RECOMDATION, DUMMY_RESTO };
 export type { RestoItem };

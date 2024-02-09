@@ -167,7 +167,7 @@ const Pencarian: PageComponent = (props: Props) => {
         fullWidth={true}
         placeholder="Mau makan apa hari ini?"
         size="small"
-        sx={{ marginBottom: '1rem' }}
+        sx={{ '& input::placeholder': { color: 'blue' }, marginBottom: '1rem' }}
         value={searchValue}
         variant="outlined"
         onChange={(e) => {
@@ -185,10 +185,10 @@ const Pencarian: PageComponent = (props: Props) => {
         </Typography>
       </Box>
       {riwayat
-        ? <Grid container={true} spacing={2}>
+        ? <Grid container={true} spacing={2} sx={{ marginBottom: '1rem' }}>
           {List_Riwayat.map((str) => {
             return (
-              <Grid item={true} key={str} xs="auto">
+              <Grid item={true} key={str} sx={{ marginBottom: '0.3rem' }} xs="auto">
                 <Chip label={str} onClick={() => { navigate(`/beranda/search-result?product=${str}`); }} />
               </Grid>
             );

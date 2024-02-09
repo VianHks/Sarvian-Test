@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import {
+  Avatar,
   Box,
   Button,
   Card,
@@ -13,7 +14,9 @@ import {
 
 import {
   AddBoxFilled,
-  IndeterminateCheckBoxFilled
+  IndeterminateCheckBoxFilled,
+  ShareFilled,
+  WestFilled
 } from '@nxweb/icons/material';
 import { Loader } from '@nxweb/icons/tabler';
 
@@ -227,7 +230,7 @@ const ProductView = () => {
             window.sessionStorage.setItem(SESSION_STORAGE_CHECKOUT, JSON.stringify(response));
             setTimeout(() => {
               setIsLoad(false);
-              navigate(`/keranjang`);
+              navigate(`/keranjang`, { state: { CheckoutId: response } });
             }, 1000);
           }
         });
@@ -269,7 +272,18 @@ const ProductView = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', position: 'relative' }}>
-
+      <Box sx={{ alignItems: 'center', bgcolor: 'transparent', display: 'flex', justifyContent: 'space-between', left: 0, padding: '0rem 1rem', position: 'absolute', right: 0, zIndex: 1 }}>
+        <IconButton aria-label="add to shopping cart" color="primary" onClick={() => navigate(-1)}>
+          <Avatar sx={{ bgcolor: theme.palette.grey[100] }}>
+            <WestFilled size={24} />
+          </Avatar>
+        </IconButton>
+        <IconButton aria-label="add to shopping cart" color="primary">
+          <Avatar sx={{ bgcolor: theme.palette.grey[100] }}>
+            <ShareFilled size={24} />
+          </Avatar>
+        </IconButton>
+      </Box>
         <SwipeableTextMobileStepper images={store?.productView?.productDetails?.data?.product?.media || []} />
         <Card sx={{ borderRadius: '1rem', bottom: 0, height: '650px', left: 0, padding: '1rem 1.5rem', position: 'fixed', right: 0 }}>
         <Typography sx={{ fontWeight: 'bold', marginBottom: '0.5rem' }} variant="h3">

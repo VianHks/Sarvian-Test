@@ -651,20 +651,99 @@ interface OrderDetailsDataModel {
   }
 }
 
+interface LinesModel {
+  id: string
+  metadata: {
+    key: string
+    value: string
+  }[]
+  metafields: {
+    note: string
+  }
+  quantity: number
+  totalPrice: {
+    gross: {
+      amount: number
+      currency: string
+    }
+  }
+  variant: {
+    id: string
+    name: string
+    pricing: {
+      price: {
+        gross: {
+          amount: 0
+          currency: string
+        }
+      }
+    }
+    product: {
+      id: string
+      name: string
+      slug: string
+      thumbnail: {
+        alt: string
+        url: string
+      }
+    }
+  }
+}
+
+interface CheckoutsDataModel {
+  channel: {
+    id: string
+    name: string
+  }
+  created: string
+  id: string
+  lines: LinesModel[]
+  totalPrice: {
+    gross: {
+      amount: number
+      currency: string
+    }
+  }
+  user: {
+    addresses: {
+      city: string
+      countryArea: string
+      id: string
+      postalCode: string
+    }[]
+    email: string
+    firstName: string
+    id: string
+    lastName: string
+  }
+}
+
+interface CheckoutsModel {
+  data: CheckoutsDataModel[]
+  pageInfo: {
+    endCursor: string
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+    startCursor: string
+  }
+  totalCount: number
+}
+
 interface OrderModel {
   cart?: CartDataModel
   checkoutDetails?: CheckoutDetailsDataModel
-  orderDetails?: OrderDetailsDataModel
-
-  orderOutput?: Order[]
+  checkouts?: CheckoutsModel
   orderDetailOutput?: OrderListDetail
+  orderDetails?: OrderDetailsDataModel
   orderListOutput?: OrderList
+  orderOutput?: Order[]
 
 }
 
 enum OrderActionType {
   GetCart = '⌘➝Cart➝GetCart',
   GetCheckoutDetails = '⌘➝Cart➝GetCheckoutDetails',
+  GetCheckouts = '⌘➝Cart➝GetCheckouts',
   GetOrderDetails = '⌘➝Order➝GetOrderDetails',
   OrderLoad = 'order-load',
   OrderClear = 'order-clear',
@@ -678,14 +757,14 @@ type OrderAction =
     type: OrderActionType.GetCart
   } | {
     data: OrderModel
-    type: OrderActionType.GetCart
-  } | {
-    data: OrderModel
     type: OrderActionType.GetCheckoutDetails
 
   } | {
     data: OrderModel
     type: OrderActionType.GetCheckoutDetails
+  } | {
+    data: OrderModel
+    type: OrderActionType.GetCheckouts
   } | {
     data: OrderModel
     type: OrderActionType.GetOrderDetails
@@ -713,4 +792,4 @@ type OrderAction =
   };
 
 export { OrderActionType };
-export type { OrderModel, OrderAction, CartDataModel, linesDataModel, OrderDetailsDataModel, OrderDataModel, CheckoutDetailsDataModel };
+export type { OrderModel, OrderAction, CartDataModel, linesDataModel, OrderDetailsDataModel, OrderDataModel, CheckoutDetailsDataModel, CheckoutsModel, LinesModel, CheckoutsDataModel };
