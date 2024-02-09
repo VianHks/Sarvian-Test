@@ -214,7 +214,7 @@ export const routes: Route[] = [
     hash: true,
     layout: 'appbar',
     meta: { description: 'Pusat Bantuan' },
-    path: '/pusat-bantuan',
+    path: '/help-center',
     search: true
   },
   {

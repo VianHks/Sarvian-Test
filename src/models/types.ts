@@ -11,6 +11,7 @@ import type { PersonalizedRecAction, PersonalRecomendationModel } from './person
 import type { ProductViewsAction, ProductViewsModel } from './product-view/types.js';
 import type { ProductsAction, ProductsModel } from './products/types.js';
 import type { RatingAction, RatingModel } from './rating/types.js';
+import type { UserAction, UserModel } from './user-profile/types.js';
 
 export type SortDirection = 'asc' | 'desc';
 
@@ -51,10 +52,11 @@ export interface RootModel {
   // Beranda?: BerandaModel
   order?: OrderModel
   rating?: RatingModel
+  profile?: UserModel
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type RootAction = CheckoutAction | FAQAction | HalamanRestoAction | HomeAction | OrderAction | PersonalizedRecAction | ProductsAction | ProductViewsAction | RatingAction | {
+export type RootAction = CheckoutAction | FAQAction | HalamanRestoAction | HomeAction | OrderAction | PersonalizedRecAction | ProductsAction | ProductViewsAction | RatingAction | UserAction | {
   type: ''
 };
 export type TAction<A extends Action, R> = ThunkAction<Promise<R>, RootModel, unknown, A>;

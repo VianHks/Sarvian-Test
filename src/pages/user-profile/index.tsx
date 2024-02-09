@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { Check, ChevronRight, PowerSettingsNew } from '@mui/icons-material';
 import {
-  Avatar,
-  Badge,
+  Alert,
   Box,
   Button,
   Card,
@@ -13,166 +13,133 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  Divider,
   Grid,
   IconButton,
   Paper,
   Stack,
-  styled,
   TextField,
-  Tooltip,
-  tooltipClasses,
   Typography,
   useTheme
 } from '@mui/material';
 
 import {
-  CircleFilled,
-  // CloseFilled,
   EditRound,
-  InfoRound,
-  PersonFilled
+  InfoRound
 } from '@nxweb/icons/material';
-import { ChevronDown } from '@nxweb/icons/tabler';
 import type { PageComponent } from '@nxweb/react';
 
-// Import { useCommand, useStore } from '@models/store';
+import { useCommand, useStore } from '@models/store';
 
-import type { TooltipProps } from '@mui/material';
-import { ChevronRight, Power, PowerSettingsNew } from '@mui/icons-material';
+interface UpdateUserProfile {
+  [key: string]: unknown
+  name: string
+  profile_picture: string
+}
 
-const BootstrapTooltip = styled(({ className, ...props }: TooltipProps) => <Tooltip {...props} arrow={true} classes={{ popper: className }} />)(({ theme }) => ({
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.common.black
-  },
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.primary.main
-  }
-}));
+const DEFAULT_USER_DATA: UpdateUserProfile = {
+  name: '',
+  profile_picture: ''
+};
 
 const Profile: PageComponent = () => {
   const theme = useTheme();
-  //   Const command = useCommand((cmd) => cmd);
+  const command = useCommand((cmd) => cmd);
   const navigate = useNavigate();
+  const [store, dispatch] = useStore((state) => state.profile);
+  const [isEditProfile, setIsEditProfile] = useState(false);
+  const [formData, setFormData] = useState<UpdateUserProfile>(DEFAULT_USER_DATA);
+  const [modalCloseProfileOpen, setModalCloseProfileOpen] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 
   /*
-   *   Const [store, dispatch] = useStore('');
-   *   const fileInputRef = useRef<HTMLInputElement | null>(null);
+   *   Const fileInputRef = useRef<HTMLInputElement | null>(null);
    */
-  const [openDrawer, setOpenDrawer] = useState(false);
-  const [selectedValue, setSelectedValue] = useState('tutup');
-  const [tooltipOpen, setTooltipOpen] = useState(false);
-  const [temporaryStoreDescription, setTemporaryStoreDescription] =
-    useState('');
-  const [isEditDescription, setIsEditDescription] = useState(false);
-  const [storeDescription, setStoreDiscription] = useState('');
-  const [modalCloseProfileOpen, setModalCloseProfileOpen] = useState(false);
 
-  const toggleDrawer = () => {
-    setOpenDrawer(!openDrawer);
+  const handleEditProfile = () => {
+    setIsEditProfile(true);
   };
 
-  const handleTooltip = () => {
-    setTooltipOpen(!tooltipOpen);
-  };
+  const handleSaveProfile = () => {
+    command.profile.updateProfileInfo({
+      name: formData.name
+    });
 
-  const handleSaveDescription = () => {
-    setIsEditDescription(false);
+    // For simulation data
+    if (store?.profile) {
+      store.profile.name = formData.name;
+    }
 
-    setStoreDiscription(temporaryStoreDescription);
-  };
-
-  const handleHelpTicketNavigate = () => {
-    navigate('/help-center');
-  };
-
-  const handleRatingNavigate = () => {
-    navigate('/sellerRating');
+    setIsEditProfile(false);
+    setShowSuccessAlert(true);
   };
 
   useEffect(() => {
-    if (!isEditDescription) {
-      setStoreDiscription(temporaryStoreDescription);
-    }
-  }, [isEditDescription]);
+    const transformedProfile: UpdateUserProfile = {
+      name: store?.profile?.name || formData.name,
+      profile_picture: ''
+    };
 
-  const handleEditDescription = () => {
-    setIsEditDescription(true);
+    setFormData(transformedProfile);
+  }, [store]);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+    if (showSuccessAlert) {
+      timer = setTimeout(() => {
+        setShowSuccessAlert(false);
+      }, 2000);
+    }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [showSuccessAlert]);
+
+  const handleNavigateLocataion = () => {
+    navigate('/location');
+  };
+
+  const handleNavigateHelp = () => {
+    navigate('/help-center');
+  };
+
+  const handleNavigateLogin = () => {
+    navigate('/');
   };
 
   const handleOpenModal = () => {
     setModalCloseProfileOpen(true);
   };
 
-  const handleConfirm = () => {
-    setModalCloseProfileOpen(false);
-  };
-
   const handleCloseModal = () => {
     setModalCloseProfileOpen(false);
   };
 
-  const handleListItemClick = (status: string) => {
-    setSelectedValue(status);
-    setOpenDrawer(false);
-  };
-
-  const handleToPreviewToko = () => {
-  };
-
   /*
-   *   Const handleChangeProfilePicture = async () => {
-   *     console.log('bhjer');
+   * Const handleConfirm = () => {
+   *   setModalCloseProfileOpen(false);
+   * };
    */
 
-  /*
-   *     if (fileInputRef.current) {
-   *       fileInputRef.current.click();
-   *       await new Promise((resolve) => fileInputRef.current?.addEventListener('change', resolve));
-   *       const file = fileInputRef.current?.files?.[0];
-   */
-
-  /*
-   *       if (file) {
-   *         const fileReader = new FileReader();
-   */
-
-  /*
-   *         fileReader.onload = () => {
-   *           const newImage = fileReader.result as string;
-   */
-
-  /*
-   *           setImage(newImage);
-   *         };
-   */
-
-  /*
-   *         fileReader.readAsDataURL(file);
-   *       }
-   *     }
-   *   };
-   */
-
-  const getIconColor = () => {
-    return selectedValue.toLocaleLowerCase() === 'buka' ? '#A5E656' : '#EC3C3C';
-  };
+  // eslint-disable-next-line no-console
+  console.log(store, formData);
 
   return (
     <Container
       disableGutters={true}
       style={{ marginBottom: '0', paddingBottom: 0 }}
     >
+
       <Box
         sx={{
-          // BackgroundImage: `url(${background})`,
-          backgroundColor: '#5698FB',
+          background: 'linear-gradient(180deg, #5698FB 0%, #2B77E7 100%)',
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'cover',
           height: '14.125rem',
           width: '22.5'
         }}
       >
+        {/* HEAD BAR */}
         <Box
           sx={{
             display: 'flex',
@@ -183,18 +150,36 @@ const Profile: PageComponent = () => {
             height: '3.5rem'
           }}
         >
+
           <Typography color="white" fontWeight="bold" variant="h4">
             Profil
           </Typography>
 
-          <Button
-            aria-label="ubah spanduk"
-            endIcon={<EditRound />}
-            size="small"
-            sx={{ p: '0.25rem 0.625rem', borderRadius: '.5rem .5rem .5rem .5rem', border: '1px solid #FFF', backgroundColor: '#5698FB' }}
-            variant="contained"
-            // OnClick={handleChangeProfilePicture}
-          >
+          {isEditProfile
+            ? <Button
+                aria-label="ubah spanduk"
+                size="small"
+                startIcon={<Check />}
+                sx={{ p: '0.25rem 0.625rem', borderRadius: '.5rem .5rem .5rem .5rem', border: '1px solid #FFF', color: '#FFF' }}
+                onClick={handleSaveProfile}
+              >
+            <Typography
+              color="white"
+              fontWeight="semibold"
+              textTransform="none"
+              variant="body2"
+            >
+              Selesai Edit
+            </Typography>
+              </Button>
+            : (
+            <Button
+              aria-label="ubah spanduk"
+              endIcon={<EditRound />}
+              size="small"
+              sx={{ p: '0.25rem 0.625rem', borderRadius: '.5rem .5rem .5rem .5rem', border: '1px solid #FFF', color: '#FFF' }}
+              onClick={handleEditProfile}
+            >
             <Typography
               color="white"
               fontWeight="semibold"
@@ -203,9 +188,12 @@ const Profile: PageComponent = () => {
             >
               Edit Profil
             </Typography>
-          </Button>
+            </Button>
+            )}
+
         </Box>
       </Box>
+
       <Box
         sx={{
           alignItems: 'center',
@@ -231,207 +219,143 @@ const Profile: PageComponent = () => {
           }}
         >
 
-          {/*  */}
+          {/* CARD PROFILE */}
           <Box
             sx={{
               position: 'absolute',
-              // textAlign: 'center',
-              display: 'flex',
+              display: 'block',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              top: '0',
-              left: 0,
-              right: 0
-              // left: '50%',
-              // transform: 'translate(-50%, -50%)'
+              top: '-5rem',
+              left: '0',
+              right: '0',
+              paddingX: '1.5rem'
             }}
           >
-            {/* CARD */}
-            <Grid item={true} xs={12}>
-              <Paper sx={{ p: 0 }}>
-                <Card sx={{ padding: 0 }}>
-                  <CardContent
-                    sx={{
-                      padding: '0.5rem',
-                      '&:last-child': {
-                        paddingBottom: '0.5rem'
-                      }
-                    }}
-                  >
-                    <Box sx={{ padding: '1rem' }}>
-                      <Stack spacing={2}>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between'
-                          }}
-                        >
-                          <Typography
-                            color="black"
-                            fontWeight="medium"
-                            variant="body2"
-                          >
-                            Penilaian
-                          </Typography>
+            {/* ALERT */}
+            {showSuccessAlert
+              ? <>
+              {formData.name === 'fail'
+                ? (
+                <Alert
+                  color="error"
+                  severity="error"
+                  sx={{
+                    position: 'absolute',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: '#FECDCA',
+                    top: '-4.3rem',
+                    left: '1.5rem',
+                    right: '1.5rem',
+                    paddingX: '1.5rem'
+                  }}
+                >
+                  <Typography fontSize="1rem">
+                    Kamu gagal memperbarui Foto Profil, coba beberapa saat lagi!
+                  </Typography>
+                </Alert>
+                )
+                : (
+                <Alert
+                  color="success"
+                  severity="success"
+                  sx={{
+                    position: 'absolute',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#DDFAA7',
+                    top: '-4.3rem',
+                    left: '1.5rem',
+                    right: '1.5rem',
+                    paddingX: '1.5rem'
+                  }}
+                >
+                  <Typography fontSize="1rem">
+                    Selamat, kamu berhasil memperbarui Foto Profil!
+                  </Typography>
+                </Alert>
+                )}
+                </>
+              : null}
 
-                          <Typography
-                            color={theme.palette.grey[700]}
-                            fontWeight="regular"
-                            variant="body2"
-                          >
-                            4.9 dari 5 (1,6rb komentar)
-                          </Typography>
-                        </Box>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between'
-                          }}
-                        >
-                          <Typography
-                            color="black"
-                            fontWeight="medium"
-                            variant="body2"
-                          >
-                            Performa Chat
-                          </Typography>
-
-                          <Typography
-                            color={theme.palette.grey[700]}
-                            fontWeight="regular"
-                            variant="body2"
-                          >
-                            100%(Hitungan Jam)
-                          </Typography>
-                        </Box>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between'
-                          }}
-                        >
-                          <Typography
-                            color="black"
-                            fontWeight="medium"
-                            variant="body2"
-                          >
-                            Produk
-                          </Typography>
-                          <Typography
-                            color={theme.palette.grey[700]}
-                            fontWeight="regular"
-                            variant="body2"
-                          >
-                            test
-                          </Typography>
-                        </Box>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between'
-                          }}
-                        >
-                          <Typography
-                            color="black"
-                            fontWeight="medium"
-                            variant="body2"
-                          >
-                            Bergabung
-                          </Typography>
-
-                          <Typography
-                            color={theme.palette.grey[700]}
-                            fontWeight="regular"
-                            variant="body2"
-                          >
-                            {/* 5 Tahun */}
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Paper>
-            </Grid>
-
-            {/* <Badge
-              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-              badgeContent={4}
-              color="success"
-              invisible={true}
-              overlap="circular"
-              variant="dot"
-            >
-              <Box
-                component="span"
+            <Card sx={{ padding: 0 }}>
+              <CardContent
                 sx={{
-                  position: 'relative',
-                  width: '7.5rem',
-                  height: '7.5rem',
-                  borderRadius: '100%'
+                  padding: '1rem',
+                  '&:last-child': {
+                    paddingBottom: '0.5rem'
+                  }
                 }}
               >
-                <Box sx={{ width: '100%', height: '100%' }}>
-                  <Avatar
-                    sx={{
-                      position: 'relative',
-                      width: '100%',
-                      height: '100%',
-                      borderRadius: '100%',
-                      backgroundColor: '#BDBDBD'
-                    }}
-                  >
-                    <PersonFilled />
-                  </Avatar>
-                </Box>
-                <Button
-                  startIcon={<EditRound />}
-                  sx={{
-                    position: 'absolute',
-                    bottom: '0.9rem',
-                    transform: 'translateX(-50%)',
-                    color: 'white'
-                  }}
-                  variant="text"
-                  // onClick={handleChangeProfilePicture}
-                >
-                  <Typography
-                    color="inherit"
-                    fontWeight="regular"
-                    noWrap={true}
-                    textTransform="none"
-                    variant="caption"
-                  >
-                    Ubah Foto
-                  </Typography>
-                </Button>
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: '0',
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: 'inherit',
-                    background:
-                      'linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 10%, rgba(0, 0, 0, 0.64) 100%)'
-                  }} />
-              </Box>
-            </Badge> */}
+                <Grid container={true}>
+                  <Grid item={true} xs={8}>
+                    <Typography color="primary" fontWeight="bold" paddingBottom=".5rem" textAlign="start" variant="h4">TokRuMates</Typography>
+
+                    {isEditProfile
+                      ? <TextField
+                          InputProps={{ disableUnderline: true }}
+                          fullWidth={true}
+                          // Multiline={true}
+                          rows={1}
+                          sx={{ border: '1px solid lightgrey', borderRadius: '.5rem', paddingLeft: '.5rem', right: '5px', marginBottom: '10px' }}
+                          value={formData.name}
+                          variant="standard"
+                          onChange={(event) => setFormData({ ...formData, name: event.target.value })} />
+                      : (
+                      <>
+                        <Typography color={theme.palette.grey[600]} textAlign="start" variant="caption">Nama:</Typography>
+                        <Typography color={theme.palette.grey[800]} fontWeight="bold" textAlign="start" variant="body2">
+                          {store?.profile?.name}
+                        </Typography>
+                      </>
+                      )}
+
+                    <Typography color={theme.palette.grey[600]} textAlign="start" variant="caption">Email:</Typography>
+                    <Typography color={theme.palette.grey[800]} fontWeight="bold" textAlign="start" variant="body2">{store?.profile?.email}</Typography>
+
+                    <Typography color={theme.palette.grey[600]} textAlign="start" variant="caption">No. Handphone:</Typography>
+                    <Typography color={theme.palette.grey[800]} fontWeight="bold" textAlign="start" variant="body2">{store?.profile?.phone}</Typography>
+                  </Grid>
+
+                  <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'start' }} xs={4}>
+                    <div
+                      style={{
+                        alignItems: 'start',
+                        display: 'flex',
+                        height: '100%',
+                        justifyContent: 'center',
+                        width: '100%'
+                      }}
+                    >
+                      {store?.profile?.profile_picture
+                        ? <img
+                            alt="profile"
+                            src={store.profile.profile_picture}
+                            style={{ maxHeight: '100%', minWidth: '100%', borderRadius: '.5rem' }} />
+                        : null}
+                    </div>
+                  </Grid>
+                </Grid>
+
+              </CardContent>
+            </Card>
           </Box>
 
           <Stack
             display="block"
             mt="6.375rem"
+            pb="0.5rem"
             pt="1.5rem"
             spacing={2}
-            pb="0.5rem"
           >
 
             {/* ALAMAT */}
             <Grid item={true} xs={12}>
               <Paper sx={{ p: 0 }}>
-                <Card sx={{ padding: 0, borderRadius: '.5rem .5rem .5rem .5rem' }} /*onClick={handleRatingNavigate}*/>
+                <Card sx={{ padding: 0, borderRadius: '.5rem .5rem .5rem .5rem' }} onClick={!isEditProfile ? handleNavigateLocataion : undefined}>
                   <CardContent
                     sx={{
                       padding: '0.5rem',
@@ -446,7 +370,8 @@ const Profile: PageComponent = () => {
                         px: '0.5rem',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        opacity: isEditProfile ? '0.5' : undefined
                       }}
                     >
                       <Typography
@@ -459,7 +384,6 @@ const Profile: PageComponent = () => {
                       <IconButton aria-label="rating">
                         <Box height="1.5rem" width="1.5rem">
                           <ChevronRight />
-                          {/* <img height="100%" src={ChevronRight} width="100%" /> */}
                         </Box>
                       </IconButton>
                     </Box>
@@ -471,7 +395,7 @@ const Profile: PageComponent = () => {
             {/* TENTANG TOKRUM */}
             <Grid item={true} xs={12}>
               <Paper sx={{ p: 0 }}>
-                <Card sx={{ padding: 0, borderRadius: '.5rem .5rem .5rem .5rem' }} /*onClick={handleRatingNavigate}*/>
+                <Card sx={{ padding: 0, borderRadius: '.5rem .5rem .5rem .5rem' }}>
                   <CardContent
                     sx={{
                       padding: '0.5rem',
@@ -486,7 +410,8 @@ const Profile: PageComponent = () => {
                         px: '0.5rem',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        opacity: isEditProfile ? '0.5' : undefined
                       }}
                     >
                       <Typography
@@ -499,7 +424,6 @@ const Profile: PageComponent = () => {
                       <IconButton aria-label="rating">
                         <Box height="1.5rem" width="1.5rem">
                           <ChevronRight />
-                          {/* <img height="100%" src={ChevronRight} width="100%" /> */}
                         </Box>
                       </IconButton>
                     </Box>
@@ -511,7 +435,7 @@ const Profile: PageComponent = () => {
             {/* SK */}
             <Grid item={true} xs={12}>
               <Paper sx={{ p: 0 }}>
-                <Card sx={{ padding: 0, borderRadius: '.5rem .5rem .5rem .5rem' }} /*onClick={handleRatingNavigate}*/>
+                <Card sx={{ padding: 0, borderRadius: '.5rem .5rem .5rem .5rem' }}>
                   <CardContent
                     sx={{
                       padding: '0.5rem',
@@ -526,7 +450,8 @@ const Profile: PageComponent = () => {
                         px: '0.5rem',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        opacity: isEditProfile ? '0.5' : undefined
                       }}
                     >
                       <Typography
@@ -551,7 +476,7 @@ const Profile: PageComponent = () => {
             {/* BANTUAN */}
             <Grid item={true} xs={12}>
               <Paper sx={{ p: 0 }}>
-                <Card sx={{ padding: 0, borderRadius: '.5rem .5rem .5rem .5rem' }} /*onClick={handleRatingNavigate}*/>
+                <Card sx={{ padding: 0, borderRadius: '.5rem .5rem .5rem .5rem' }} onClick={!isEditProfile ? handleNavigateHelp : undefined}>
                   <CardContent
                     sx={{
                       padding: '0.5rem',
@@ -566,7 +491,8 @@ const Profile: PageComponent = () => {
                         px: '0.5rem',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        opacity: isEditProfile ? '0.5' : undefined
                       }}
                     >
                       <Typography
@@ -594,7 +520,7 @@ const Profile: PageComponent = () => {
             {/* KELUAR APLIKASI */}
             <Grid item={true} xs={12}>
               <Paper sx={{ p: 0 }}>
-                <Card sx={{ padding: 0 }}>
+                <Card sx={{ padding: 0 }} onClick={!isEditProfile ? handleOpenModal : undefined}>
                   <CardContent
                     sx={{
                       padding: '0.5rem',
@@ -609,7 +535,8 @@ const Profile: PageComponent = () => {
                         px: '0.5rem',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        opacity: isEditProfile ? '0.5' : undefined
                       }}
                     >
                       <Typography
@@ -621,12 +548,11 @@ const Profile: PageComponent = () => {
                       </Typography>
                       <IconButton
                         aria-label="keluar aplikasi"
-                        onClick={handleOpenModal}
                       >
                         <Box height="1.5rem" width="1.5rem">
                           <PowerSettingsNew
                             style={{
-                              color: '#D92D20'
+                              color: theme.palette.error.main
                             }} />
                           {/* <img height="100%" src={onOff} width="100%" /> */}
                         </Box>
@@ -640,6 +566,8 @@ const Profile: PageComponent = () => {
           </Stack>
         </Card>
       </Box>
+
+      {/* DIALOG - KELUAR APLIKASI */}
       <Dialog
         aria-describedby="alert-dialog-description"
         aria-labelledby="alert-dialog-title"
@@ -653,7 +581,7 @@ const Profile: PageComponent = () => {
               fontWeight="bold"
               variant="h4"
             >
-              Yakin kamu ingin keluar dari TokoRumahan Mitra?
+              Yakin kamu ingin keluar dari Tokrum Food Buyer?
             </Typography>
           </DialogContentText>
         </DialogContent>
@@ -676,7 +604,7 @@ const Profile: PageComponent = () => {
             color="error"
             size="small"
             variant="contained"
-            onClick={handleConfirm}
+            onClick={handleNavigateLogin}
           >
             <Typography
               color={theme.palette.grey[100]}
@@ -688,6 +616,7 @@ const Profile: PageComponent = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
     </Container>
   );
 };
