@@ -610,7 +610,7 @@ const Home: PageComponent = () => {
         </Grid>
         )
         : null}
-      <Card
+      {/* <Card
         sx={{
           backgroundColor: '#D5ECFE',
           borderColor: 'transparent',
@@ -643,7 +643,7 @@ const Home: PageComponent = () => {
                       padding: '0.5rem',
                       width: '9.25rem'
                     }}
-                    onClick={handleCardToRestoClick}
+                    onClick={handleCardToRestoClick()}
                   >
                     <CardMedia
                       image={recomendationImage}
@@ -711,7 +711,7 @@ const Home: PageComponent = () => {
             </Grid>
           </Grid>
         </Box>
-      </Card>
+      </Card> */}
       <Card
         sx={{
           backgroundColor: 'transparent',
@@ -818,6 +818,7 @@ const Home: PageComponent = () => {
               marginBottom: '1rem',
               padding: '0.5rem'
             }}
+            onClick={() => { handleCardToRestoClick(resto.id); }}
           >
             <Grid container={true} spacing={2}>
               <Grid item={true} xs={4}>
