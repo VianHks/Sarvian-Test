@@ -214,7 +214,7 @@ export const routes: Route[] = [
     hash: true,
     layout: 'appbar',
     meta: { description: 'Pusat Bantuan' },
-    path: '/pusat-bantuan',
+    path: '/help-center',
     search: true
   },
   {
@@ -242,6 +242,14 @@ export const routes: Route[] = [
     layout: 'appbar',
     meta: { description: 'Pesanan Berlangsung' },
     path: '/inprogress/multi-order/pesan-antar',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/user-profile/index.js')),
+    hash: true,
+    layout: 'bottomnav',
+    path: '/profile',
     search: true
   }
 ];
