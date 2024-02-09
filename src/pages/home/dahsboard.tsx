@@ -215,7 +215,9 @@ const Home: PageComponent = () => {
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
   const command = useCommand((cmd) => cmd);
+
   const isSmallScreen = useMediaQuery('(max-width: 380px)');
+
   const today = new Date();
   const dayOfWeek = today.getDay();
   const daysOfWeek = [
@@ -520,42 +522,16 @@ const Home: PageComponent = () => {
         value={searchValue}
         variant="outlined"
         onClick={handleSearch} />
-        <Box
-          sx={{
-            px: '8px',
-            py: '16px',
-            marginBottom: '16px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            boxShadow: '0px 4px 8px 0px rgba(49, 127, 242, 0.08)',
-            border: '1px solid',
-            borderRadius: '8px',
-            borderColor: '#5698FB'
-          }}
-        >
-          <Box sx={{ display: 'flex'}}>
-            <img alt="dana" src={danaIcon} height={24} width={24}/>
-            <Typography
-              color="#475467"
-              marginLeft="6px"
-              variant="h6"
-            >
-              Saldo DANA
-            </Typography>
-          </Box>
-          <Typography
-            color="#1050AE"
-            fontWeight="bold"
-            sx={{ cursor: 'pointer' }}
-            variant="h6"
-            onClick={handleBindDANA}
-          >
-            Hubungkan
-          </Typography>
-        </Box>
-      <Grid container={true} spacing={1} sx={{ display: isSmallScreen ? 'grid' : 'flex', justifyContent: 'space-evenly', marginBottom: shipmentMethode === 'Pesan Antar' ? '1rem' : '1rem' }}>
-        {/* <Grid item={true}>
+      <Grid
+        container={true}
+        sx={{
+          display: 'flex',
+          gap: '0.6rem',
+          marginBottom: shipmentMethode === 'Pesan Antar' ? '1rem' : '2rem',
+          marginTop: '1rem'
+        }}
+      >
+        <Grid item={true}>
           <Chip
             disabled={true}
             icon={<img alt="icon" sizes="large" src={pesanAntarIcon} />}

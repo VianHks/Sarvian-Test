@@ -300,7 +300,7 @@ const PersonalizedRecomendation: PageComponent = () => {
             padding: '0.6rem',
             width: '50%'
           }}
-          variant="contained"
+          variant="outlined"
           onClick={() => handleBack()}
         >
           Kembali
