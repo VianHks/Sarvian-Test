@@ -33,12 +33,10 @@ import { useCommand, useStore } from '@models/store';
 interface UpdateUserProfile {
   [key: string]: unknown
   name: string
-  profile_picture: string
 }
 
 const DEFAULT_USER_DATA: UpdateUserProfile = {
-  name: '',
-  profile_picture: ''
+  name: ''
 };
 
 const Profile: PageComponent = () => {
@@ -50,6 +48,8 @@ const Profile: PageComponent = () => {
   const [formData, setFormData] = useState<UpdateUserProfile>(DEFAULT_USER_DATA);
   const [modalCloseProfileOpen, setModalCloseProfileOpen] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [originalName, setOriginalName] = useState<string>('');
+  const [isFail, setIsFail] = useState(false);
 
   /*
    *   Const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -59,24 +59,31 @@ const Profile: PageComponent = () => {
     setIsEditProfile(true);
   };
 
-  const handleSaveProfile = () => {
-    command.profile.updateProfileInfo({
-      name: formData.name
-    });
+  const handleSaveProfile = async () => {
+    /* This is testing fail need to change for prod */
+    if (formData.name === 'fail') {
+      setIsFail(true);
+      setShowSuccessAlert(true);
+      setFormData({ ...formData, name: originalName });
+    } else {
+      await command.profile.updateProfileInfo({
+        name: formData.name
+      }).then(() => {
+        if (store?.profile) {
+          store.profile.name = formData.name;
+        }
 
-    // For simulation data
-    if (store?.profile) {
-      store.profile.name = formData.name;
+        setIsFail(false);
+        setShowSuccessAlert(true);
+      });
     }
 
     setIsEditProfile(false);
-    setShowSuccessAlert(true);
   };
 
   useEffect(() => {
     const transformedProfile: UpdateUserProfile = {
-      name: store?.profile?.name || formData.name,
-      profile_picture: ''
+      name: store?.profile?.name || formData.name
     };
 
     setFormData(transformedProfile);
@@ -234,9 +241,10 @@ const Profile: PageComponent = () => {
             }}
           >
             {/* ALERT */}
+
             {showSuccessAlert
               ? <>
-              {formData.name === 'fail'
+              {isFail
                 ? (
                 <Alert
                   color="error"
@@ -253,7 +261,7 @@ const Profile: PageComponent = () => {
                   }}
                 >
                   <Typography fontSize="1rem">
-                    Kamu gagal memperbarui Foto Profil, coba beberapa saat lagi!
+                    Kamu gagal memperbarui Profil, coba beberapa saat lagi!
                   </Typography>
                 </Alert>
                 )
@@ -274,7 +282,7 @@ const Profile: PageComponent = () => {
                   }}
                 >
                   <Typography fontSize="1rem">
-                    Selamat, kamu berhasil memperbarui Foto Profil!
+                    Selamat, kamu berhasil memperbarui Profil!
                   </Typography>
                 </Alert>
                 )}
@@ -320,14 +328,14 @@ const Profile: PageComponent = () => {
                     <Typography color={theme.palette.grey[800]} fontWeight="bold" textAlign="start" variant="body2">{store?.profile?.phone}</Typography>
                   </Grid>
 
-                  <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'start' }} xs={4}>
+                  <Grid item={true} sx={{ alignItems: 'start', display: 'flex', justifyContent: 'end' }} xs={4}>
                     <div
                       style={{
                         alignItems: 'start',
                         display: 'flex',
-                        height: '100%',
+                        height: '6rem',
                         justifyContent: 'center',
-                        width: '100%'
+                        width: '6rem'
                       }}
                     >
                       {store?.profile?.profile_picture
