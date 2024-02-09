@@ -17,10 +17,10 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  styled,
   TextField,
   Toolbar,
-  Typography,
-  styled
+  Typography
 } from '@mui/material';
 
 import {
@@ -38,13 +38,13 @@ import { RatingCommand } from '@models/rating/commands';
 import { useStore } from '@models/store';
 
 import FloatingShoppingButton from './floatingshopping-button';
+import ListMenuRecomendation from './list-menu-recomendation';
 import ListMenu from './listmenu';
 import Rating from './rating';
 
 import ProfilFoto from '@assets/images/Orang.svg';
 
 import type { SelectChangeEvent } from '@mui/material/Select';
-import ListMenuRecomendation from './list-menu-recomendation';
 
 interface RestoItem {
   id: number
@@ -55,7 +55,6 @@ interface RestoItem {
   restoName: string
   verified: boolean
 }
-
 
 const DUMMY_MENU_RECOMDATION = [
   {
@@ -146,8 +145,6 @@ const HalamanResto: PageComponent = () => {
   const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_KEYS.CHECKOUT) ?? '';
   const [isLoading, setIsLoading] = useState(false);
 
-
-  
   const [searchParams] = useSearchParams();
   const channelId = searchParams.get('id');
   const channelName = 'makan';
@@ -203,18 +200,24 @@ const HalamanResto: PageComponent = () => {
     }
   };
 
-  // const scrollToTesElement = () => {
-  //   const tesElement = tesElementRef.current;
-  
-  //   // Check if tesElement is not null or undefined before accessing its properties
-  //   if (tesElement) {
-  //     tesElement.scrollTop = tesElement.scrollHeight;
-  //   }
-  // };
+  /*
+   * Const scrollToTesElement = () => {
+   *   const tesElement = tesElementRef.current;
+   */
 
-  // useEffect(() => {
-  //   scrollToTesElement();
-  // }, []);
+  /*
+   *   // Check if tesElement is not null or undefined before accessing its properties
+   *   if (tesElement) {
+   *     tesElement.scrollTop = tesElement.scrollHeight;
+   *   }
+   * };
+   */
+
+  /*
+   * useEffect(() => {
+   *   scrollToTesElement();
+   * }, []);
+   */
 
   const calculateTotal = (lines: LinesModel[]) => {
     let totalAmount = 0;
@@ -326,25 +329,35 @@ const HalamanResto: PageComponent = () => {
       );
     }
   };
-  // const handleScroll = () => {
-  //   const tesElement = tesElementRef.current;
-  //   const listMenuElement = listMenuElementRef.current;
+  /*
+   * Const handleScroll = () => {
+   *   const tesElement = tesElementRef.current;
+   *   const listMenuElement = listMenuElementRef.current;
+   */
 
-  //   if (tesElement && listMenuElement) {
-  //     listMenuElement.scrollTop = tesElement.scrollTop;
-  //   }
-  // };
+  /*
+   *   if (tesElement && listMenuElement) {
+   *     listMenuElement.scrollTop = tesElement.scrollTop;
+   *   }
+   * };
+   */
 
-  // useEffect(() => {
-  //   handleScroll();
+  /*
+   * useEffect(() => {
+   *   handleScroll();
+   */
 
-  //   const tesElement = tesElementRef.current;
-  //   tesElement?.addEventListener('scroll', handleScroll);
+  /*
+   *   const tesElement = tesElementRef.current;
+   *   tesElement?.addEventListener('scroll', handleScroll);
+   */
 
-  //   return () => {
-  //     tesElement?.removeEventListener('scroll', handleScroll);
-  //   };
-  // }, []);
+  /*
+   *   return () => {
+   *     tesElement?.removeEventListener('scroll', handleScroll);
+   *   };
+   * }, []);
+   */
 
   useEffect(() => {
     const param = {
@@ -403,7 +416,8 @@ const HalamanResto: PageComponent = () => {
 
     listMenuElement?.scrollIntoView({ behavior: 'smooth' });
     setSelectedValue(selectedCategory);
-};
+  };
+
   useEffect(() => {
     if (isLoading) {
       const timeoutId = setTimeout(() => {
@@ -762,17 +776,17 @@ const HalamanResto: PageComponent = () => {
                             </Grid>
                             <Box sx={{ marginTop: '10px', width: '83%', paddingInline: '1rem', marginLeft: '-0.5rem' }}>
                               <TextField
-                                fullWidth={true}
-                                value={obj.review}
-                                size="small"
-                                multiline
                                 InputProps={{
                                   readOnly: true,
                                   style: { maxHeight: 'none' }
                                 }}
+                                fullWidth={true}
+                                multiline={true}
+                                size="small"
                                 sx={{
                                   color: 'black'
                                 }}
+                                value={obj.review}
                                 variant="outlined" />
                             </Box>
                           </Grid>
@@ -808,7 +822,7 @@ const HalamanResto: PageComponent = () => {
             Menu
           </Typography>
           <ListMenuRecomendation />
-          <ListMenu scrollToKategoriMenu={scrollToKategoriMenu}/>
+          <ListMenu scrollToKategoriMenu={scrollToKategoriMenu} />
           {!checkoutIdFromStorage &&
             <FloatingShoppingButton onClick={handleShoppingButtonClick} />}
         </Box>

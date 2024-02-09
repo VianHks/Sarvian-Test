@@ -112,8 +112,30 @@ const PersonalizedRecomendation: PageComponent = () => {
   };
 
   useEffect(() => {
-    dispatch(PersonalizedRecomendationCommand.getPersonalizeRecomendation());
+    if (token) {
+      dispatch(
+        PersonalizedRecomendationCommand.getCustomerProfile(userId, token)
+      );
+      dispatch(
+        PersonalizedRecomendationCommand.getPersonalizeRecomendation()
+      );
+      dispatch(
+        PersonalizedRecomendationCommand.getMenuRecomendation(token)
+      );
+    }
   }, [dispatch]);
+
+  useEffect(() => {
+    if (token && store?.customerProfile?.data?.user?.metadata) {
+      const { metadata } = store.customerProfile.data.user;
+      if (metadata && metadata.length > 0) {
+        navigate(`/beranda?id=${userId}`);
+      } else {
+        dispatch(PersonalizedRecomendationCommand.getPersonalizeRecomendation());
+        dispatch(PersonalizedRecomendationCommand.getMenuRecomendation(token));
+      }
+    }
+  }, [token, store?.customerProfile?.data, dispatch]);
 
   const handleNext = () => {
     const payload = {
@@ -149,6 +171,8 @@ const PersonalizedRecomendation: PageComponent = () => {
       setActiveStep(1);
     }
   };
+
+  console.log('cekstore', store);
 
   const renderCard = (mealType: string) => {
     const selectedFoodsList = getFoodsList(mealType);

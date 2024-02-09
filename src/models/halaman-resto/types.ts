@@ -1,8 +1,6 @@
 /* eslint-disable import/exports-last */
 /* eslint-disable linebreak-style */
 
-import { linesDataModel } from "@models/order/types"
-
 export interface CheckoutListByEmail {
   data: {
     checkouts: {

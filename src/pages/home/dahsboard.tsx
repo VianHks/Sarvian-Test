@@ -226,7 +226,7 @@ const Home: PageComponent = () => {
   ];
   const thisDay = daysOfWeek[dayOfWeek].toLowerCase();
 
-  const [store, dispatch] = useStore((state) => state?.home);
+  const [store, dispatch] = useStore((state) => state);
   const [shipmentMethode, setShipmentMethode] = useState('Pick Up');
   const [searchValue, setSearchValue] = useState('');
   const [deliveryData, setDeliveryData] = useState<ChannelsDataModel[]>([]);
@@ -484,7 +484,7 @@ const Home: PageComponent = () => {
         </Grid>
         <Grid item={true}>
           <Typography color="neutral-90" fontWeight="bold" variant="h5">
-            Jl. Hegarmanah No.28
+            {store?.personalizedRec?.customerProfile?.data?.user?.defaultShippingAddress?.streetAddress1}
           </Typography>
         </Grid>
         <Grid item={true}>
@@ -960,7 +960,9 @@ const Home: PageComponent = () => {
             })}
           </Grid>
         </Box>} */}
-      <FloatingShoppingButton onClick={() => navigate('/order')} />
+      {shipmentMethode === 'Pesan Antar'
+        ? <FloatingShoppingButton onClick={() => navigate('/order')} />
+        : null}
     </Box>
   );
 };
