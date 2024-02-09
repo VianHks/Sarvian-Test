@@ -246,7 +246,7 @@ const Order: PageComponent = () => {
   useEffect(() => {
     const param = {
       after: '',
-      customer: 'Holly Acosta',
+      customer: 'Rafi Ahmad',
       direction: 'DESC',
       field: 'NUMBER',
       first: 100,
