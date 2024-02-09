@@ -300,7 +300,7 @@ const PersonalizedRecomendation: PageComponent = () => {
             padding: '0.6rem',
             width: '50%'
           }}
-          variant="outlined"
+          variant="contained"
           onClick={() => handleBack()}
         >
           Kembali
@@ -308,15 +308,10 @@ const PersonalizedRecomendation: PageComponent = () => {
         <Button
           disabled={isButtonDisabled()}
           fullWidth={activeStep === 0}
-          style={{
+          sx={{
             background: isButtonDisabled()
               ? theme.palette.grey[500]
-              : 'var(--Button-Blue---Light, linear-gradient(180deg, #5698FB 0%, #2B77E7 100%))',
-            boxShadow: isButtonDisabled()
-              ? 'none'
-              : '2px -2px 8px 0px rgba(37, 105, 206, 0.24) inset, 0px 4px 4px 0px #8DBAFF inset'
-          }}
-          sx={{
+              : theme.palette.primary.gradient,
             padding: '0.6rem',
             width: activeStep > 0 ? '50%' : '100%'
           }}

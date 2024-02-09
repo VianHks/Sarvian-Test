@@ -1,4 +1,4 @@
-import type { Palette } from '@mui/material';
+import type { Palette, PaletteOptions } from '@mui/material';
 
 export const palette = (mode: Palette['mode']): Palette => {
   // ** Vars
@@ -17,7 +17,8 @@ export const palette = (mode: Palette['mode']): Palette => {
     600: '#1F66D0',
     700: '#1050AE',
     800: '#053C8C',
-    900: '#002B6A'
+    900: '#002B6A',
+    gradient: 'linear-gradient(180deg, #5698FB 0%, #2B77E7 100%)'
   };
 
   const errorColor = {
@@ -121,6 +122,7 @@ export const palette = (mode: Palette['mode']): Palette => {
     primary: {
       contrastText: whiteColor,
       dark: primaryColor[800],
+      gradient: primaryColor.gradient,
       light: primaryColor[600],
       main: primaryColor[700]
     },
@@ -177,5 +179,5 @@ export const palette = (mode: Palette['mode']): Palette => {
       primary: `rgba(${mainColor}, 0.78)`,
       secondary: `rgba(${mainColor}, 0.68)`
     }
-  } as Palette;
+  } as PaletteOptions as Palette;
 };
