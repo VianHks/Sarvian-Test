@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Check, ChevronRight, PowerSettingsNew } from '@mui/icons-material';
@@ -21,6 +22,7 @@ import {
   Typography,
   useTheme
 } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
 import {
   EditRound,
@@ -28,7 +30,22 @@ import {
 } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
 
+import type { CustSnackBarProps } from '@components/custom-component/snackbar';
 import { useCommand, useStore } from '@models/store';
+
+import { toBase64 } from './validatesize';
+
+const VisuallyHiddenInput = styled('input')({
+  bottom: 0,
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  left: 0,
+  overflow: 'hidden',
+  position: 'absolute',
+  whiteSpace: 'nowrap',
+  width: 1
+});
 
 interface UpdateUserProfile {
   [key: string]: unknown
@@ -44,12 +61,21 @@ const Profile: PageComponent = () => {
   const command = useCommand((cmd) => cmd);
   const navigate = useNavigate();
   const [store, dispatch] = useStore((state) => state.profile);
-  const [isEditProfile, setIsEditProfile] = useState(false);
+
   const [formData, setFormData] = useState<UpdateUserProfile>(DEFAULT_USER_DATA);
+
+  const [isFail, setIsFail] = useState(false);
+  const [isEditProfile, setIsEditProfile] = useState(false);
+
   const [modalCloseProfileOpen, setModalCloseProfileOpen] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+
   const [originalName, setOriginalName] = useState<string>('');
-  const [isFail, setIsFail] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<{ file: File | null }>({ file: null });
+  const [base64Images, setBase64Images] = useState<Record<string, unknown>>({});
+  const [snackbarProps, setSnackbarProps] = useState<CustSnackBarProps | null>(null);
+
+  const fileInputRefs = useRef<(HTMLInputElement | null)[]>(Array(4).fill(null).map(() => null));
 
   /*
    *   Const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -102,6 +128,36 @@ const Profile: PageComponent = () => {
     };
   }, [showSuccessAlert]);
 
+  useEffect(() => {
+    const storedFileInfoArray = store?.photoeditor;
+
+    const storedArray = store?.photoEditorOutput || [];
+    const mediaIdsFromStore = storedArray.map((item) => item.mediaId);
+
+    setMediaIds(mediaIdsFromStore);
+
+    setSelectedImages((prevSelectedImages) => {
+      const newSelectedImages = [...prevSelectedImages];
+
+      storedFileInfoArray.forEach((fileInfo, index) => {
+        if (fileInfo !== null) {
+          const file = new File([''], fileInfo.fileName, { type: fileInfo.typeFile });
+
+          newSelectedImages[index] = file;
+        }
+      });
+
+      return newSelectedImages;
+    });
+    const base64ImagesArray = storedArray.map((item) => item.base64Image);
+
+    setBase64Images(base64ImagesArray);
+  }, [store?.photoEditorOutput, window.sessionStorage.getItem('PhotoEditorIndex')]);
+
+  const handleCloseSnackbar = () => {
+    setSnackbarProps(null);
+  };
+
   const handleNavigateLocataion = () => {
     navigate('/location');
   };
@@ -120,6 +176,101 @@ const Profile: PageComponent = () => {
 
   const handleCloseModal = () => {
     setModalCloseProfileOpen(false);
+  };
+
+  const handleButtonClick = (index: number) => {
+    if (fileInputRefs.current && fileInputRefs.current[index]) {
+      fileInputRefs.current?.[index]?.click();
+    }
+  };
+
+  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = event.target.files?.[0];
+
+    if (file) {
+      if (file.size > 1024 * 1024) {
+        setSnackbarProps({
+          message: 'Gambar melebihi ukururan 1MB. Pastikan jika ukurannya kurang dari 1MB',
+          severity: 'warning'
+        });
+
+        return;
+      }
+
+      try {
+        const base64Image = await toBase64(file);
+
+        const newSelectedImages = { ...selectedImages, file };
+
+        setSelectedImages(newSelectedImages);
+
+        const newBase64Images: Record<string, unknown> = { ...base64Images, [file.name]: base64Image };
+
+        if (typeof base64Image === 'string') {
+          newBase64Images[file.name] = base64Image;
+        }
+
+        setBase64Images(newBase64Images);
+
+        const filteredBase64Images = Object.fromEntries(
+          Object.entries(newBase64Images).filter(([key, value]) => value !== null && value !== undefined)
+        );
+
+        setBase64Images(filteredBase64Images);
+
+        window.sessionStorage.setItem('PhotoEditorIndex', index.toString());
+        const clickedMediaId = store?.menuDetails?.data.product.media[index]?.id;
+
+        setMediaIds((prevMediaIds) => {
+          prevMediaIds[index] = clickedMediaId || '';
+          window.sessionStorage.setItem('MediaIds', prevMediaIds.toString());
+
+          return [...prevMediaIds];
+        });
+
+        const updatedSelectedImages: PhotoEditorModel[] = newSelectedImages.map(
+          (selectedFileOrNull, i) => {
+            if (selectedFileOrNull !== null) {
+              return {
+                file: selectedFileOrNull,
+                fileName: selectedFileOrNull.name || '',
+                size: selectedFileOrNull.size || 0,
+                typeFile: selectedFileOrNull.type || '',
+                base64Image: newBase64Images[i] || '',
+                mediaId: clickedMediaId || ''
+              };
+            }
+
+            return {
+              file: null,
+              fileName: '',
+              size: 0,
+              typeFile: '',
+              base64Image: '',
+              mediaId: ''
+            };
+          }
+        );
+
+        dispatch(MenuCommand.storePhotoEditorData(updatedSelectedImages));
+
+        const imgPreview = document.getElementById(`imgPreview_${index}`) as HTMLImageElement | null;
+        if (imgPreview) {
+          imgPreview.src = base64Image as string;
+        }
+
+        window.sessionStorage.setItem(SESSION_STORAGE_FORMDATA_PRODUCT, JSON.stringify(formData));
+
+        navigate('/photoeditor');
+      } catch (error) {
+        setSnackbarProps({
+          message: 'Upload Gambar gagal',
+          severity: 'warning'
+        });
+
+        console.error(error);
+      }
+    }
   };
 
   /*
@@ -345,6 +496,49 @@ const Profile: PageComponent = () => {
                             style={{ maxHeight: '100%', minWidth: '100%', borderRadius: '.5rem' }} />
                         : null}
                     </div>
+                  </Grid>
+
+                  {/* TESTING DATA - CUSTOM COMPONENT */}
+                  <Grid container={true} spacing={1} sx={{ flexWrap: 'nowrap' }}>
+                    {[0, 1, 2, 3].map((index) => (
+                      <Grid item={true} key={index}>
+                        <Button
+                          style={{
+                            height: 'auto',
+                            minWidth: 0,
+                            padding: 0,
+                            textTransform: 'none',
+                            width: 'auto'
+                          }}
+                          variant="outlined"
+                          onClick={() => handleButtonClick(index)}
+                        >
+                          <img
+                            alt="Selected"
+                            id={`imgPreview_${index}`}
+                            src={getPreviewImageSrc(index) || ''}
+                            style={{
+                              display: 'block',
+                              height: '60px',
+                              marginLeft: 'auto',
+                              marginRight: 'auto',
+                              objectFit: 'cover',
+                              paddingLeft: '0rem !important',
+                              width: '60px'
+                            }} />
+                          <VisuallyHiddenInput
+                            accept="image/jpeg, image/jpg"
+                            ref={(el) => {
+                              fileInputRefs.current[index] = el;
+                            }}
+                            type="file"
+                            onChange={(event) => {
+                              handleImageChange(event, index);
+                            }} />
+                        </Button>
+                      </Grid>
+
+                    ))}
                   </Grid>
                 </Grid>
 
