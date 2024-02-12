@@ -107,8 +107,6 @@ interface VariantModel {
   variant: string
 }
 
-const SESSION_STORAGE_CHECKOUT = 'CheckoutId';
-
 const ProductView = () => {
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
@@ -125,15 +123,15 @@ const ProductView = () => {
   const [formData, setFormData] = useState<FormData>(DEFAULT_FORM_DATA);
   const [variants, setVariants] = useState<VariantModel[]>([]);
   const [description, setDescription] = useState<DescriptionDataModel>(DEFAULT_DESCRIPTION);
-  const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '';
-  const productPrice = useMemo(() => store?.productView?.productDetails?.data?.product.variants[0]?.channelListings[0]?.price?.amount, [store]);
-  const [total, setTotal] = useState(0);
-  const [value, setValue] = useState<string[]>(['0']);
+  const checkoutIdFromStore = store?.productView?.checkoutId?.checkout_id || '';
+  const productPrice = useMemo(() => store?.productView?.productDetails?.data?.product.variants[0]?.channelListings[0]?.price?.amount, [store]) || 0;
+
   const [selectedChoices, setSelectedChoices] = useState<Record<string, string>>({});
-  const [selectedCheckboxes, setSelectedCheckboxes] = useState<string[]>([]);
-  const itemPrice = value.map((v) => parseInt(v, 10)).reduce((atr, num) => atr + num, 0);
-  const addOnPrice = selectedCheckboxes.map((itm) => parseInt(itm, 10));
-  const totalAddOn = addOnPrice.reduce((acc, num) => acc + num, 0);
+
+  const [variantValue, setVariantValue] = useState<string[]>([]);
+  const [attributeValue, setAttributeValue] = useState<string[]>([]);
+  const variantPrice = variantValue.map((v) => parseInt(v, 10)).reduce((atr, num) => atr + num, 0);
+  const attributePrice = attributeValue.map((v) => parseInt(v, 10)).reduce((atr, num) => atr + num, 0);
 
   const [isLoad, setIsLoad] = useState(false);
   const [count, setCount] = useState(1);
@@ -142,6 +140,8 @@ const ProductView = () => {
 
     return totalPrice;
   };
+
+  const total = (count * productPrice) + (count * variantPrice) + (count * attributePrice);
 
   const handleIncrement = () => {
     setCount(count + 1);
@@ -153,35 +153,7 @@ const ProductView = () => {
     }
   };
 
-  const handleAddOn = (value: string) => {
-    if (selectedCheckboxes.includes(value)) {
-      const valNumber = parseInt(value, 10);
-
-      setSelectedCheckboxes(selectedCheckboxes.filter((item) => item !== value));
-
-      setTotal(total - valNumber);
-    } else {
-      setSelectedCheckboxes([...selectedCheckboxes, value]);
-    }
-  };
-
-  const updateTotalPrice = () => {
-    let totalPrice = 0;
-
-    variants.forEach((variant) => {
-      variant.choices.forEach((choice) => {
-        const priceParts = choice.name.split(':')[1].trim();
-        const choicePrice = Number(priceParts);
-
-        totalPrice += choicePrice;
-      });
-    });
-
-    // Update the state with an array of values
-    setValue([String(totalPrice)]);
-  };
-
-  const handleVariantChange = (id: string, name: string, choice: { name: string, id: string }, price: string) => {
+  const handleVariantChange = (id: string, name: string, choice: { name: string, id: string }, price: string, index: number) => {
     setSelectedChoices((prevSelectedChoices) => ({
       ...prevSelectedChoices,
       [`${id}:${name}`]: `${choice.id}:${choice.name}`
@@ -208,7 +180,76 @@ const ProductView = () => {
       return [...prevVariants, newVariant];
     });
 
-    setValue([price]);
+    setVariantValue((prevValues) => {
+      const newValues = [...prevValues];
+
+      // Toggle the current index value
+      if (newValues[index] === price) {
+        newValues[index] = '';
+      } else {
+        newValues[index] = price;
+      }
+
+      // Filter out empty values
+      const filteredValues = newValues.filter((value) => value !== '');
+
+      return filteredValues;
+    });
+  };
+
+  const handleMultiselectChange = (id: string, name: string, choice: { name: string, id: string }, price: string, index: number, length: number) => {
+    setVariants((prevVariants) => {
+      const existingVariantIndex = prevVariants.findIndex((variant) => variant.id === id);
+
+      if (existingVariantIndex !== -1) {
+        const updatedVariants = [...prevVariants];
+        const updatedChoices = [...updatedVariants[existingVariantIndex].choices];
+
+        const existingChoiceIndex = updatedChoices.findIndex((c) => c.id === choice.id);
+
+        if (existingChoiceIndex === -1) {
+          updatedChoices.push({
+            id: choice.id,
+            name: choice.name
+          });
+        } else {
+          updatedChoices.splice(existingChoiceIndex, 1);
+        }
+
+        updatedVariants[existingVariantIndex].choices = updatedChoices;
+
+        return updatedVariants;
+      }
+
+      // For 'MULTISELECT' type, allow multiple choices
+      const newVariant: VariantModel = {
+        id,
+        variant: name,
+        choices: [{ id: choice.id, name: choice.name }]
+      };
+
+      return [...prevVariants, newVariant];
+    });
+
+    if (attributeValue.length === 0) {
+      const defaultValues = Array.from({ length }, () => '0');
+
+      setAttributeValue(defaultValues);
+    }
+
+    setAttributeValue((prevValues) => {
+      const newValues = [...prevValues];
+
+      newValues[index] = newValues[index] === price ? '0' : price;
+
+      const anyChecked = newValues.some((value) => value !== '0');
+
+      if (!anyChecked) {
+        newValues.fill('0');
+      }
+
+      return newValues;
+    });
   };
 
   useEffect(() => {
@@ -217,6 +258,9 @@ const ProductView = () => {
         productId || 'UHJvZHVjdDoxNzM=',
         token || ''
       )
+    );
+    dispatch(
+      command.productView.getCheckoutId({ checkout_id: checkoutIdFromStore })
     );
   }, [dispatch]);
 
@@ -232,10 +276,11 @@ const ProductView = () => {
   }, [store?.productView?.productDetails?.data?.product?.productType, dispatch, token]);
 
   useEffect(() => {
-    if (checkoutIdFromStorage !== '') {
-      dispatch(OrderCommand.getCart(checkoutIdFromStorage, token || ''));
+    if (checkoutIdFromStore !== '') {
+      dispatch(OrderCommand.getCart(checkoutIdFromStore || '', token || ''));
+      dispatch(OrderCommand.getCheckoutDetails(checkoutIdFromStore || '', token || ''));
     }
-  }, [checkoutIdFromStorage, dispatch, token]);
+  }, [checkoutIdFromStore, dispatch, token]);
 
   useEffect(() => {
     if (store) {
@@ -266,7 +311,7 @@ const ProductView = () => {
   }, [channel, count, productId, store, variantId]);
 
   useEffect(() => {
-    if (checkoutIdFromStorage && store?.order?.cart?.data?.checkout) {
+    if (checkoutIdFromStore && store?.order?.cart?.data?.checkout) {
       const { lines } = store.order.cart.data.checkout;
       const variantIndex = lines.findIndex((item) => item?.variant?.id === variantId);
 
@@ -287,38 +332,14 @@ const ProductView = () => {
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkoutIdFromStorage, store?.order]);
-
-  useEffect(() => {
-    if (productPrice) {
-      setTotal(count * productPrice);
-      setFormData({
-        ...formData,
-        price: calculateTotalPrice(count, productPrice),
-        quantity: count
-      });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, productPrice]);
-
-  useEffect(() => {
-    if (store?.productView?.productDetails?.data?.product?.productType?.hasVariants === true && productPrice) {
-      setTotal((count * productPrice) + (count * itemPrice) + (count * totalAddOn));
-      setFormData({
-        ...formData,
-        price: calculateTotalPrice(count, productPrice),
-        quantity: count
-      });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, productPrice, itemPrice, totalAddOn]);
+  }, [checkoutIdFromStore, store?.order]);
 
   const handleAddToCart = () => {
     setIsLoad(true);
 
-    if (checkoutIdFromStorage !== '') {
+    if (checkoutIdFromStore) {
       const payload = {
-        checkoutId: checkoutIdFromStorage,
+        checkoutId: checkoutIdFromStore,
         lines: [
           {
             lineId: formData.lineId,
@@ -332,10 +353,11 @@ const ProductView = () => {
       command.productView.putCheckout(payload, token || '')
         .then((response) => {
           if (response) {
-            window.sessionStorage.setItem(SESSION_STORAGE_CHECKOUT, JSON.stringify(response));
+            dispatch(command.productView.getCheckoutId({ checkout_id: response }));
             setTimeout(() => {
               setIsLoad(false);
-              navigate(`/keranjang`, { state: { CheckoutId: response } });
+              // Navigate(`/keranjang`, { state: { CheckoutId: response } });
+              navigate(`/checkout-dinein?checkoutId=${response}`, { state: { CheckoutId: response } });
             }, 1000);
           }
         });
@@ -358,11 +380,11 @@ const ProductView = () => {
               },
               {
                 key: 'total',
-                value: String(total)
+                value: String(total / count)
               }
             ],
-            price: formData.price,
-            quantity: formData.quantity,
+            price: calculateTotalPrice(count, productPrice),
+            quantity: count,
             variantId: formData.variantId
           }
         ],
@@ -372,7 +394,7 @@ const ProductView = () => {
       command.productView.postCreateCheckout(payload, token || '')
         .then((response) => {
           if (response) {
-            window.sessionStorage.setItem(SESSION_STORAGE_CHECKOUT, JSON.stringify(response));
+            dispatch(command.productView.getCheckoutId({ checkout_id: response }));
             setIsLoad(false);
             setTimeout(() => {
               setIsLoad(false);
@@ -383,7 +405,8 @@ const ProductView = () => {
     }
   };
 
-  console.log('variant', variants);
+  console.log('checkoutId', checkoutIdFromStore);
+  console.log('details', store?.order?.checkoutDetails?.data?.checkout);
 
   return (
     <Box sx={{ minHeight: '100vh', position: 'relative' }}>
@@ -440,7 +463,7 @@ const ProductView = () => {
                   Ganti Item
                 </Typography>
                 <hr style={{ marginTop: '0rem !important' }} />
-                {store?.productView?.productTypeDetails?.data?.productType?.variantAttributes?.filter((type) => type?.inputType === 'DROPDOWN').map((obj) => {
+                {store?.productView?.productTypeDetails?.data?.productType?.variantAttributes?.filter((type) => type?.inputType === 'DROPDOWN').map((obj, idx) => {
                   return (
                     <div key={obj.id}>
                       <Typography
@@ -468,7 +491,7 @@ const ProductView = () => {
                                   <Radio
                                     checked={selectedChoices[`${obj.id}:${obj.name}`] ===  `${item?.node?.id}:${item?.node?.name}`}
                                     onChange={() => {
-                                      handleVariantChange(obj.id, obj.name, { id: item?.node?.id, name: item?.node?.name }, price);
+                                      handleVariantChange(obj.id, obj.name, { id: item?.node?.id, name: item?.node?.name }, price, idx);
                                     }} />
                                 }
                                 label={
@@ -492,7 +515,7 @@ const ProductView = () => {
                     </div>
                   );
                 })}
-                {/* <Typography
+                <Typography
                   sx={{
                     color: theme?.palette?.grey[900],
                     fontWeight: 'bold',
@@ -517,7 +540,7 @@ const ProductView = () => {
                       >
                       {obj.name}
                       </Typography>
-                      {obj?.choices?.edges?.map((item) => {
+                      {obj?.choices?.edges?.map((item, idx) => {
                         const nameParts = item?.node?.name.split(':');
                         if (nameParts.length === 3) {
                           const name = nameParts[0].trim();
@@ -529,8 +552,10 @@ const ProductView = () => {
                                 <FormControlLabel
                                   control={
                                     <Checkbox
-                                      checked={selectedCheckboxes.includes(price)}
-                                      onChange={() => handleAddOn(price)} />
+                                      // Checked={selectedChoices[`${obj.id}:${obj.name}`] ===  `${item?.node?.id}:${item?.node?.name}`}
+                                      onChange={() => {
+                                        handleMultiselectChange(obj.id, obj.name, { id: item?.node?.id, name: item?.node?.name }, price, idx, obj?.choices?.edges?.length);
+                                      }} />
                                   }
                                   label={
                                     <Typography fontWeight="bold" variant="h6">
@@ -538,7 +563,7 @@ const ProductView = () => {
                                     </Typography>
                                   }
                                   sx={{ fontWeight: 'bold' }}
-                                  value={price} />
+                                  value={`${item?.node?.id}:${item?.node?.name}`} />
                               </Grid>
                               <Grid item={true} sx={{ alignItems: 'center', display: 'flex', fontWeight: 'bold', justifyContent: 'end' }} xs={4}>
                                   <Typography fontWeight="bold">
@@ -553,7 +578,7 @@ const ProductView = () => {
                       })}
                     </div>
                   );
-                })} */}
+                })}
               </>
               )
               : null}

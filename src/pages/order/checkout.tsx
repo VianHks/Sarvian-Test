@@ -270,19 +270,19 @@ const Checkout: PageComponent = (props: Props) => {
   const { windowProps } = props;
   const [searchParams] = useSearchParams();
   const checkoutId = searchParams.get('checkoutId');
-  const checkoutIdFromStorage = JSON.parse(window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '');
   const command = useCommand((cmd) => cmd);
   const idUser = 'tokrum:b5bbc271-1cc2-4cc9-9b07-8f0dd92966e1';
   const userName = 'Ridwan Azis';
 
-  const [store, dispatch] = useStore((state) => state?.order);
+  const [store, dispatch] = useStore((state) => state);
   const [checkoutDetails, setCheckoutDetails] = useState<ChekoutDetailDataModel>(DEFAULT_CHECKOUT_DETAILS);
   const [formOrder, setFormOrder] = useState<FormOrderDataModel>(DEFAULT_FORM_ORDER);
   const [total, setTotal] = useState(0);
-  const [changeItem, setChangeItem] = useState<string[]>([]);
+  const [variants, setVariants] = useState<{ title: string, name: string }[]>([]);
 
   const metaDataTotal = checkoutDetails?.lines?.find((obj) => obj?.metadata);
   const totalHarga = metaDataTotal?.metadata?.find((itm) => itm?.key === 'total')?.value;
+  const totalHargaNumber = Number(totalHarga);
 
   const [isLoad, setIsLoad] = useState(false);
   const [alert, setAlert] = useState(false);
@@ -297,18 +297,12 @@ const Checkout: PageComponent = (props: Props) => {
 
   const calculateTotal = () => {
     const newTotal = checkoutDetails.lines.reduce((acc, line) => {
-      const lineTotal = line.quantity * line.variant.pricing.price.gross.amount;
+      const lineTotal = line.quantity * totalHargaNumber;
 
       return acc + lineTotal;
     }, 0);
 
-    if (totalHarga !== null) {
-      const totalHargaNumber = Number(totalHarga);
-
-      setTotal(newTotal + totalHargaNumber);
-    } else {
-      setTotal(newTotal);
-    }
+    setTotal(newTotal);
   };
 
   const toggleDrawer = (newOpen: boolean) => () => {
@@ -383,7 +377,7 @@ const Checkout: PageComponent = (props: Props) => {
   const handleConfirmChangeResto = () => {
     setOpenChangeResto(!openChangeResto);
     OrderCommand.postCheckoutCustomerDetach(
-      { checkoutId: checkoutIdFromStorage },
+      { checkoutId },
       token || ''
     ).then(() => {
       window.sessionStorage.removeItem(SESSION_STORAGE_CHECKOUT);
@@ -397,16 +391,16 @@ const Checkout: PageComponent = (props: Props) => {
     const payloadOrder = {
       buyerName: userName,
       channel: 'makan',
-      checkoutId: checkoutIdFromStorage || checkoutId,
+      checkoutId: checkoutId || checkoutId,
       customerId: idUser,
       estimation: formOrder.estimation.format('HH:mm'),
       note: formOrder.note,
       orderType: formOrder.orderType,
       transactionReference: ''
     };
-    if (store?.checkoutDetails?.data?.checkout !== checkoutDetails) {
+    if (store?.order?.checkoutDetails?.data?.checkout !== checkoutDetails) {
       const payload = {
-        checkoutId: checkoutIdFromStorage || checkoutId,
+        checkoutId: checkoutId || checkoutId,
         lines: checkoutDetails?.lines.map((item) => ({
           lineId: item?.id,
           note: item?.metafields?.note,
@@ -422,7 +416,7 @@ const Checkout: PageComponent = (props: Props) => {
               (res) => {
                 window?.sessionStorage?.removeItem(SESSION_STORAGE_CHECKOUT);
                 window?.sessionStorage?.setItem(SESSION_STORAGE_ORDER, JSON.stringify(res));
-                navigate(`/order-in-progress/single-order?orderId=${res}`);
+                navigate(`/order-in-progress/single-order?orderId=${res}&price=${total}`);
                 setIsLoad(false);
               }
             );
@@ -436,7 +430,7 @@ const Checkout: PageComponent = (props: Props) => {
         if (res !== 'err') {
           window?.sessionStorage?.removeItem(SESSION_STORAGE_CHECKOUT);
           window?.sessionStorage?.setItem(SESSION_STORAGE_ORDER, JSON.stringify(res));
-          navigate(`/order-in-progress/single-order?orderId=${res}`);
+          navigate(`/order-in-progress/single-order?orderId=${res}&price=${total}`);
           setIsLoad(false);
         } else {
           setIsLoad(false);
@@ -447,20 +441,21 @@ const Checkout: PageComponent = (props: Props) => {
   };
 
   useEffect(() => {
-    if (checkoutIdFromStorage) {
-      dispatch(OrderCommand.getCheckoutDetails(checkoutIdFromStorage || '', token || ''));
+    if (checkoutId || checkoutId) {
+      dispatch(OrderCommand.getCheckoutDetails(checkoutId || '', token || ''));
+      dispatch(command.productView.getCheckoutId({ checkout_id: checkoutId || '' }));
     }
-  }, [dispatch, token, checkoutIdFromStorage]);
+  }, [dispatch, token, checkoutId]);
 
   useEffect(() => {
-    if (store?.checkoutDetails) {
-      setCheckoutDetails(store?.checkoutDetails?.data?.checkout);
+    if (store?.order?.checkoutDetails) {
+      setCheckoutDetails(store?.order?.checkoutDetails?.data?.checkout);
 
       setTotal(
-        store?.checkoutDetails?.data?.checkout?.totalPrice?.gross?.amount
+        store?.order?.checkoutDetails?.data?.checkout?.totalPrice?.gross?.amount
       );
     }
-  }, [store?.checkoutDetails]);
+  }, [store?.order?.checkoutDetails]);
 
   useEffect(() => {
     calculateTotal();
@@ -469,7 +464,7 @@ const Checkout: PageComponent = (props: Props) => {
       ?.flatMap((obj) => obj?.metadata?.filter((meta) => meta?.key === 'variant')?.map((meta) => meta?.value))
       ?.map((jsonString) => JSON.parse(jsonString || ''));
 
-    const namesArray: string[] = [];
+    const namesArray: { title: string, name: string }[] = [];
 
     metaDataVariants?.forEach((variantsArray: VariantModel[]) => {
       if (variantsArray) {
@@ -480,14 +475,14 @@ const Checkout: PageComponent = (props: Props) => {
             if (nameParts && nameParts.length === 3) {
               const name = nameParts[0]?.trim();
 
-              namesArray.push(name);
+              namesArray.push({ title: atr?.variant, name });
             }
           }
         });
       }
     });
 
-    setChangeItem(namesArray);
+    setVariants(namesArray);
   }, [checkoutDetails]);
 
   return (
@@ -497,7 +492,7 @@ const Checkout: PageComponent = (props: Props) => {
           Gagal Membuat Order
         </Alert>
       </Snackbar>
-      {checkoutIdFromStorage
+      {checkoutId
         ? (
         <>
           <Typography
@@ -751,15 +746,20 @@ const Checkout: PageComponent = (props: Props) => {
                             </Typography>
                             <Typography
                               sx={{ fontWeight: 'bold', textAlign: 'start' }}
-                              variant="body2"
+                              variant="caption"
                             >
-                              Ganti Item : {changeItem.join(', ')}
+                              {variants.map((obj) => (
+                                <div key={obj.title}>
+                                  {`${obj?.title}: ${obj?.name}`}
+                                </div>
+                              ))}
                             </Typography>
                           </Box>
-
-                          <Button color="primary" size="small" variant="text">
-                            Edit
-                          </Button>
+                          <Box>
+                            <Button color="primary" size="small" variant="text">
+                              Edit
+                            </Button>
+                          </Box>
                         </Box>
                         <Box
                           sx={{
@@ -773,7 +773,7 @@ const Checkout: PageComponent = (props: Props) => {
                             variant="body2"
                           >
                             Rp.{' '}
-                            {obj?.variant?.pricing?.price?.gross?.amount.toLocaleString(
+                            {totalHargaNumber.toLocaleString(
                               'id-ID'
                             )}
                           </Typography>
@@ -990,7 +990,7 @@ const Checkout: PageComponent = (props: Props) => {
                 sx={{ background: theme.palette.primary.gradient }}
                 variant="contained"
                 onClick={
-                  checkoutIdFromStorage
+                  checkoutId
                     ? toggleOpenModalCheckout
                     : () => navigate('./order-in-progress')
                 }

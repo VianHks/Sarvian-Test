@@ -60,7 +60,7 @@ interface ProductDetailsDataModel {
   }
 }
 
-interface CreateCheckoutDataModel {
+interface CheckoutIdModel {
   checkout_id: string
 }
 
@@ -90,9 +90,9 @@ interface ProductTypeModel {
 }
 
 interface ProductViewsModel {
+  checkoutId?: CheckoutIdModel
   productDetails?: ProductDetailsDataModel
   productTypeDetails?: ProductTypeModel
-  responseCreateCheckout?: CreateCheckoutDataModel
 }
 
 enum ProductViewsActionType {
@@ -119,7 +119,7 @@ export type {
   ProductViewsModel,
   ProductViewsAction,
   ProductDetailsDataModel,
-  CreateCheckoutDataModel,
+  CheckoutIdModel,
   ProductTypeModel,
   VariantAttributesModel
 };
