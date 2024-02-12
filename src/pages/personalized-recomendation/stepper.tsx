@@ -4,9 +4,9 @@ import type { StepIconProps } from '@mui/material';
 
 const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
-    top: 10,
     left: 'calc(-50% + 10px)',
-    right: 'calc(50% + 10px)'
+    right: 'calc(50% + 10px)',
+    top: 10
   },
   [`&.${stepConnectorClasses.active}`]: {
     [`& .${stepConnectorClasses.line}`]: {
@@ -19,31 +19,31 @@ const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
     }
   },
   [`& .${stepConnectorClasses.line}`]: {
-    height: 5,
-    border: 0,
     backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[800] : '#F2F4F7',
-    borderRadius: 1
+    border: 0,
+    borderRadius: 1,
+    height: 5
   }
 }));
 
 const ColorlibStepIconRoot = styled('div')<{
-  ownerState: { completed?: boolean, active?: boolean }
+  ownerState: { active?: boolean, completed?: boolean }
 }>(({ theme, ownerState }) => ({
-  backgroundColor: ownerState.active || ownerState.completed ? '#FBD600' : theme.palette.mode === 'dark' ? theme.palette.grey[700] : '#F2F4F7',
-  zIndex: 1,
-  color: ownerState.active || ownerState.completed ? '#1050AE' : theme.palette.mode === 'dark' ? theme.palette.grey[700] : '#ccc',
-  width: 24,
-  height: 24,
-  display: 'flex',
-  borderRadius: '24px',
-  justifyContent: 'center',
   alignItems: 'center',
   ...ownerState.active && {
     backgroundImage: '#FBD600'
   },
+  backgroundColor: ownerState.active || ownerState.completed ? '#FBD600' : theme.palette.mode === 'dark' ? theme.palette.grey[700] : '#F2F4F7',
+  borderRadius: '24px',
+  color: ownerState.active || ownerState.completed ? '#1050AE' : theme.palette.mode === 'dark' ? theme.palette.grey[700] : '#ccc',
+  display: 'flex',
+  height: 24,
+  justifyContent: 'center',
   ...ownerState.completed && {
     backgroundImage: '#FBD600'
-  }
+  },
+  width: 24,
+  zIndex: 1
 }));
 
 const ColorlibStepIcon = (props: StepIconProps) => {
@@ -56,8 +56,8 @@ const ColorlibStepIcon = (props: StepIconProps) => {
   };
 
   return (
-      <ColorlibStepIconRoot className={className} ownerState={{ completed, active }}>
-        {icons[String(props.icon)]}
+      <ColorlibStepIconRoot className={className} ownerState={{ active, completed }}>
+        {icons[String(props?.icon)]}
       </ColorlibStepIconRoot>
   );
 };

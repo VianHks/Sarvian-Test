@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import { Avatar, Box, Card, Grid, Typography } from '@mui/material';
+import { Avatar, Box, Card, Grid, Typography, useTheme } from '@mui/material';
 
 import type { PageComponent } from '@nxweb/react';
 
@@ -12,6 +12,7 @@ import { useStore } from '@models/store';
 import Rating from './rating';
 
 import RestoFoto from '@assets/images/RestoFoto.svg';
+import LogoBilo from '@assets/images/logoBiloCheckout.svg';
 
 const DUMMY_Rating = [
   {
@@ -49,28 +50,37 @@ const DUMMY_Rating = [
 
 const UlasandanRating: PageComponent = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
   const [store, dispatch] = useStore((state) => state?.rating);
+  const [searchParams] = useSearchParams();
+  // const channelId = searchParams.get('id');
   const channelId = 'Q2hhbm5lbDo0';
+  
 
   useEffect(() => {
-    dispatch(
-      RatingCommand.RatingLoad(channelId)
-    )
-      .catch((err: unknown) => {
-        console.error(err);
-      });
+    if (channelId) {
+      dispatch(
+        RatingCommand.RatingLoad(channelId)
+      )
+        .catch((err: unknown) => {
+          console.error(err);
+        });
 
-    return () => {
-      dispatch(RatingCommand.RatingClear());
-    };
+      return () => {
+        dispatch(RatingCommand.RatingClear());
+      };
+    }
   }, [dispatch, token]);
+
+  console.log('cekrating', store);
 
   return (
     <Box sx={{ margin: '0.5rem 0.5rem' }}>
-    {store?.data?.map((obj) => (
-      <Card key={obj.id} sx={{ borderColor: 'transparent', marginBottom: '1rem', padding: '0.5rem', marginTop: '2rem' }}>
+   {store?.data && store.data.length > 0
+     ? store.data.map((obj) => (
+      <Card key={obj.id} sx={{ borderColor: 'transparent', marginBottom: '0.5rem', padding: '0.5rem', marginTop: '1rem' }}>
         <Grid container={true} spacing={4} sx={{ display: 'flex', justifyContent: 'space-between' }}>
 
             <Grid item={true} xs={2}>
@@ -113,8 +123,30 @@ const UlasandanRating: PageComponent = () => {
             <Typography sx={{ fontSize: '0.5rem' }} variant="caption">{obj.createdAt}</Typography>
        </Grid>
       </Card>
-    ))}
+     ))
+     : (
+          <>
+            <div
+              style={{
+                marginTop: '2rem',
+                padding: '5rem 5rem 0rem 5rem',
+                textAlign: 'center'
+              }}
+            >
+              <img
+                alt="Logo"
+                src={LogoBilo}
+                style={{ height: 'auto', width: '100%' }} />
+            </div>
+            <Typography
+              sx={{ color: theme?.palette?.primary?.main, textAlign: 'center' }}
+              variant="h5"
+            >
+              Sayang sekali saat ini belum ada rating untuk resto kamu...
+            </Typography>
 
+          </>
+     )}
     </Box>
   );
 };

@@ -7,6 +7,7 @@ declare module '@mui/material/styles' {
       bodyBg: string
       dark: string
       darkPaperBg: string
+      gradient: string
       light: string
       lightPaperBg: string
       main: string
@@ -14,12 +15,16 @@ declare module '@mui/material/styles' {
       trackBg: string
     }
   }
+  interface PaletteColor {
+    gradient?: string
+  }
   interface PaletteOptions {
     customColors?: {
       avatarBg?: string
       bodyBg?: string
       dark?: string
       darkPaperBg?: string
+      gradient?: string
       light?: string
       lightPaperBg?: string
       main?: string

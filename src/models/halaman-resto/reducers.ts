@@ -4,8 +4,75 @@ import type { TAction, TDispatch } from '@models/types';
 
 import { HalamanRestoActionType } from './types.js';
 
-import type { ChannelDetailDataModel, HalamanRestoAction, HalamanRestoModel, ProductbyCollectionsDataModel, ProductByMetadataDataModel, ProductListDataModel } from './types.js';
+import type { ChannelDetailDataModel, CheckoutListByEmail, HalamanRestoAction, HalamanRestoModel, LinesMetadataModel, LinesModel, ProductbyCollectionsDataModel, ProductByMetadataDataModel, ProductListDataModel } from './types.js';
 
+const DefaultLines: LinesModel[] =
+[
+  {
+    metadata: [
+      {
+        key: 'note',
+        value: ''
+      }
+    ],
+    lineId: '',
+    note: '',
+    price: '',
+    quantity: 0,
+    variantId: '',
+    update: '',
+    colectionId: '',
+    productId: '',
+    thumbnail: '',
+    name: '',
+    isAvailableForPurchase: false
+  }
+];
+
+const DefaultLinesMetadata: LinesMetadataModel[] =
+[
+  {
+    metadata: [
+      {
+        key: 'note',
+        value: ''
+      }
+    ],
+    lineId: '',
+    note: '',
+    price: '',
+    quantity: 0,
+    variantId: '',
+    update: '',
+    colectionId: '',
+    productId: '',
+    thumbnail: '',
+    name: '',
+    isAvailableForPurchase: false
+  }
+];
+
+const DefaultCheckoutList: CheckoutListByEmail = {
+  data: {
+    checkouts: {
+      edges: [
+        {
+          node: {
+            id: ''
+          }
+        }
+      ],
+      totalCount: 0
+    }
+  },
+  extensions: {
+    cost: {
+      maximumAvailable: 0,
+      requestedQueryCost: 0
+    }
+  }
+
+};
 const DefaultChannelDetail: ChannelDetailDataModel = {
   avgRating: '',
   data: {
@@ -118,7 +185,12 @@ const DefaultCollectionsbyMetadata: ProductByMetadataDataModel = {
       thumbnail: {
         alt: '',
         url: ''
-      }
+      },
+      variants: [
+        {
+          id: ''
+        }
+      ]
     }
   ],
   pageInfo: {
@@ -199,7 +271,10 @@ const ChannelDefault: HalamanRestoModel = {
   channelDetailOutput: DefaultChannelDetail,
   productListOutput: DefaultProductList,
   productByMetadataOutput: DefaultCollectionsbyMetadata,
-  productByCollectionsOutput: DefaultProductbyCollection
+  productByCollectionsOutput: DefaultProductbyCollection,
+  checkoutListOutput: DefaultCheckoutList,
+  linesOutput: DefaultLines,
+  linesMetadataOutput: DefaultLinesMetadata
 };
 const HalamanRestoReducer = (
   state: HalamanRestoModel = ChannelDefault,
@@ -216,6 +291,12 @@ const HalamanRestoReducer = (
       return { ...state, ...action.data };
     case HalamanRestoActionType.CheckoutLoad:
       return { ...state, ...action.data };
+    case HalamanRestoActionType.CheckoutListByEmail:
+      return { ...state, ...action.data };
+    case HalamanRestoActionType.LinesLoad:
+      return { ...state, ...action.data };
+    case HalamanRestoActionType.LinesMetadataLoad:
+      return { ...state, ...action.data };
 
     default:
       return state;
@@ -223,6 +304,56 @@ const HalamanRestoReducer = (
 };
 
 export const ChannelCommand = {
+  storeLines: (lines: LinesModel[]) => {
+    return (dispatch: TDispatch<HalamanRestoAction>) => {
+      const linesData: HalamanRestoModel = {
+        linesOutput: lines
+      };
+
+      dispatch({
+        data: linesData,
+        type: HalamanRestoActionType.LinesLoad
+      });
+    };
+  },
+  storeLinesMetadata: (lines: LinesMetadataModel[]) => {
+    return (dispatch: TDispatch<HalamanRestoAction>) => {
+      const linesMetaData: HalamanRestoModel = {
+        linesMetadataOutput: lines
+      };
+
+      dispatch({
+        data: linesMetaData,
+        type: HalamanRestoActionType.LinesMetadataLoad
+      });
+    };
+  },
+
+  getCheckoutList: (params: unknown, token: string): TAction<HalamanRestoAction, void> => {
+    return (dispatch: TDispatch<HalamanRestoAction>) => {
+      return apiFetch(token)
+        .post(`/foodbuyer/0.1/checkout-by-channel`, params)
+        .then((response) => {
+          if (response.status === 200) {
+            if (response.data !== null) {
+              const checkoutList: HalamanRestoModel = {
+                checkoutListOutput: response.data as CheckoutListByEmail
+              };
+
+              dispatch({
+                data: checkoutList,
+                type: HalamanRestoActionType.CheckoutListByEmail
+              });
+            } else {
+              dispatch({
+                data: ChannelDefault,
+                type: HalamanRestoActionType.CheckoutListByEmail
+              });
+            }
+          }
+        });
+    };
+  },
   getChannelDetail: (id: string, token: string): TAction<HalamanRestoAction, void> => {
     return (dispatch: TDispatch<HalamanRestoAction>) => {
       return apiFetch(token)

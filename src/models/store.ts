@@ -7,6 +7,7 @@ import {
 
 import { checkoutCommand } from './checkout/commands.js';
 import { CheckoutReducer } from './checkout/reducers.js';
+import { DanaCommands } from './dana/reducers.js';
 import { FAQReducer } from './faq/reducers.js';
 import { halamanRestoCommand } from './halaman-resto/commands.js';
 import { HalamanRestoReducer } from './halaman-resto/reducers.js';
@@ -51,6 +52,7 @@ const rootModel: RootModel = {
 const rootCommand = {
   beranda: homeCommand,
   checkout: checkoutCommand,
+  dana: DanaCommands,
   halamanResto: halamanRestoCommand,
   home: homeCommands,
   order: orderCommand,

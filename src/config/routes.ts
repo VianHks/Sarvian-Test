@@ -114,7 +114,8 @@ export const routes: Route[] = [
     layout: 'bottomnav',
     meta: { description: 'Chat' },
     path: '/chat-list',
-    search: true
+    search: true,
+    title: 'Chat'
   },
   {
     auth: false,

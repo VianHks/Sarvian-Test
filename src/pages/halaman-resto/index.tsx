@@ -1,5 +1,5 @@
-import { Fragment, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
@@ -17,6 +17,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  styled,
   TextField,
   Toolbar,
   Typography
@@ -24,9 +25,7 @@ import {
 
 import {
   AccessTimeFilled,
-  AddBoxFilled,
   ArrowBackFilled,
-  IndeterminateCheckBoxFilled,
   LocationOnFilled,
   SearchOutlined,
   StarFilled
@@ -35,11 +34,12 @@ import type { PageComponent } from '@nxweb/react';
 
 import { useAuth } from '@hooks/use-auth';
 import { ChannelCommand } from '@models/halaman-resto/reducers';
-import { OrderCommand } from '@models/order/reducers';
 import { RatingCommand } from '@models/rating/commands';
 import { useStore } from '@models/store';
 
 import FloatingShoppingButton from './floatingshopping-button';
+import ListMenuRecomendation from './list-menu-recomendation';
+import ListMenu from './listmenu';
 import Rating from './rating';
 
 import ProfilFoto from '@assets/images/Orang.svg';
@@ -55,52 +55,6 @@ interface RestoItem {
   restoName: string
   verified: boolean
 }
-
-const DUMMY_MENU_RECOMDATION = [
-  {
-    id: 1,
-    userName: 'Jatnika',
-    rating: '4',
-    comment: 'Ngenah weh pokokna mah'
-  },
-  {
-    id: 2,
-    userName: 'Rere',
-    rating: '2',
-    comment: 'Endol'
-  },
-  {
-    id: 3,
-    userName: 'Udin',
-    rating: '4',
-    comment: 'Enak banget'
-  },
-  {
-    id: 1,
-    userName: 'Jatnika',
-    rating: '5',
-    comment: 'Mantab'
-  },
-  {
-    id: 4,
-    userName: 'Retno',
-    rating: '3',
-    comment: 'Kurang enak g ada rasa'
-  }
-];
-
-const DUMMY_RESTO = [
-  {
-    id: 1,
-    location: 1.5,
-    open: '9.00 - 12.00 WIB',
-    orderMethode: 'Pesan Antar, Pick Up',
-    rating: '4.9',
-    restoName: 'Resto Sunda Gila 1',
-    verified: true
-  }
-];
-
 interface RestoSchedule {
   day: string
   open: string
@@ -128,44 +82,6 @@ interface LinesModel {
   isAvailableForPurchase: boolean
 }
 
-const DefaultLines: LinesModel = {
-  metadata: [
-    {
-      key: 'note',
-      value: ''
-    }
-  ],
-  lineId: '',
-  note: '',
-  price: '',
-  quantity: 0,
-  variantId: '',
-  update: '',
-  colectionId: '',
-  productId: '',
-  thumbnail: '',
-  name: '',
-  isAvailableForPurchase: false
-};
-
-interface PayloadDataModel {
-  after: string
-  channel: string
-  deliveryMethodId: string
-  first: number
-  lines: LinesModel[]
-  userId: string
-}
-
-const DATA: PayloadDataModel = {
-  after: '',
-  channel: 'makan',
-  deliveryMethodId: 'string',
-  first: 100,
-  lines: [DefaultLines],
-  userId: 'string'
-};
-
 const SESSION_STORAGE_KEYS = {
   CHECKOUT: 'CheckoutId',
   COLIDS: 'ColIds'
@@ -178,10 +94,14 @@ const HalamanResto: PageComponent = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const navigate = useNavigate();
+
+  const [colIds, setColIds] = useState<{ id: string, name: string }[]>([]);
   const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_KEYS.CHECKOUT) ?? '';
-  const colIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_KEYS.COLIDS) ?? '';
   const [isLoading, setIsLoading] = useState(false);
-  const channelId = 'Q2hhbm5lbDo0';
+
+  const [searchParams] = useSearchParams();
+  const channelId = searchParams.get('id');
+  const channelName = 'makan';
   const daysOfWeek = [
     'minggu',
     'senin',
@@ -201,7 +121,6 @@ const HalamanResto: PageComponent = () => {
   const filteredJadwal = jadwalOperasional.filter((resto: RestoSchedule) => {
     return resto.day.toLowerCase() === currentDay;
   });
-  const [colIds, setColIds] = useState<{ id: string, name: string }[]>([]);
   const [selectedValue, setSelectedValue] = useState<string>('');
   const [showAlert, setShowAlert] = useState(true);
   const filteredCategories =
@@ -209,78 +128,12 @@ const HalamanResto: PageComponent = () => {
       (category) => category.products.totalCount > 0
     ) || [];
 
-  const [formData, setFormData] = useState(DATA);
-
-  const calculateTotalAmount = (lines: LinesModel[] | undefined): number => {
-    if (!lines) {
-      return 0;
-    }
-
-    return lines.reduce((total, line) => {
-      const price = parseFloat(line.price) || 0;
-      const lineTotal = price * line.quantity;
-
-      return total + lineTotal;
-    }, 0);
-  };
-
-  const calculateTotalItems = (lines: LinesModel[] | undefined): number => {
-    if (!lines) {
-      return 0;
-    }
-
-    return lines.reduce((total, line) => {
-      return total + line.quantity;
-    }, 0);
-  };
-
-  const handleIncrement = (id: string) => {
-    setFormData((prevFormData) => {
-      const updatedFormData = { ...prevFormData };
-
-      const lineToUpdate = updatedFormData.lines.find(
-        (line) => line.variantId === id
-      );
-
-      if (lineToUpdate) {
-        lineToUpdate.quantity = Math.max(lineToUpdate.quantity + 1, 0);
-
-        setTotalItems((prevTotalItems) => prevTotalItems + 1);
-      }
-
-      const newTotalAmount = calculateTotalAmount(updatedFormData.lines);
-
-      setTotalAmount(newTotalAmount);
-
-      return updatedFormData;
-    });
-  };
-
-  const handleDecrement = (id: string) => {
-    setFormData((prevFormData) => {
-      const updatedFormData = { ...prevFormData };
-
-      if (updatedFormData.lines) {
-        const lineToUpdate = updatedFormData.lines.find(
-          (line) => line.variantId === id
-        );
-
-        if (lineToUpdate && lineToUpdate.quantity > 0) {
-          lineToUpdate.quantity = Math.max(lineToUpdate.quantity - 1, 0);
-          setTotalItems((prevTotalItems) => Math.max(prevTotalItems - 1, 0));
-        }
-      }
-
-      const newTotalAmount = calculateTotalAmount(updatedFormData.lines);
-
-      setTotalAmount(newTotalAmount);
-
-      return updatedFormData;
-    });
-  };
-
   const handleLihatSemuaClick = () => {
-    navigate('./ulasan-rating');
+    navigate(`./ulasan-rating?id=${channelId}`);
+  };
+
+  const handleBack = () => {
+    navigate(-1);
   };
 
   const handleResponse = (res: string | null | undefined) => {
@@ -301,24 +154,78 @@ const HalamanResto: PageComponent = () => {
     }
   };
 
+  /*
+   * Const scrollToTesElement = () => {
+   *   const tesElement = tesElementRef.current;
+   */
+
+  /*
+   *   // Check if tesElement is not null or undefined before accessing its properties
+   *   if (tesElement) {
+   *     tesElement.scrollTop = tesElement.scrollHeight;
+   *   }
+   * };
+   */
+
+  /*
+   * useEffect(() => {
+   *   scrollToTesElement();
+   * }, []);
+   */
+
+  const calculateTotal = (lines: LinesModel[]) => {
+    let totalAmount = 0;
+    let totalQuantity = 0;
+
+    lines.forEach((line) => {
+      const price = parseFloat(line.price);
+      const quantity = line.quantity || 0;
+
+      totalAmount += price * quantity;
+      totalQuantity += quantity;
+    });
+
+    return { totalAmount, totalQuantity };
+  };
+
+  useEffect(() => {
+    if (store?.halamanResto?.linesOutput) {
+      const { totalAmount, totalQuantity } = calculateTotal(store.halamanResto.linesOutput);
+
+      setTotalAmount(totalAmount);
+      setTotalItems(totalQuantity);
+    }
+  }, [store?.halamanResto?.linesOutput]);
+
   const handleShoppingButtonClick = () => {
     navigate('/keranjang');
   };
 
-  const handleCardClick = (variantId: string, productId: string) => {
-    navigate(`/product-view?productId=${productId}&variantId?=${variantId}`);
-  };
-
   const handleLanjutPembayaranClick = () => {
     setIsLoading(true);
-    const filteredLines = formData.lines.filter(
-      (line) => line.quantity > 0 && !line.lineId
-    );
+    const filteredPutLines = (store?.halamanResto?.linesOutput || []).map(
+      (line) => {
+        return {
+          metadata: line?.metadata || [],
+          lineId: line?.lineId || '',
+          note: line?.note || '',
+          price: line?.price || '0',
+          quantity: line?.quantity || 0,
+          variantId: line?.variantId || '',
+          update: line?.update || '',
+          colectionId: line?.colectionId || '',
+          productId: line?.productId || '',
+          thumbnail: line?.thumbnail || '',
+          name: line?.name || '',
+          isAvailableForPurchase: line?.isAvailableForPurchase || false
+        };
+      }
+    ).filter((line) => line.quantity > 0 && line.lineId);
 
-    // Const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
+    const checkoutIdFromStorage = sessionStorage.getItem('CheckoutId');
 
     if (checkoutIdFromStorage) {
-      const linesToUpdate = formData.lines.filter((line) => line.lineId);
+      const linesToUpdate = filteredPutLines.filter((line) => line.lineId);
       const paramUpdate = {
         checkoutId: checkoutIdFromStorage,
         lines: linesToUpdate.map((line) => ({
@@ -334,14 +241,33 @@ const HalamanResto: PageComponent = () => {
       });
     }
 
-    if (filteredLines.length > 0) {
+    const filteredPostLines = (store?.halamanResto?.linesOutput || []).map(
+      (line) => {
+        return {
+          metadata: line?.metadata || [],
+          lineId: line?.lineId || '',
+          note: line?.note || '',
+          price: line?.price || '0',
+          quantity: line?.quantity || 0,
+          variantId: line?.variantId || '',
+          update: line?.update || '',
+          colectionId: line?.colectionId || '',
+          productId: line?.productId || '',
+          thumbnail: line?.thumbnail || '',
+          name: line?.name || '',
+          isAvailableForPurchase: line?.isAvailableForPurchase || false
+        };
+      }
+    ).filter((line) => line.quantity > 0 && !line.lineId);
+
+    if (filteredPostLines.length > 0) {
       const paramCreate = {
         after: '',
         channel: 'makan',
         deliveryMethodId:
-          'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
+            'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
         first: 100,
-        lines: filteredLines.map((line) => ({
+        lines: filteredPostLines.map((line) => ({
           metadata: line.metadata,
           price: line.price,
           quantity: line.quantity,
@@ -357,6 +283,35 @@ const HalamanResto: PageComponent = () => {
       );
     }
   };
+  /*
+   * Const handleScroll = () => {
+   *   const tesElement = tesElementRef.current;
+   *   const listMenuElement = listMenuElementRef.current;
+   */
+
+  /*
+   *   if (tesElement && listMenuElement) {
+   *     listMenuElement.scrollTop = tesElement.scrollTop;
+   *   }
+   * };
+   */
+
+  /*
+   * useEffect(() => {
+   *   handleScroll();
+   */
+
+  /*
+   *   const tesElement = tesElementRef.current;
+   *   tesElement?.addEventListener('scroll', handleScroll);
+   */
+
+  /*
+   *   return () => {
+   *     tesElement?.removeEventListener('scroll', handleScroll);
+   *   };
+   * }, []);
+   */
 
   useEffect(() => {
     const param = {
@@ -369,155 +324,51 @@ const HalamanResto: PageComponent = () => {
     };
 
     dispatch(ChannelCommand.getCollections(param, token || ''));
+
     const paramMetadata = {
       after: '',
       channel: 'makan',
       filterKey: 'recomendation',
       filterValue: 'true',
-      first: 100
+      first: 10
     };
 
     dispatch(
       ChannelCommand.getCollectionsbyMetadata(paramMetadata, token || '')
     );
 
-    // Const checkoutIdFromStorage = sessionStorage.getItem('checkoutId');
-    if (checkoutIdFromStorage !== null) {
+    const emailUser = 'ridwan.azis@navcore.com';
+    const paramChekoutList = {
+      channel: channelName,
+      customer: emailUser
+    };
+
+    if (emailUser) {
       dispatch(
-        OrderCommand.getCheckoutDetails(checkoutIdFromStorage, token || '')
+        ChannelCommand.getCheckoutList(paramChekoutList, token || '')
       );
     }
 
-    dispatch(ChannelCommand.getChannelDetail(channelId, token || ''));
-    dispatch(RatingCommand.RatingLoad(channelId)).catch((err: unknown) => {
-      console.error(err);
-    });
+    if (channelId) {
+      dispatch(ChannelCommand.getChannelDetail(channelId, token || ''));
+
+      const dummyId = 'Q2hhbm5lbDo0';
+
+      dispatch(RatingCommand.RatingLoad(dummyId)).catch((err: unknown) => {
+        console.error(err);
+      });
+    }
 
     return () => {
       dispatch(RatingCommand.RatingClear());
     };
   }, [dispatch, token]);
 
-  useEffect(() => {
-    const collectionIds = (store?.halamanResto?.productListOutput?.data || [])
-      .filter((category) => category.products.totalCount > 0)
-      .map((category) => ({
-        id: category.id.toString(),
-        name: category.name
-      }));
-
-    setColIds(collectionIds);
-
-    const colIdsOnly = colIds.map((colObj) => colObj.id);
-    if (colIds.length > 0) {
-      const paramCollection = {
-        after: '',
-        channel: 'makan',
-        collection: colIdsOnly,
-        direction: 'ASC',
-        field: 'NAME',
-        first: 100
-      };
-
-      dispatch(
-        ChannelCommand.getproductbyCollection(paramCollection, token || '')
-      );
-    }
-  }, [store?.halamanResto?.productListOutput?.data]);
-
-  useEffect(() => {
-    if (store?.halamanResto?.productByCollectionsOutput) {
-      const linesUpdate = Array.from(
-        { length: store?.halamanResto?.productByCollectionsOutput.totalCount },
-        (_, index) => {
-          const matchingColId = colIds.find((colId) => store?.halamanResto?.productByCollectionsOutput?.data[
-            index
-          ]?.collections.some((collection) => collection.id === colId.id));
-
-          const colectionIds = matchingColId?.id || '';
-          const targetId = matchingColId
-            ? store?.halamanResto?.productByCollectionsOutput?.data[index]
-              ?.variants[0].id || ''
-            : '';
-          const matchingProduct =
-            store?.halamanResto?.productByCollectionsOutput?.data.find(
-              (product) => product.variants[0].id === targetId
-            );
-
-          const productIds =
-            store?.halamanResto?.productByCollectionsOutput?.data[index].id ||
-            '';
-          const defaultPrice =
-            matchingProduct?.pricing?.priceRange?.start?.net?.amount || 0;
-
-          const defaultName = matchingProduct?.name || '';
-          const defaultThumbnail = matchingProduct?.thumbnail.url || '';
-          const defaultAvailableforPurchase =
-            matchingProduct?.channelListings[0]?.isAvailableForPurchase ||
-            false;
-
-          const initialQuantity =
-            store?.order?.checkoutDetails?.data?.checkout?.lines &&
-            store.order.checkoutDetails.data.checkout &&
-            store.order.checkoutDetails.data.checkout.lines &&
-            store.order.checkoutDetails.data.checkout.lines.length > 0
-              ? store.order.checkoutDetails.data.checkout.lines.find(
-                (line) => line.variant.id === targetId
-              )?.quantity || 0
-              : 0;
-
-          const initialLineId =
-            store?.order?.checkoutDetails?.data?.checkout?.lines &&
-            store.order.checkoutDetails.data.checkout.lines.length > 0
-              ? store.order.checkoutDetails.data.checkout.lines.find(
-                (line) => line?.variant?.id === targetId
-              )?.id || ''
-              : '';
-          const initialNote =
-            store?.order?.checkoutDetails?.data?.checkout?.lines &&
-            store.order.checkoutDetails.data.checkout.lines.length > 0
-              ? store.order.checkoutDetails.data.checkout.lines.find(
-                (line) => line.variant.id === targetId
-              )?.metafields?.note || ''
-              : '';
-
-          return {
-            ...DefaultLines,
-            variantId: targetId,
-            price: String(defaultPrice),
-            quantity: initialQuantity,
-            lineId: initialLineId,
-            note: initialNote,
-            colectionId: colectionIds,
-            productId: productIds,
-            thumbnail: defaultThumbnail,
-            name: defaultName,
-            isAvailableForPurchase: defaultAvailableforPurchase
-          };
-        }
-      );
-
-      setFormData({ ...formData, lines: linesUpdate });
-    }
-  }, [
-    store?.halamanResto?.productByCollectionsOutput,
-    store?.order?.checkoutDetails?.data?.checkout
-  ]);
-
-  useEffect(() => {
-    const initialTotalAmount = calculateTotalAmount(formData.lines);
-    const initialTotalItems = calculateTotalItems(formData.lines);
-
-    setTotalAmount(initialTotalAmount);
-    setTotalItems(initialTotalItems);
-  }, [formData]);
-
   const scrollToKategoriMenu = (event: SelectChangeEvent<string>) => {
     const selectedCategory = event.target.value as string;
+    const listMenuElement = document.getElementById(selectedCategory);
 
-    const footerElement = document.getElementById('tes');
-
-    footerElement?.scrollIntoView({ behavior: 'smooth' });
+    listMenuElement?.scrollIntoView({ behavior: 'smooth' });
     setSelectedValue(selectedCategory);
   };
 
@@ -531,10 +382,12 @@ const HalamanResto: PageComponent = () => {
     }
   }, [isLoading, showAlert]);
 
+  console.log('MAINPAGESTORE', store);
+
   return (
     <>
       <div>
-        <Toolbar sx={{ backgroundColor: '#D5ECFE', paddingInline: '1rem' }}>
+        <Toolbar sx={{ backgroundColor: '#D5ECFE', paddingInline: '1rem', position: 'fixed', top: 0, left: 0, zIndex: 100 }}>
           <IconButton
             aria-label="back"
             color="default"
@@ -542,13 +395,14 @@ const HalamanResto: PageComponent = () => {
             size="large"
             sx={{ mr: -2, marginTop: '0.2rem' }}
           >
-            <ArrowBackFilled />
+            <ArrowBackFilled onClick={handleBack} />
           </IconButton>
           <Box
             sx={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between'
+              justifyContent: 'space-between',
+              marginLeft: '0.5rem'
             }}
           >
             <FormControl size="small" sx={{ backgroundColor: '#D5ECFE' }}>
@@ -595,7 +449,7 @@ const HalamanResto: PageComponent = () => {
           </Box>
         </Toolbar>
 
-        <Box sx={{ margin: '0.5rem 0.5rem', paddingInline: '1rem' }}>
+        <Box sx={{ margin: '0.5rem 0.5rem', paddingInline: '1rem', marginTop: '5rem', marginBottom: '7rem' }}>
           {filteredJadwal.map((resto: RestoSchedule) => {
             const currentHour = new Date().getHours();
 
@@ -661,7 +515,8 @@ const HalamanResto: PageComponent = () => {
                       sx={{
                         alignItems: 'center',
                         display: 'flex',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        marginLeft: '0.25rem'
                       }}
                       xs={2}
                     >
@@ -688,7 +543,7 @@ const HalamanResto: PageComponent = () => {
                           ? (
                           <Typography
                             color="neutral-70"
-                            sx={{ marginBottom: '0.125' }}
+                            sx={{ marginTop: '0.5rem', fontSize: '0.75rem', marginLeft: '0.25rem' }}
                             variant="body2"
                           >
                             Verified by TokoRumahan
@@ -696,7 +551,7 @@ const HalamanResto: PageComponent = () => {
                           )
                           : null}
                         <Typography
-                          sx={{ fontWeight: 'bold', textAlign: 'start' }}
+                          sx={{ fontWeight: 'bold', textAlign: 'start', marginLeft: '0.25rem', marginTop: '0.5rem' }}
                           variant="h4"
                         >
                           {
@@ -754,6 +609,8 @@ const HalamanResto: PageComponent = () => {
             );
           })}
 
+{store?.rating?.data && store?.rating?.data.length > 0
+  ? <>
           <Grid
             container={true}
             justifyContent="space-between"
@@ -784,6 +641,8 @@ const HalamanResto: PageComponent = () => {
               <Button
                 size="small"
                 sx={{
+                  border: 'none',
+                  fontWeight: 'bold',
                   paddingInline: '0.5rem',
                   backgroundColor: '#FBD600',
                   fontSize: '0.75rem',
@@ -792,7 +651,7 @@ const HalamanResto: PageComponent = () => {
                 variant="outlined"
                 onClick={handleLihatSemuaClick}
               >
-                Lihat Semua
+                Lihat semua
               </Button>
             </Grid>
           </Grid>
@@ -800,12 +659,12 @@ const HalamanResto: PageComponent = () => {
             <Card
               sx={{
                 borderColor: 'transparent',
-                borderRadius: 0,
+                borderRadius: '10px',
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
                 marginBottom: '1rem',
                 marginInline: '-1.5rem',
                 position: 'relative',
-                zIndex: 100
+                zIndex: 20
               }}
             >
               <Box sx={{ overflowX: 'auto' }}>
@@ -823,7 +682,6 @@ const HalamanResto: PageComponent = () => {
                           key={obj.id}
                           sx={{
                             borderColor: 'transparent',
-                            marginBottom: '1rem',
                             padding: '0.5rem'
                           }}
                         >
@@ -833,7 +691,8 @@ const HalamanResto: PageComponent = () => {
                               sx={{
                                 alignItems: 'center',
                                 display: 'flex',
-                                justifyContent: 'center'
+                                justifyContent: 'center',
+                                marginLeft: '-0.25rem'
                               }}
                               xs={2}
                             >
@@ -847,7 +706,8 @@ const HalamanResto: PageComponent = () => {
                                 alignItems: 'center',
                                 display: 'flex',
                                 justifyContent: 'start',
-                                paddingTop: '0rem!important'
+                                paddingTop: '0rem!important',
+                                marginTop: '0.85rem'
                               }}
                               xs={8}
                             >
@@ -855,25 +715,32 @@ const HalamanResto: PageComponent = () => {
                                 <Typography
                                   sx={{
                                     fontWeight: 'bold',
-                                    textAlign: 'start',
-                                    marginLeft: '0.5rem'
+                                    textAlign: 'start'
                                   }}
                                   variant="h6"
                                 >
                                   {obj.customerId}
                                 </Typography>
-                                <Box sx={{ marginLeft: '0.5rem' }}>
+                                <Box sx={{ marginTop: '0.25rem' }}>
                                   {obj.rating
                                     ? <Rating rating={obj.rating.toString()} />
                                     : null}
                                 </Box>
                               </Box>
                             </Grid>
-                            <Box sx={{ marginTop: '10px', width: '80%' }}>
+                            <Box sx={{ marginTop: '10px', width: '83%', paddingInline: '1rem', marginLeft: '-0.5rem' }}>
                               <TextField
+                                InputProps={{
+                                  readOnly: true,
+                                  style: { maxHeight: 'none' }
+                                }}
                                 fullWidth={true}
-                                placeholder={obj.review}
+                                multiline={true}
                                 size="small"
+                                sx={{
+                                  color: 'black'
+                                }}
+                                value={obj.review}
                                 variant="outlined" />
                             </Box>
                           </Grid>
@@ -885,6 +752,9 @@ const HalamanResto: PageComponent = () => {
               </Box>
             </Card>
           </Box>
+    </>
+  : null}
+
           <Grid container={true} justifyContent="center">
             {isLoading
               ? (
@@ -905,198 +775,8 @@ const HalamanResto: PageComponent = () => {
           >
             Menu
           </Typography>
-          {colIds.map((colId, colIndex) => (
-            <Fragment key={colIndex}>
-              <Typography
-                id="tes"
-                sx={{
-                  fontWeight: 'medium',
-                  textAlign: 'start',
-                  marginBottom: '0.25rem'
-                }}
-                variant="h5"
-              >
-                {colId.name}
-              </Typography>
-              {formData?.lines
-                ?.filter((obj) => (Array.isArray(obj.colectionId)
-                  ? obj.colectionId.some(
-                    (collection) => collection === colId.id
-                  )
-                  : true))
-                .map((obj) => {
-                  return (
-                    <div key={obj.productId} style={{ marginBottom: '0.5rem' }}>
-                      <Card sx={{ paddingInline: '0.5rem' }}>
-                        <Grid
-                          container={true}
-                          spacing={2}
-                          sx={{
-                            alignItems: 'center',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            marginBottom: '0.5rem'
-                          }}
-                        >
-                          <Grid item={true} xs={3}>
-                            <div
-                              style={{
-                                width: '100%',
-                                height: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}
-                            >
-                              <img
-                                alt={obj.name}
-                                src={obj.thumbnail}
-                                style={{
-                                  maxHeight: '100%',
-                                  maxWidth: '100%',
-                                  marginTop: '0.5rem',
-                                  borderRadius: '8px'
-                                }} />
-                            </div>
-                          </Grid>
-                          <Grid
-                            item={true}
-                            sx={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              justifyContent: 'space-between'
-                            }}
-                            xs={9}
-                          >
-                            <Box
-                              sx={{
-                                marginTop: obj.isAvailableForPurchase
-                                  ? '2.5rem'
-                                  : '1rem',
-                                alignItems: 'center',
-                                display: 'flex',
-                                justifyContent: 'space-between'
-                              }}
-                              onClick={() => handleCardClick(
-                                obj?.variantId,
-                                obj?.productId || ''
-                              )}
-                            >
-                              <Typography
-                                sx={{
-                                  fontWeight: 'bold',
-                                  textAlign: 'start',
-                                  marginTop: '-2rem',
-                                  color: 'black'
-                                }}
-                                variant="body2"
-                              >
-                                {obj.name}
-                              </Typography>
-                            </Box>
-                            {!obj.isAvailableForPurchase && (
-                              <Typography
-                                sx={{
-                                  fontWeight: 'bold',
-                                  textAlign: 'start',
-                                  color: 'red'
-                                }}
-                                variant="body2"
-                              >
-                                Persediaan Habis
-                              </Typography>
-                            )}
-                            {obj.isAvailableForPurchase
-                              ? (
-                              <div>
-                                <Grid
-                                  container={true}
-                                  justifyContent="space-between"
-                                  spacing={2}
-                                  sx={{ marginBottom: '1rem' }}
-                                >
-                                  <Grid item={true} xs={6}>
-                                    <Typography
-                                      sx={{
-                                        fontWeight: 'bold',
-                                        textAlign: 'start',
-                                        color: '#1f66d0'
-                                      }}
-                                      variant="body2"
-                                    >
-                                      Rp. {obj?.price?.toLocaleString()}
-                                    </Typography>
-                                  </Grid>
-                                  <Grid item={true} xs={6}>
-                                    <Typography
-                                      sx={{
-                                        fontWeight: 'medium',
-                                        marginLeft: '2.5rem'
-                                      }}
-                                      variant="body2"
-                                    >
-                                      Terjual 4
-                                    </Typography>
-                                  </Grid>
-                                </Grid>
-                                <Box
-                                  sx={{
-                                    alignItems: 'center',
-                                    display: 'flex',
-                                    justifyContent: 'end',
-                                    marginTop: '-1rem'
-                                  }}
-                                >
-                                  <Grid
-                                    item={true}
-                                    sx={{
-                                      display: 'flex',
-                                      justifyContent: 'end'
-                                    }}
-                                    xs="auto"
-                                  >
-                                    <IconButton
-                                      aria-label="min"
-                                      size="small"
-                                      sx={{ color: 'black' }}
-                                      onClick={() => handleDecrement(obj.variantId)}
-                                    >
-                                      <IndeterminateCheckBoxFilled size={24} />
-                                    </IconButton>
-                                    <Typography
-                                      key={obj.productId}
-                                      style={{
-                                        display: 'inline-block',
-                                        margin: '0 0.5rem',
-                                        marginTop: '0.5rem'
-                                      }}
-                                      variant="body2"
-                                    >
-                                      {obj?.quantity || 0}
-                                    </Typography>
-
-                                    <IconButton
-                                      aria-label="plus"
-                                      size="small"
-                                      sx={{ color: 'black' }}
-                                      onClick={() => handleIncrement(obj.variantId)}
-                                    >
-                                      <AddBoxFilled size={24} />
-                                    </IconButton>
-                                  </Grid>
-                                </Box>
-                              </div>
-                              )
-                              : null}
-                          </Grid>
-                        </Grid>
-                      </Card>
-                    </div>
-                  );
-                })}
-            </Fragment>
-          ))}
-
+          <ListMenuRecomendation />
+          <ListMenu scrollToKategoriMenu={scrollToKategoriMenu} />
           {!checkoutIdFromStorage &&
             <FloatingShoppingButton onClick={handleShoppingButtonClick} />}
         </Box>
@@ -1105,13 +785,15 @@ const HalamanResto: PageComponent = () => {
         sx={{
           borderRadius: '12px 12px 0 0',
           bottom: 0,
+          left: 0,
           marginTop: '1rem',
           paddingInline: '1rem',
-          position: 'sticky'
+          position: 'fixed',
+          width: '100%'
         }}
       >
         <Typography
-          sx={{ color: '#1F66D0', fontWeight: 'medium', textAlign: 'start' }}
+          sx={{ color: '#1F66D0', fontWeight: 'medium', textAlign: 'start', marginTop: '0.5rem' }}
           variant="body2"
         >
           {totalItems} Item
@@ -1147,7 +829,7 @@ const HalamanResto: PageComponent = () => {
             justifyContent: 'space-between'
           }}
         >
-          <Button
+          {/* <Button
             color="primary"
             size="small"
             sx={{ textTransform: 'none', width: '20%', marginBottom: '0.5rem' }}
@@ -1165,11 +847,11 @@ const HalamanResto: PageComponent = () => {
               </Grid>
               <Grid item={true} />
             </Grid>
-          </Button>
+          </Button> */}
           <Button
             color="primary"
             size="medium"
-            sx={{ textTransform: 'none', width: '80%', marginBottom: '0.5rem' }}
+            sx={{ textTransform: 'none', width: '100%', marginBottom: '0.5rem' }}
             variant="contained"
             onClick={handleLanjutPembayaranClick}
           >
@@ -1184,5 +866,4 @@ const HalamanResto: PageComponent = () => {
 HalamanResto.displayName = 'HalamanResto';
 
 export default HalamanResto;
-export { DUMMY_MENU_RECOMDATION, DUMMY_RESTO };
 export type { RestoItem };
