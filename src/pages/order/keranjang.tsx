@@ -30,11 +30,11 @@ const SESSION_STORAGE_CHECKOUT = 'CheckoutId';
 // NOTES: Edit keranjang harus di adjust dari segi logicnya
 
 const Keranjang: PageComponent = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const { auth } = useAuth();
   const location = useLocation();
   const { state } = location;
-  const theme = useTheme();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
   const [searchParams] = useSearchParams();
   const action = searchParams.get('action');
@@ -372,8 +372,8 @@ const Keranjang: PageComponent = () => {
                   {action !== 'edit'
                     ? (
                     <Button
-                      color="primary"
                       fullWidth={true}
+                      sx={{ background: theme.palette.primary.gradient }}
                       variant="contained"
                       onClick={handleCheckout}
                     >

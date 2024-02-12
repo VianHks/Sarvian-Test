@@ -33,12 +33,7 @@ import {
 } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
 
-import {
-  Card,
-  CardContent,
-  Grid,
-  Typography
-} from '@components/material.js';
+import { Card, CardContent, Grid, Typography } from '@components/material.js';
 
 import Bakar from '@assets/images/Bakar.png';
 import Bike from '@assets/images/Bike.svg';
@@ -76,18 +71,16 @@ interface DetailOrder {
 }
 
 interface PesananDataModel {
+  catatan: string
+  detailOrder: DetailOrder[]
+  restoFoto: string
   restoId: number
   restoName: string
-  restoFoto: string
-  detailOrder: DetailOrder[]
-  catatan: string
 }
 
 const DUMMY_PESANAN: PesananDataModel[] = [
   {
-    restoId: 1,
-    restoName: 'Resto Bundo Gilo',
-    restoFoto: `${MieBaso}`,
+    catatan: 'Baso nya jangan sampai dingin',
     detailOrder: [
       {
         count: 0,
@@ -104,12 +97,12 @@ const DUMMY_PESANAN: PesananDataModel[] = [
         title: 'Baso Campur'
       }
     ],
-    catatan: 'Baso nya jangan sampai dingin'
+    restoFoto: `${MieBaso}`,
+    restoId: 1,
+    restoName: 'Resto Bundo Gilo'
   },
   {
-    restoId: 2,
-    restoName: 'Cake Mamah',
-    restoFoto: `${TelponLogo}`,
+    catatan: 'Rotinya Harus anget',
     detailOrder: [
       {
         count: 0,
@@ -126,12 +119,12 @@ const DUMMY_PESANAN: PesananDataModel[] = [
         title: 'Roti isi'
       }
     ],
-    catatan: 'Rotinya Harus anget'
+    restoFoto: `${TelponLogo}`,
+    restoId: 2,
+    restoName: 'Cake Mamah'
   },
   {
-    restoId: 3,
-    restoName: 'HolyWings',
-    restoFoto: `${TokoHw}`,
+    catatan: 'Vodkanya Yang Crystal',
     detailOrder: [
       {
         count: 0,
@@ -148,14 +141,14 @@ const DUMMY_PESANAN: PesananDataModel[] = [
         title: 'Chicken Wings HW'
       }
     ],
-    catatan: 'Vodkanya Yang Crystal'
+    restoFoto: `${TokoHw}`,
+    restoId: 3,
+    restoName: 'HolyWings'
   }
 ];
 
 const DEFAULT_PESANAN: PesananDataModel = {
-  restoId: 0,
-  restoName: '',
-  restoFoto: '',
+  catatan: '',
   detailOrder: [
     {
       count: 0,
@@ -165,8 +158,9 @@ const DEFAULT_PESANAN: PesananDataModel = {
       title: ''
     }
   ],
-  catatan: ''
-
+  restoFoto: '',
+  restoId: 0,
+  restoName: ''
 };
 
 const drawerBleeding = 120;
@@ -402,183 +396,189 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
         Pesanan Kamu
       </Typography>
       {DUMMY_PESANAN.map((order, orderIndex) => (
-      <Accordion key={order.restoId} sx={{ marginBottom: '1rem' }}>
-        <AccordionSummary
-          aria-controls="panel1a-content"
-          expandIcon={<KeyboardArrowDownFilled />}
-          id="panel1a-header"
-          sx={{ padding: '0.5rem, 1rem, 0.5rem, 1rem!important' }}
-        >
-          <Box
-            sx={{
-              alignItems: 'center',
-              display: 'flex',
-              gap: '0.5rem',
-              justifyContent: 'start'
-            }}
+        <Accordion key={order.restoId} sx={{ marginBottom: '1rem' }}>
+          <AccordionSummary
+            aria-controls="panel1a-content"
+            expandIcon={<KeyboardArrowDownFilled />}
+            id="panel1a-header"
+            sx={{ padding: '0.5rem, 1rem, 0.5rem, 1rem!important' }}
           >
-            <Avatar src={order.restoFoto} sx={{ height: '30px', width: '30px' }} />
-            <Typography sx={{ fontWeight: 'bold' }} variant="body1">
-              {order.restoName}
-            </Typography>
-          </Box>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Grid
-            container={true}
-            spacing={5}
-            sx={{
-              alignItems: 'center',
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginBottom: '1rem'
-            }}
-          >
-            <Grid item={true} xs={6}>
-              <Button
-                color="primary"
-                fullWidth={true}
-                size="small"
-                variant="outlined"
-              >
-                Ganti Resto
-              </Button>
-            </Grid>
-            <Grid item={true} xs={6}>
-              <Button
-                color="primary"
-                fullWidth={true}
-                size="small"
-                sx={{ paddingInline: '0.5rem' }}
-                variant="outlined"
-              >
-                Tambah Pesanan
-              </Button>
-            </Grid>
-          </Grid>
-          {order.detailOrder.map((obj, index) => (
-        <div key={index} style={{ marginBottom: '1rem' }}>
-          <Grid
-            container={true}
-            spacing={2}
-            sx={{
-              alignItems: 'center',
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginBottom: '0.5rem'
-            }}
-          >
-            <Grid item={true} xs={3}>
-              <div
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden'
-                }}
-              >
-                <img
-                  alt={obj.title}
-                  src={obj.foto}
-                  style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'cover' }} />
-              </div>
-            </Grid>
-            <Grid
-              item={true}
+            <Box
               sx={{
+                alignItems: 'center',
                 display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between'
+                gap: '0.5rem',
+                justifyContent: 'start'
               }}
-              xs={9}
             >
-              <Box
-                sx={{
-                  alignItems: 'center',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginBottom: '1rem'
-                }}
-              >
-                <Typography
-                  sx={{ fontWeight: 'bold', textAlign: 'start' }}
-                  variant="body2"
-                >
-                  {obj.title}
-                </Typography>
-                <Button color="primary" size="small" variant="text">
-                  Edit
-                </Button>
-              </Box>
-              <Box
-                sx={{
-                  alignItems: 'center',
-                  display: 'flex',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <Typography
-                  sx={{ fontWeight: 'bold', textAlign: 'start' }}
-                  variant="body2"
-                >
-                  Rp. {obj.harga.toLocaleString('id-ID')}
-                </Typography>
-                <Box sx={{ textAlign: 'center' }}>
-                  <IconButton
-                    aria-label="min"
-                    size="small"
-                    onClick={() => handleDecrement(orderIndex, index)}
-                  >
-                    <IndeterminateCheckBoxFilled size={24} />
-                  </IconButton>
-                  <Typography
-                    style={{
-                      display: 'inline-block',
-                      margin: '0 0.5rem'
-                    }}
-                    variant="body2"
-                  >
-                    {obj.count}
-                  </Typography>
-                  <IconButton
-                    aria-label="plus"
-                    size="small"
-                    onClick={() => handleIncrement(orderIndex, index)}
-                  >
-                    <AddBoxFilled size={24} />
-                  </IconButton>
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
-          <Box sx={{ marginBottom: '1rem' }}>
-            <TextField
-              fullWidth={true}
-              id="detail"
-              size="small"
-              value={obj.detail}
-              variant="outlined" />
-          </Box>
-        </div>
-          ))}
-              <Typography
-                sx={{ fontWeight: 'bold', marginBottom: '0.5rem' }}
-                variant="body1"
-              >
-                Catatan buat Resto:
+              <Avatar
+                src={order.restoFoto}
+                sx={{ height: '30px', width: '30px' }} />
+              <Typography sx={{ fontWeight: 'bold' }} variant="body1">
+                {order.restoName}
               </Typography>
-              <Box sx={{ marginBottom: '1rem' }}>
-                <TextField
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Grid
+              container={true}
+              spacing={5}
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '1rem'
+              }}
+            >
+              <Grid item={true} xs={6}>
+                <Button
+                  color="primary"
                   fullWidth={true}
-                  id="detail"
                   size="small"
-                  value={order.catatan}
-                  variant="outlined" />
-              </Box>
-        </AccordionDetails>
-      </Accordion>
+                  variant="outlined"
+                >
+                  Ganti Resto
+                </Button>
+              </Grid>
+              <Grid item={true} xs={6}>
+                <Button
+                  color="primary"
+                  fullWidth={true}
+                  size="small"
+                  sx={{ paddingInline: '0.5rem' }}
+                  variant="outlined"
+                >
+                  Tambah Pesanan
+                </Button>
+              </Grid>
+            </Grid>
+            {order.detailOrder.map((obj, index) => (
+              <div key={index} style={{ marginBottom: '1rem' }}>
+                <Grid
+                  container={true}
+                  spacing={2}
+                  sx={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginBottom: '0.5rem'
+                  }}
+                >
+                  <Grid item={true} xs={3}>
+                    <div
+                      style={{
+                        alignItems: 'center',
+                        display: 'flex',
+                        height: '100%',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                        width: '100%'
+                      }}
+                    >
+                      <img
+                        alt={obj.title}
+                        src={obj.foto}
+                        style={{
+                          maxHeight: '100%',
+                          maxWidth: '100%',
+                          objectFit: 'cover'
+                        }} />
+                    </div>
+                  </Grid>
+                  <Grid
+                    item={true}
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between'
+                    }}
+                    xs={9}
+                  >
+                    <Box
+                      sx={{
+                        alignItems: 'center',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        marginBottom: '1rem'
+                      }}
+                    >
+                      <Typography
+                        sx={{ fontWeight: 'bold', textAlign: 'start' }}
+                        variant="body2"
+                      >
+                        {obj.title}
+                      </Typography>
+                      <Button color="primary" size="small" variant="text">
+                        Edit
+                      </Button>
+                    </Box>
+                    <Box
+                      sx={{
+                        alignItems: 'center',
+                        display: 'flex',
+                        justifyContent: 'space-between'
+                      }}
+                    >
+                      <Typography
+                        sx={{ fontWeight: 'bold', textAlign: 'start' }}
+                        variant="body2"
+                      >
+                        Rp. {obj.harga.toLocaleString('id-ID')}
+                      </Typography>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <IconButton
+                          aria-label="min"
+                          size="small"
+                          onClick={() => handleDecrement(orderIndex, index)}
+                        >
+                          <IndeterminateCheckBoxFilled size={24} />
+                        </IconButton>
+                        <Typography
+                          style={{
+                            display: 'inline-block',
+                            margin: '0 0.5rem'
+                          }}
+                          variant="body2"
+                        >
+                          {obj.count}
+                        </Typography>
+                        <IconButton
+                          aria-label="plus"
+                          size="small"
+                          onClick={() => handleIncrement(orderIndex, index)}
+                        >
+                          <AddBoxFilled size={24} />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                  </Grid>
+                </Grid>
+                <Box sx={{ marginBottom: '1rem' }}>
+                  <TextField
+                    fullWidth={true}
+                    id="detail"
+                    size="small"
+                    value={obj.detail}
+                    variant="outlined" />
+                </Box>
+              </div>
+            ))}
+            <Typography
+              sx={{ fontWeight: 'bold', marginBottom: '0.5rem' }}
+              variant="body1"
+            >
+              Catatan buat Resto:
+            </Typography>
+            <Box sx={{ marginBottom: '1rem' }}>
+              <TextField
+                fullWidth={true}
+                id="detail"
+                size="small"
+                value={order.catatan}
+                variant="outlined" />
+            </Box>
+          </AccordionDetails>
+        </Accordion>
       ))}
       <Typography
         sx={{ fontWeight: 'bold', marginBottom: '0.5rem', marginTop: '1rem' }}
@@ -777,7 +777,7 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
           </Box>
         </StyledBox>
       </SwipeableDrawer>
-
+      {/*
       <Global
         styles={{
           '.MuiDrawer-root > .MuiPaper-root': {
@@ -814,8 +814,8 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1rem 1rem 1rem' }}>
           <Button
-            color="primary"
             fullWidth={true}
+            sx={{ background: theme.palette.primary.gradient }}
             variant="contained"
             onClick={!isCheckout ? toggleOpenModalCheckout : () => navigate('./order-in-progress')}
           >
@@ -823,7 +823,62 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
           </Button>
           </Box>
         </StyledBox>
-      </SwipeableDrawer>
+      </SwipeableDrawer> */}
+
+      <div
+        style={{
+          backgroundColor: '#fff',
+          bottom: 0,
+          boxShadow: '0px -5px 15px rgba(0, 0, 0, 0.1)',
+          display: 'grid',
+          flexDirection: 'row',
+          marginInline: '-1.5rem',
+          position: 'fixed',
+          textAlign: 'center',
+          width: '100vw'
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            padding: '1rem 1rem 0rem 1rem'
+          }}
+        >
+          <Typography
+            sx={{ fontWeight: 'bold' }}
+            variant="h5"
+          >
+            Total Pembayaran
+          </Typography>
+          <Typography
+            sx={{ fontWeight: 'bold' }}
+            variant="h5"
+          >
+            Rp. {menuCost > 0 ? totalmenuCost.toLocaleString('id-ID') : '0'}
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            padding: '1rem 1rem 1rem 1rem'
+          }}
+        >
+          <Button
+            fullWidth={true}
+            sx={{ background: theme.palette.primary.gradient, padding: '0.5rem' }}
+            variant="contained"
+            onClick={
+              !isCheckout
+                ? toggleOpenModalCheckout
+                : () => navigate('./order-in-progress')
+            }
+          >
+            {isCheckout ? 'Checkout' : 'Proses Pesanan'}
+          </Button>
+        </Box>
+      </div>
 
       <Global
         styles={{
@@ -863,7 +918,14 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
               Pilih Waktu Penyiapan Pesanan
             </Typography>
             <hr />
-            <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', marginTop: '3rem' }}>
+            <Box
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                justifyContent: 'center',
+                marginTop: '3rem'
+              }}
+            >
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <MobileTimePicker
                   value={selectedTime}
@@ -871,13 +933,28 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
               </LocalizationProvider>
             </Box>
           </Box>
-          <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center' }}>
-            <Typography sx={{ textAlign: 'center' }}>Pesanan kamu akan disiapkan pada pukul <br /> {selectedTime.format('HH:mm')}</Typography>
+          <Box
+            sx={{
+              alignItems: 'center',
+              display: 'flex',
+              justifyContent: 'center'
+            }}
+          >
+            <Typography sx={{ textAlign: 'center' }}>
+              Pesanan kamu akan disiapkan pada pukul <br />{' '}
+              {selectedTime.format('HH:mm')}
+            </Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1rem 1rem 1rem' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: '1rem 1rem 1rem 1rem'
+            }}
+          >
             <Button
-              color="primary"
               fullWidth={true}
+              sx={{ background: theme.palette.primary.gradient }}
               variant="contained"
               onClick={handlePilihButtonClick}
             >
@@ -896,7 +973,12 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
           <Typography
             component="h3"
             id="modal-modal-title"
-            sx={{ color: `${theme?.palette?.error}`, fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'center' }}
+            sx={{
+              color: `${theme?.palette?.error}`,
+              fontWeight: 'bold',
+              marginBottom: '0.5rem',
+              textAlign: 'center'
+            }}
             variant="h3"
           >
             Udah yakin dengan pesananmu?
@@ -908,11 +990,17 @@ const CheckoutMultiOrder: PageComponent = (props: Props) => {
           >
             Sebelum pesan, pastiin pesananmu udah bener-bener sesuai, ya!
           </Typography>
-          <Box gap={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <Box
+            gap={2}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}
+          >
             <Button
-              color="primary"
               size="medium"
-              sx={{ width: '100%' }}
+              sx={{ background: theme.palette.primary.gradient, width: '100%' }}
               variant="contained"
               onClick={handleConfirmCheckout}
             >
