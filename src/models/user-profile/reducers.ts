@@ -4,7 +4,7 @@ import {  UserActionType   } from './types';
 
 import  profilePicture  from '@assets/images/girl_picture.jpg';
 
-import type { UserAction, UserModel, UserProfileDataModel } from './types';
+import type { PhotoEditorModel, UserAction, UserModel, UserProfileDataModel } from './types';
 
 const DEFAULT_USER_INFO: UserProfileDataModel = {
   id: '1',
@@ -18,13 +18,24 @@ const DEFAULT_USER_INFO: UserProfileDataModel = {
   verified_phone: false
 };
 
+const DEFAULT_PHOTOEDITOR: PhotoEditorModel = {
+  file: null,
+  fileName: '',
+  size: 0,
+  typeFile: '',
+  base64Image: ''
+};
+
 export const UserDefault: UserModel = {
-  profile: DEFAULT_USER_INFO
+  profile: DEFAULT_USER_INFO,
+  photoeditor: DEFAULT_PHOTOEDITOR
 };
 
 export const UsersReducer = (state: UserModel = UserDefault, action: UserAction): UserModel => {
   switch (action.type) {
     case UserActionType.GetUserDetail:
+      return { ...state, ...action.data };
+    case UserActionType.Photoeditor:
       return { ...state, ...action.data };
 
     default:
@@ -50,6 +61,7 @@ export const UserCommand = {
       });
     };
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   updateProfileInfo: (payload: unknown): Promise<string | undefined> => {
     // CreateTicket: async (payload: unknown, token: string): Promise<string | undefined> => {
     return Promise.resolve(payload).then(() => {
@@ -61,5 +73,31 @@ export const UserCommand = {
       return 'ok';
       // }
     });
+  },
+  updatePhotoEditorData: (imageData: PhotoEditorModel | null) => {
+    return (dispatch: TDispatch<UserAction>) => {
+      // Const updatedData: PhotoEditorModel[] = [];
+
+      const photoeditor: UserModel = {
+        photoeditor: imageData || DEFAULT_PHOTOEDITOR
+      };
+
+      dispatch({
+        data: photoeditor,
+        type: UserActionType.Photoeditor
+      });
+    };
+  },
+  deletePhotoEditorData: (imageData: PhotoEditorModel) => {
+    return (dispatch: TDispatch<UserAction>) => {
+      const photoeditor: UserModel = {
+        photoeditor: imageData
+      };
+
+      dispatch({
+        data: photoeditor,
+        type: UserActionType.PhotoeditorDelete
+      });
+    };
   }
 };

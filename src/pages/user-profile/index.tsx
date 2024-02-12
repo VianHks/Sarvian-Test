@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import type { ChangeEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { Check, ChevronRight, PowerSettingsNew } from '@mui/icons-material';
 import {
@@ -21,6 +22,7 @@ import {
   Typography,
   useTheme
 } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
 import {
   EditRound,
@@ -28,15 +30,36 @@ import {
 } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
 
+import type { CustSnackBarProps } from '@components/custom-component/snackbar';
 import { useCommand, useStore } from '@models/store';
+import type { PhotoEditorModel } from '@models/user-profile/types';
+
+import { toBase64 } from './validatesize';
+
+import iconPhoto from '@assets/images/unggahfoto.svg';
+
+const VisuallyHiddenInput = styled('input')({
+  bottom: 0,
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  left: 0,
+  overflow: 'hidden',
+  position: 'absolute',
+  whiteSpace: 'nowrap',
+  width: 1,
+  borderRadius: '1rem'
+});
 
 interface UpdateUserProfile {
   [key: string]: unknown
   name: string
+  // profile_picture: string | null
 }
 
 const DEFAULT_USER_DATA: UpdateUserProfile = {
   name: ''
+  // profile_picture: ''
 };
 
 const Profile: PageComponent = () => {
@@ -44,16 +67,23 @@ const Profile: PageComponent = () => {
   const command = useCommand((cmd) => cmd);
   const navigate = useNavigate();
   const [store, dispatch] = useStore((state) => state.profile);
-  const [isEditProfile, setIsEditProfile] = useState(false);
+  const { action } = useParams();
+
   const [formData, setFormData] = useState<UpdateUserProfile>(DEFAULT_USER_DATA);
+
+  const [isFail, setIsFail] = useState(false);
+  const [isEditProfile, setIsEditProfile] = useState(false);
+
   const [modalCloseProfileOpen, setModalCloseProfileOpen] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const [originalName, setOriginalName] = useState<string>('');
-  const [isFail, setIsFail] = useState(false);
+  const [showSuccessAlertPicture, setShowSuccessAlertPicture] = useState(false);
 
-  /*
-   *   Const fileInputRef = useRef<HTMLInputElement | null>(null);
-   */
+  const [originalName, setOriginalName] = useState<string>('');
+  const [selectedImages, setSelectedImages] = useState<(File | null)>(null);
+  const [base64Images, setBase64Images] = useState<string>('');
+  const [snackbarProps, setSnackbarProps] = useState<CustSnackBarProps | null>(null);
+
+  const fileInputRefs = useRef<(HTMLInputElement | null)>(null);
 
   const handleEditProfile = () => {
     setIsEditProfile(true);
@@ -68,9 +98,11 @@ const Profile: PageComponent = () => {
     } else {
       await command.profile.updateProfileInfo({
         name: formData.name
+        // Profile_picture: store?.photoeditor?.fileName
       }).then(() => {
         if (store?.profile) {
           store.profile.name = formData.name;
+          // Store.profile.profile_picture = store?.photoeditor?.fileName || null;
         }
 
         setIsFail(false);
@@ -81,9 +113,23 @@ const Profile: PageComponent = () => {
     setIsEditProfile(false);
   };
 
+  function getPreviewImageSrc(): string | undefined {
+    if (store?.photoeditor) {
+      const photoModel = store.photoeditor;
+      if (photoModel?.base64Image) {
+        // setShowSuccessAlertPicture(true);
+
+        return photoModel.base64Image;
+      }
+    }
+
+    return iconPhoto;
+  }
+
   useEffect(() => {
     const transformedProfile: UpdateUserProfile = {
       name: store?.profile?.name || formData.name
+      // profile_picture: store?.photoeditor?.fileName || null
     };
 
     setFormData(transformedProfile);
@@ -101,6 +147,41 @@ const Profile: PageComponent = () => {
       if (timer) clearTimeout(timer);
     };
   }, [showSuccessAlert]);
+
+  // useEffect(() => {
+  //   let timer: NodeJS.Timeout | null = null;
+  //   if (showSuccessAlertPicture) {
+  //     timer = setTimeout(() => {
+  //       setShowSuccessAlert(false);
+  //     }, 2000);
+  //   }
+
+  //   return () => {
+  //     if (timer) clearTimeout(timer);
+  //   };
+  // }, [showSuccessAlertPicture]);
+
+  useEffect(() => {
+    const storedFileInfo = store?.photoeditor;
+
+    if (storedFileInfo !== null && typeof storedFileInfo === 'object') {
+      const fileInfo = storedFileInfo;
+
+      const file = fileInfo !== null ? new File([''], fileInfo.fileName, { type: fileInfo.typeFile }) : null;
+
+      setSelectedImages(file);
+
+      const base64Image = fileInfo !== null ? fileInfo.base64Image : '';
+
+      setBase64Images(base64Image as string);
+    }
+  }, [store?.photoeditor]);
+
+  /*
+   * Const handleCloseSnackbar = () => {
+   *   setSnackbarProps(null);
+   * };
+   */
 
   const handleNavigateLocataion = () => {
     navigate('/location');
@@ -120,6 +201,71 @@ const Profile: PageComponent = () => {
 
   const handleCloseModal = () => {
     setModalCloseProfileOpen(false);
+  };
+
+  const handleButtonClick = () => {
+    if (fileInputRefs.current) {
+      fileInputRefs.current?.click();
+    }
+  };
+
+  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (file) {
+      /*
+       * If (file.size > 1024 * 1024) {
+       *   setSnackbarProps({
+       *     message: 'Gambar melebihi ukururan 1MB. Pastikan jika ukurannya kurang dari 1MB',
+       *     severity: 'warning'
+       *   });
+       */
+
+      /*
+       *   return;
+       * }
+       */
+
+      try {
+        const base64Image = await toBase64(file);
+
+        const newImage = file;
+
+        setSelectedImages(newImage);
+
+        setBase64Images(base64Image as string);
+
+        const updatedSelectedImages: PhotoEditorModel | null = selectedImages
+          ? {
+            ...selectedImages,
+            file: newImage,
+            fileName: newImage.name || '',
+            size: newImage.size || 0,
+            typeFile: newImage.type || '',
+            base64Image: base64Images || ''
+          }
+          : null;
+
+        // eslint-disable-next-line no-console
+        console.log(updatedSelectedImages);
+
+        dispatch(command.profile?.updatePhotoEditorData(updatedSelectedImages || null));
+
+        const imgPreview = document.getElementById(`imgPreview_0`) as HTMLImageElement | null;
+        if (imgPreview) {
+          imgPreview.src = base64Image as string;
+        }
+
+        navigate('/edit-photo');
+      } catch (error) {
+        setSnackbarProps({
+          message: 'Upload Gambar gagal',
+          severity: 'warning'
+        });
+
+        console.error(error);
+      }
+    }
   };
 
   /*
@@ -240,6 +386,7 @@ const Profile: PageComponent = () => {
               paddingX: '1.5rem'
             }}
           >
+
             {/* ALERT */}
 
             {showSuccessAlert
@@ -289,6 +436,53 @@ const Profile: PageComponent = () => {
                 </>
               : null}
 
+            {/* {showSuccessAlertPicture
+              ? <>
+              {isFail
+                ? (
+                <Alert
+                  color="error"
+                  severity="error"
+                  sx={{
+                    position: 'absolute',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: '#FECDCA',
+                    top: '-4.3rem',
+                    left: '1.5rem',
+                    right: '1.5rem',
+                    paddingX: '1.5rem'
+                  }}
+                >
+                  <Typography fontSize="1rem">
+                    Kamu gagal memperbarui Profil Picture, coba beberapa saat lagi!
+                  </Typography>
+                </Alert>
+                )
+                : (
+                <Alert
+                  color="success"
+                  severity="success"
+                  sx={{
+                    position: 'absolute',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#DDFAA7',
+                    top: '-4.3rem',
+                    left: '1.5rem',
+                    right: '1.5rem',
+                    paddingX: '1.5rem'
+                  }}
+                >
+                  <Typography fontSize="1rem">
+                    Selamat, kamu berhasil memperbarui Profil Picture!
+                  </Typography>
+                </Alert>
+                )}
+                </>
+              : null} */}
+
             <Card sx={{ padding: 0 }}>
               <CardContent
                 sx={{
@@ -328,7 +522,7 @@ const Profile: PageComponent = () => {
                     <Typography color={theme.palette.grey[800]} fontWeight="bold" textAlign="start" variant="body2">{store?.profile?.phone}</Typography>
                   </Grid>
 
-                  <Grid item={true} sx={{ alignItems: 'start', display: 'flex', justifyContent: 'end' }} xs={4}>
+                  {/* <Grid item={true} sx={{ alignItems: 'start', display: 'flex', justifyContent: 'end' }} xs={4}>
                     <div
                       style={{
                         alignItems: 'start',
@@ -345,7 +539,50 @@ const Profile: PageComponent = () => {
                             style={{ maxHeight: '100%', minWidth: '100%', borderRadius: '.5rem' }} />
                         : null}
                     </div>
+                  </Grid> */}
+
+                  {/* TESTING DATA - CUSTOM COMPONENT */}
+                  <Grid item={true} sx={{ alignItems: 'start', display: 'flex', justifyContent: 'end' }} xs={4}>
+                    <Grid item={true}>
+                      <Button
+                        disabled={isEditProfile}
+                        style={{
+                          height: 'auto',
+                          minWidth: 0,
+                          padding: 0,
+                          textTransform: 'none',
+                          width: 'auto'
+                        }}
+                        onClick={handleButtonClick}
+                      >
+                        <img
+                          alt="Selected"
+                          id="imgPreview_0"
+                          src={getPreviewImageSrc() || ''}
+                          style={{
+                            display: 'block',
+                            height: '6rem',
+                            marginLeft: 'auto',
+                            marginRight: 'auto',
+                            objectFit: 'cover',
+                            paddingLeft: '0rem !important',
+                            width: '6rem',
+                            opacity: isEditProfile ? '0.5' : undefined,
+                            borderRadius: '.5rem'
+                          }} />
+                        <VisuallyHiddenInput
+                          accept="image/jpeg, image/jpg"
+                          ref={(el) => {
+                            fileInputRefs.current = el;
+                          }}
+                          type="file"
+                          onChange={(event) => {
+                            handleImageChange(event);
+                          }} />
+                      </Button>
+                    </Grid>
                   </Grid>
+
                 </Grid>
 
               </CardContent>
