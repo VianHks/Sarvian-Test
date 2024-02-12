@@ -24,6 +24,7 @@ import { RatingReducer } from './rating/reducers.js';
 import { UserCommand, UserDefault, UsersReducer } from './user-profile/reducers.js';
 
 import type { RootAction, RootModel } from './types.js';
+import { DEFAULT_REGISTER, RegisterCommand, RegisterReducer } from './register/reducers.js';
 
 // ** Init reducers
 const rootReducer = combineReducers({
@@ -37,7 +38,8 @@ const rootReducer = combineReducers({
   products: productsReducer,
   productView: ProductViewReducer,
   rating: RatingReducer,
-  profile: UsersReducer
+  profile: UsersReducer,
+  register: RegisterReducer
 });
 
 // ** Init models
@@ -45,7 +47,8 @@ const rootModel: RootModel = {
   personalizedRec: PersonalRecomendationDefault,
   productView: ProductViewsDefault,
   rating: {},
-  profile: UserDefault
+  profile: UserDefault,
+  register: DEFAULT_REGISTER
 };
 
 // ** Init commands
@@ -60,7 +63,8 @@ const rootCommand = {
   products: productsCommand,
   productView: ProductViewsCommand,
   rating: RatingCommand,
-  profile: UserCommand
+  profile: UserCommand,
+  register: RegisterCommand
 };
 
 // ** Create store

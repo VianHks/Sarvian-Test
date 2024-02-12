@@ -22,8 +22,9 @@ import type { CustomerProfile, PersonalizedRecAction, PersonalRecomendationModel
 const DefaultMenuRec: RecMenu = {
   data: [
     {
-      image: '',
-      name: ''
+      id: '',
+      photo: '',
+      title: ''
     }
   ]
 };
@@ -206,7 +207,7 @@ export const PersonalizedRecomendationCommand = {
   getMenuRecomendation: (token: string): TAction<PersonalizedRecAction, void> => {
     return (dispatch: TDispatch<PersonalizedRecAction>) => {
       return apiFetch(token)
-        .get(`/foodbuyer/0.1/menu-recomendation`)
+        .get(`/menu-recomendation`)
         .then((response) => {
           if (response.status === 200) {
             if (response.data !== null) {
@@ -228,10 +229,10 @@ export const PersonalizedRecomendationCommand = {
         });
     };
   },
-  getCustomerProfile: (id: string, token: string): TAction<PersonalizedRecAction, void> => {
+  getCustomerProfile: (token: string, tokenKey: unknown): TAction<PersonalizedRecAction, void> => {
     return (dispatch: TDispatch<PersonalizedRecAction>) => {
       return apiFetch(token)
-        .get(`/foodbuyer/0.1/customer/${id}`)
+        .post(`/customer`, tokenKey)
         .then((response) => {
           if (response.status === 200) {
             if (response.data !== null) {
@@ -268,7 +269,7 @@ export const PersonalizedRecomendationCommand = {
     };
   },
   postPersonalizeRecomendation: (payload: unknown, token: string): Promise<string> => {
-    return apiFetch(token).post(`/foodbuyer/0.1/personalize-recomendation`, payload)
+    return apiFetch(token).post(`/personalize-recomendation`, payload)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .then((response: any) => {
         if (response.status === 200) {

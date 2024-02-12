@@ -51,9 +51,25 @@ const PersonalizedRecomendation: PageComponent = () => {
   const [store, dispatch] = useStore((state) => state?.personalizedRec);
   const [foodsList, setFoodsList] =
     useState<FoodsListDataModel>(DEFAULT_FOODS_LIST);
-  const userId = 'VXNlcjoyMDUwMjQwNjE5';
 
   const [activeStep, setActiveStep] = useState(0);
+  const [userid, setUserId] = useState('');
+
+  useEffect(() => {
+    if (token) {
+      const tokenKey = {
+        token
+      };
+
+      dispatch(PersonalizedRecomendationCommand.getCustomerProfile(token, tokenKey));
+    }
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (store?.customerProfile?.data?.user?.id) {
+      setUserId(store?.customerProfile?.data?.user?.id);
+    }
+  }, [store?.customerProfile?.data?.user]);
 
   const getFoodsList = (mealType: string) => {
     switch (mealType) {
@@ -89,6 +105,9 @@ const PersonalizedRecomendation: PageComponent = () => {
       const updatedFoodsList = { ...prevFoodsList };
       const selectedItems = updatedFoodsList[mealType];
 
+      console.log('cekitem', updatedFoodsList);
+      console.log('cekSELECTEDitem', selectedItems);
+
       const isItemAlreadySelected = selectedItems.some(
         (item) => item.id === clickedItem.id
       );
@@ -98,13 +117,8 @@ const PersonalizedRecomendation: PageComponent = () => {
           (item) => item.id !== clickedItem.id
         );
       } else {
-        const selectedItem = store?.recomendationList?.find(
-          (item: FoodsDataModel) => item.id === clickedItem.id
-        );
-
-        if (selectedItem) {
-          updatedFoodsList[mealType] = [...selectedItems, selectedItem];
-        }
+        // Add the clickedItem directly, without checking if it's already selected
+        updatedFoodsList[mealType] = [...selectedItems, clickedItem];
       }
 
       return updatedFoodsList;
@@ -117,9 +131,9 @@ const PersonalizedRecomendation: PageComponent = () => {
 
   useEffect(() => {
     if (token && store?.customerProfile?.data?.user?.metadata) {
-      const { metadata } = store.customerProfile.data.user;
-      if (metadata && metadata.length > 0) {
-        navigate(`/beranda?id=${userId}`);
+      const { metadata } = store?.customerProfile?.data?.user || [];
+      if (metadata && metadata.length > 1) {
+        navigate(`/beranda`);
       } else {
         dispatch(PersonalizedRecomendationCommand.getPersonalizeRecomendation());
         dispatch(PersonalizedRecomendationCommand.getMenuRecomendation(token));
@@ -128,29 +142,31 @@ const PersonalizedRecomendation: PageComponent = () => {
   }, [token, store?.customerProfile?.data, dispatch]);
 
   const handleNext = () => {
-    const payload = {
-      id: userId,
-      metadataInput: [
-        { key: 'breakfast', value: JSON.stringify(foodsList.breakfast) },
-        { key: 'lunch', value: JSON.stringify(foodsList.lunch) },
-        { key: 'dinner', value: JSON.stringify(foodsList.dinner) }
-      ]
-    };
-    if (activeStep === 0) {
-      setActiveStep(1);
-    } else if (activeStep === 1) {
-      setActiveStep(2);
-    } else {
-      PersonalizedRecomendationCommand.postPersonalizeRecomendation(
-        payload,
-        token || ''
-      );
-      setTimeout(() => {
-        navigate('/location-by-gps');
-      });
-      setTimeout(() => {
-        navigate('/beranda');
-      }, 4000);
+    if (userid) {
+      const payload = {
+        id: userid,
+        metadataInput: [
+          { key: 'breakfast', value: JSON.stringify(foodsList.breakfast) },
+          { key: 'lunch', value: JSON.stringify(foodsList.lunch) },
+          { key: 'dinner', value: JSON.stringify(foodsList.dinner) }
+        ]
+      };
+      if (activeStep === 0) {
+        setActiveStep(1);
+      } else if (activeStep === 1) {
+        setActiveStep(2);
+      } else {
+        PersonalizedRecomendationCommand.postPersonalizeRecomendation(
+          payload,
+          token || ''
+        );
+        setTimeout(() => {
+          navigate('/location-by-gps');
+        });
+        setTimeout(() => {
+          navigate('/beranda');
+        }, 4000);
+      }
     }
   };
 
@@ -163,6 +179,7 @@ const PersonalizedRecomendation: PageComponent = () => {
   };
 
   console.log('cekstore', store);
+  console.log('cekstore', userid);
 
   const renderCard = (mealType: string) => {
     const selectedFoodsList = getFoodsList(mealType);
@@ -170,7 +187,7 @@ const PersonalizedRecomendation: PageComponent = () => {
     return (
       <Box>
         <Grid container={true} spacing={2}>
-          {store?.recomendationList?.map((obj: FoodsDataModel) => {
+          {store?.recomendationMenu?.data?.map((obj: FoodsDataModel) => {
             const isItemSelected = selectedFoodsList.some(
               (item) => Number(item.id) === Number(obj.id)
             );

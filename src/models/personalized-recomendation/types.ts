@@ -9,8 +9,9 @@ interface PersonalizedRecMenu {
 export interface RecMenu {
   data: [
     {
-      image: string
-      name: string
+      id: string
+      photo: string
+      title: string
     }
   ]
 
