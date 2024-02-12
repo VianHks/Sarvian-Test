@@ -5,7 +5,7 @@ import type { TAction, TDispatch } from '@models/types.js';
 import { ProductViewsActionType } from './types.js';
 
 import type {
-  CreateCheckoutDataModel,
+  CheckoutIdModel,
   ProductDetailsDataModel,
   ProductTypeModel,
   ProductViewsAction,
@@ -33,7 +33,7 @@ const DEFAULT_PRODUCT_DETAILS = {
   }
 };
 
-const DEFAULT_RESPONSE_CREATE_CHECKOUT = {
+const DEFAULT_CHEKOUTID = {
   checkout_id: ''
 };
 
@@ -65,9 +65,9 @@ const DEFAULT_PRODUCT_TYPE: ProductTypeModel = {
 };
 
 const ProductViewsDefault: ProductViewsModel = {
+  checkoutId: DEFAULT_CHEKOUTID,
   productDetails: DEFAULT_PRODUCT_DETAILS,
-  productTypeDetails: DEFAULT_PRODUCT_TYPE,
-  responseCreateCheckout: DEFAULT_RESPONSE_CREATE_CHECKOUT
+  productTypeDetails: DEFAULT_PRODUCT_TYPE
 };
 
 const ProductViewReducer = (
@@ -173,7 +173,7 @@ const ProductViewsCommand = {
 
           if (response.status === 200) {
             if (id) {
-              return 'ok';
+              return id;
             }
 
             return 'err';
@@ -186,33 +186,16 @@ const ProductViewsCommand = {
         })
     );
   },
-  getCheckoutId: (
-    payload: unknown,
-    token: string
-  ): TAction<ProductViewsAction, void> => {
+  getCheckoutId: (data: CheckoutIdModel | null) => {
     return (dispatch: TDispatch<ProductViewsAction>) => {
-      return apiFetch(token)
-        .post(`/foodbuyer/0.1/checkout`, payload)
-        .then((response) => {
-          if (response.status === 200) {
-            if (response.data !== null) {
-              const productViews: ProductViewsModel = {
-                responseCreateCheckout:
-                  response.data as CreateCheckoutDataModel
-              };
+      const profile: ProductViewsModel = {
+        checkoutId: data || DEFAULT_CHEKOUTID
+      };
 
-              dispatch({
-                data: productViews,
-                type: ProductViewsActionType.GetProductDetails
-              });
-            } else {
-              dispatch({
-                data: ProductViewsDefault,
-                type: ProductViewsActionType.GetProductDetails
-              });
-            }
-          }
-        });
+      dispatch({
+        data: profile,
+        type: ProductViewsActionType.GetCheckoutId
+      });
     };
   }
 };

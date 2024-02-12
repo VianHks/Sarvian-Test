@@ -31,6 +31,7 @@ import { useAuth } from '@hooks/use-auth';
 import { OrderCommand } from '@models/order/reducers';
 import type { OrderDataModel } from '@models/order/types';
 import { useStore } from '@models/store';
+import type { VariantModel } from '@pages/product-view';
 
 import QR from '@assets/images/Dummy_QR.svg';
 import MieBaso from '@assets/images/MieBaso.png';
@@ -132,12 +133,19 @@ const Orders: PageComponent = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const [searchParams] = useSearchParams();
-  const orderId = searchParams.get('id');
+  const orderId = searchParams.get('orderId');
+  const totalPrice = searchParams.get('price') || '0';
+  const totalPriceNumber = parseInt(totalPrice, 10);
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
 
   const [store, dispatch] = useStore((state) => state);
   const [detailOrder, setDetailOrder] = useState<OrderDataModel>(DEFAULT_ORDER_DETAILS);
+  const [variants, setVariants] = useState<{ title: string, name: string }[]>([]);
+  const metaDataTotal = detailOrder?.lines?.find((obj) => obj?.metadata);
+  const totalHarga = metaDataTotal?.metadata?.find((itm) => itm?.key === 'total')?.value;
+  const productPrice = Number(totalHarga);
+
   const [openModal, setOpenModal] = useState(false);
   const [openQR, setOpenQR] = useState(false);
   const [restoCountdown, setRestoCountdown] = useState(120);
@@ -174,16 +182,44 @@ const Orders: PageComponent = () => {
   };
 
   useEffect(() => {
-    dispatch(
-      OrderCommand.getOrderDetails(orderId || '', token || '')
-    );
-  }, [dispatch]);
+    if (token) {
+      dispatch(
+        OrderCommand.getOrderDetails(orderId || '', token || '')
+      );
+    }
+  }, [dispatch, token]);
 
   useEffect(() => {
     if (store?.order?.orderDetails?.data?.order) {
       setDetailOrder(store?.order?.orderDetails?.data?.order);
     }
   }, [store?.order?.orderDetails?.data]);
+
+  useEffect(() => {
+    const metaDataVariants = detailOrder?.lines
+      ?.flatMap((obj) => obj?.metadata?.filter((meta) => meta?.key === 'variant')?.map((meta) => meta?.value))
+      ?.map((jsonString) => JSON.parse(jsonString || ''));
+
+    const namesArray: { title: string, name: string }[] = [];
+
+    metaDataVariants?.forEach((variantsArray: VariantModel[]) => {
+      if (variantsArray) {
+        variantsArray.forEach((atr: VariantModel) => {
+          if (atr && atr.choices) {
+            const nameParts = atr.choices[0]?.name.split(':');
+
+            if (nameParts && nameParts.length === 3) {
+              const name = nameParts[0]?.trim();
+
+              namesArray.push({ title: atr?.variant, name });
+            }
+          }
+        });
+      }
+    });
+
+    setVariants(namesArray);
+  }, [detailOrder]);
 
   return (
     <Container sx={{ marginBottom: '-5.5rem', marginTop: '-0.25rem' }}>
@@ -441,13 +477,25 @@ const Orders: PageComponent = () => {
                         marginBottom: '1rem'
                       }}
                     >
-                      <Typography
-                        color={theme.palette.grey[900]}
-                        sx={{ fontWeight: 'bold', textAlign: 'start' }}
-                        variant="body2"
-                      >
-                        {obj.productName}
-                      </Typography>
+                      <Box>
+                        <Typography
+                          color={theme.palette.grey[900]}
+                          sx={{ fontWeight: 'bold', textAlign: 'start' }}
+                          variant="body2"
+                        >
+                          {obj.productName}
+                        </Typography>
+                        <Typography
+                          sx={{ fontWeight: 'bold', textAlign: 'start' }}
+                          variant="caption"
+                        >
+                          {variants.map((obj) => (
+                            <div key={obj.title}>
+                              {`${obj?.title}: ${obj?.name}`}
+                            </div>
+                          ))}
+                        </Typography>
+                      </Box>
                     </Box>
                     <Box
                       sx={{
@@ -461,7 +509,7 @@ const Orders: PageComponent = () => {
                         sx={{ fontWeight: 'bold', textAlign: 'start' }}
                         variant="body2"
                       >
-                        Rp. {obj.unitPrice?.gross?.amount.toLocaleString('id-ID')}
+                        Rp. {productPrice.toLocaleString('id-ID')}
                       </Typography>
                       <Box sx={{ textAlign: 'center' }}>
                         <Typography
@@ -569,7 +617,7 @@ const Orders: PageComponent = () => {
             sx={{ fontWeight: 'bold' }}
             variant="h5"
           >
-            Rp. {detailOrder?.lines[0]?.totalPrice?.gross?.amount?.toLocaleString('id-ID')}
+            Rp. {totalPriceNumber?.toLocaleString('id-ID')}
           </Typography>
         </Box>
       </Box>
@@ -600,7 +648,7 @@ const Orders: PageComponent = () => {
               }}
               variant="body2"
             >
-              Rp. {detailOrder?.lines[0]?.totalPrice?.gross?.amount?.toLocaleString('id-ID')}
+              Rp. {totalPriceNumber?.toLocaleString('id-ID')}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
