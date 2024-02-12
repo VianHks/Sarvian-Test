@@ -51,8 +51,6 @@ const PersonalizedRecomendation: PageComponent = () => {
   const [store, dispatch] = useStore((state) => state?.personalizedRec);
   const [foodsList, setFoodsList] =
     useState<FoodsListDataModel>(DEFAULT_FOODS_LIST);
-  const [foodsList, setFoodsList] =
-    useState<FoodsListDataModel>(DEFAULT_FOODS_LIST);
   const userId = 'VXNlcjoyMDUwMjQwNjE5';
 
   const [activeStep, setActiveStep] = useState(0);
@@ -315,7 +313,7 @@ const PersonalizedRecomendation: PageComponent = () => {
             padding: '0.6rem',
             width: activeStep > 0 ? '50%' : '100%'
           }}
-          variant="contained"
+          variant="outlined"
           onClick={() => handleNext()}
         >
           Lanjut
