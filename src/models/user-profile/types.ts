@@ -15,12 +15,13 @@ export interface PhotoEditorModel {
   'fileName': string
   'size': number
   'typeFile': string
-  'base64Image': string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  'base64Image': any | string
 }
 
 export interface UserModel {
   profile?: UserProfileDataModel
-  photoeditor: PhotoEditorModel
+  photoeditor?: PhotoEditorModel
 }
 
 export enum UserActionType {

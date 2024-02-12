@@ -251,5 +251,13 @@ export const routes: Route[] = [
     layout: 'bottomnav',
     path: '/profile',
     search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/user-profile/editphoto.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/edit-photo',
+    search: true
   }
 ];

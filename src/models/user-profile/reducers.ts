@@ -20,7 +20,7 @@ const DEFAULT_USER_INFO: UserProfileDataModel = {
 
 const DEFAULT_PHOTOEDITOR: PhotoEditorModel = {
   file: null,
-  fileName: 'girl_picture.jpg',
+  fileName: '',
   size: 0,
   typeFile: '',
   base64Image: ''
@@ -74,12 +74,12 @@ export const UserCommand = {
       // }
     });
   },
-  updatePhotoEditorData: (imageData: PhotoEditorModel) => {
+  updatePhotoEditorData: (imageData: PhotoEditorModel | null) => {
     return (dispatch: TDispatch<UserAction>) => {
       // Const updatedData: PhotoEditorModel[] = [];
 
       const photoeditor: UserModel = {
-        photoeditor: imageData
+        photoeditor: imageData || DEFAULT_PHOTOEDITOR
       };
 
       dispatch({

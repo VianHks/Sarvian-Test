@@ -94,7 +94,7 @@ const PhotoEditor: FC<PhotoProps> = ({
             const photoeditorFile = window.sessionStorage.getItem('fileName') || '';
             const currentPhotoEditorOutput = DEFAULT_PHOTOEDITOR;
 
-            let updatedPhotoEditorOutput: PhotoEditorModel = currentPhotoEditorOutput; // Initialize with current value or default
+            let updatedPhotoEditorOutput: PhotoEditorModel = currentPhotoEditorOutput;
 
             if (photoeditorFile === currentPhotoEditorOutput?.fileName || photoeditorFile === store?.profile?.profile_picture) {
               updatedPhotoEditorOutput = {
@@ -168,14 +168,14 @@ const PhotoEditor: FC<PhotoProps> = ({
 
         setBase64Images((prevImages) => ({
           ...prevImages,
-          [index]: croppedImageData
+          prevImages: croppedImageData
         }));
 
         const uniqueId = `${GenerateID()}.png`;
         const croppedFile = dataURLtoFile(croppedImageData, uniqueId);
         const options = {
           maxSizeMB: 1,
-          maxWidthOrHeight: 1920,
+          maxWidthOrHeight: 400, //1920
           useWebWorker: true
         };
 

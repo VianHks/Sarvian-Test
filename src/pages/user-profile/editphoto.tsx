@@ -16,6 +16,8 @@ import {
 } from '@components/material.js';
 import { useCommand, useStore } from '@models/store';
 
+import iconPhoto from '@assets/images/unggahfoto.svg';
+
 const EditPhoto: PageComponent = () => {
   const command = useCommand((cmd) => cmd);
   const navigate = useNavigate();
@@ -27,7 +29,7 @@ const EditPhoto: PageComponent = () => {
   const photoEditorData = store?.photoeditor;
   const photoEditorIndex = window.sessionStorage.getItem('fileName');
 
-  const photoSrc = store?.photoeditor?.fileName || Photo;
+  const photoSrc = store?.photoeditor?.file || Photo;
   const background = `${theme.palette.grey[100]}`;
 
   const handleCrop = () => {
@@ -79,15 +81,15 @@ const EditPhoto: PageComponent = () => {
 
       <div>
         <PhotoEditor
-          filePhoto={photoSrc}
+          filePhoto={photoSrc || iconPhoto}
           navigateBack={handleNavigateBack}
           onCrop={handleCrop} />
-        {showPreview && croppedImage
-          ? <img
-              alt="Cropped Image"
-              src={photoSrc?.toString() || undefined}
-              style={{ width: '100%', height: 'auto' }} />
-          : null}
+          {showPreview && croppedImage
+            ? <img
+                alt="Cropped Image"
+                src={photoSrc?.toString() || undefined}
+                style={{ width: '100%', height: 'auto' }} />
+            : null}
       </div>
     </AppBar>
   );

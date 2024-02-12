@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { Check, ChevronRight, PowerSettingsNew } from '@mui/icons-material';
 import {
@@ -32,8 +32,11 @@ import type { PageComponent } from '@nxweb/react';
 
 import type { CustSnackBarProps } from '@components/custom-component/snackbar';
 import { useCommand, useStore } from '@models/store';
+import type { PhotoEditorModel } from '@models/user-profile/types';
 
 import { toBase64 } from './validatesize';
+
+import iconPhoto from '@assets/images/unggahfoto.svg';
 
 const VisuallyHiddenInput = styled('input')({
   bottom: 0,
@@ -44,16 +47,19 @@ const VisuallyHiddenInput = styled('input')({
   overflow: 'hidden',
   position: 'absolute',
   whiteSpace: 'nowrap',
-  width: 1
+  width: 1,
+  borderRadius: '1rem'
 });
 
 interface UpdateUserProfile {
   [key: string]: unknown
   name: string
+  // profile_picture: string | null
 }
 
 const DEFAULT_USER_DATA: UpdateUserProfile = {
   name: ''
+  // profile_picture: ''
 };
 
 const Profile: PageComponent = () => {
@@ -61,6 +67,7 @@ const Profile: PageComponent = () => {
   const command = useCommand((cmd) => cmd);
   const navigate = useNavigate();
   const [store, dispatch] = useStore((state) => state.profile);
+  const { action } = useParams();
 
   const [formData, setFormData] = useState<UpdateUserProfile>(DEFAULT_USER_DATA);
 
@@ -69,17 +76,14 @@ const Profile: PageComponent = () => {
 
   const [modalCloseProfileOpen, setModalCloseProfileOpen] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showSuccessAlertPicture, setShowSuccessAlertPicture] = useState(false);
 
   const [originalName, setOriginalName] = useState<string>('');
-  const [selectedImages, setSelectedImages] = useState<{ file: File | null }>({ file: null });
-  const [base64Images, setBase64Images] = useState<Record<string, unknown>>({});
+  const [selectedImages, setSelectedImages] = useState<(File | null)>(null);
+  const [base64Images, setBase64Images] = useState<string>('');
   const [snackbarProps, setSnackbarProps] = useState<CustSnackBarProps | null>(null);
 
-  const fileInputRefs = useRef<(HTMLInputElement | null)[]>(Array(4).fill(null).map(() => null));
-
-  /*
-   *   Const fileInputRef = useRef<HTMLInputElement | null>(null);
-   */
+  const fileInputRefs = useRef<(HTMLInputElement | null)>(null);
 
   const handleEditProfile = () => {
     setIsEditProfile(true);
@@ -94,9 +98,11 @@ const Profile: PageComponent = () => {
     } else {
       await command.profile.updateProfileInfo({
         name: formData.name
+        // Profile_picture: store?.photoeditor?.fileName
       }).then(() => {
         if (store?.profile) {
           store.profile.name = formData.name;
+          // Store.profile.profile_picture = store?.photoeditor?.fileName || null;
         }
 
         setIsFail(false);
@@ -107,9 +113,23 @@ const Profile: PageComponent = () => {
     setIsEditProfile(false);
   };
 
+  function getPreviewImageSrc(): string | undefined {
+    if (store?.photoeditor) {
+      const photoModel = store.photoeditor;
+      if (photoModel?.base64Image) {
+        // setShowSuccessAlertPicture(true);
+
+        return photoModel.base64Image;
+      }
+    }
+
+    return iconPhoto;
+  }
+
   useEffect(() => {
     const transformedProfile: UpdateUserProfile = {
       name: store?.profile?.name || formData.name
+      // profile_picture: store?.photoeditor?.fileName || null
     };
 
     setFormData(transformedProfile);
@@ -128,35 +148,40 @@ const Profile: PageComponent = () => {
     };
   }, [showSuccessAlert]);
 
+  // useEffect(() => {
+  //   let timer: NodeJS.Timeout | null = null;
+  //   if (showSuccessAlertPicture) {
+  //     timer = setTimeout(() => {
+  //       setShowSuccessAlert(false);
+  //     }, 2000);
+  //   }
+
+  //   return () => {
+  //     if (timer) clearTimeout(timer);
+  //   };
+  // }, [showSuccessAlertPicture]);
+
   useEffect(() => {
-    const storedFileInfoArray = store?.photoeditor;
+    const storedFileInfo = store?.photoeditor;
 
-    const storedArray = store?.photoEditorOutput || [];
-    const mediaIdsFromStore = storedArray.map((item) => item.mediaId);
+    if (storedFileInfo !== null && typeof storedFileInfo === 'object') {
+      const fileInfo = storedFileInfo;
 
-    setMediaIds(mediaIdsFromStore);
+      const file = fileInfo !== null ? new File([''], fileInfo.fileName, { type: fileInfo.typeFile }) : null;
 
-    setSelectedImages((prevSelectedImages) => {
-      const newSelectedImages = [...prevSelectedImages];
+      setSelectedImages(file);
 
-      storedFileInfoArray.forEach((fileInfo, index) => {
-        if (fileInfo !== null) {
-          const file = new File([''], fileInfo.fileName, { type: fileInfo.typeFile });
+      const base64Image = fileInfo !== null ? fileInfo.base64Image : '';
 
-          newSelectedImages[index] = file;
-        }
-      });
+      setBase64Images(base64Image as string);
+    }
+  }, [store?.photoeditor]);
 
-      return newSelectedImages;
-    });
-    const base64ImagesArray = storedArray.map((item) => item.base64Image);
-
-    setBase64Images(base64ImagesArray);
-  }, [store?.photoEditorOutput, window.sessionStorage.getItem('PhotoEditorIndex')]);
-
-  const handleCloseSnackbar = () => {
-    setSnackbarProps(null);
-  };
+  /*
+   * Const handleCloseSnackbar = () => {
+   *   setSnackbarProps(null);
+   * };
+   */
 
   const handleNavigateLocataion = () => {
     navigate('/location');
@@ -178,90 +203,60 @@ const Profile: PageComponent = () => {
     setModalCloseProfileOpen(false);
   };
 
-  const handleButtonClick = (index: number) => {
-    if (fileInputRefs.current && fileInputRefs.current[index]) {
-      fileInputRefs.current?.[index]?.click();
+  const handleButtonClick = () => {
+    if (fileInputRefs.current) {
+      fileInputRefs.current?.click();
     }
   };
 
-  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>, index: number) => {
+  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
     if (file) {
-      if (file.size > 1024 * 1024) {
-        setSnackbarProps({
-          message: 'Gambar melebihi ukururan 1MB. Pastikan jika ukurannya kurang dari 1MB',
-          severity: 'warning'
-        });
+      /*
+       * If (file.size > 1024 * 1024) {
+       *   setSnackbarProps({
+       *     message: 'Gambar melebihi ukururan 1MB. Pastikan jika ukurannya kurang dari 1MB',
+       *     severity: 'warning'
+       *   });
+       */
 
-        return;
-      }
+      /*
+       *   return;
+       * }
+       */
 
       try {
         const base64Image = await toBase64(file);
 
-        const newSelectedImages = { ...selectedImages, file };
+        const newImage = file;
 
-        setSelectedImages(newSelectedImages);
+        setSelectedImages(newImage);
 
-        const newBase64Images: Record<string, unknown> = { ...base64Images, [file.name]: base64Image };
+        setBase64Images(base64Image as string);
 
-        if (typeof base64Image === 'string') {
-          newBase64Images[file.name] = base64Image;
-        }
-
-        setBase64Images(newBase64Images);
-
-        const filteredBase64Images = Object.fromEntries(
-          Object.entries(newBase64Images).filter(([key, value]) => value !== null && value !== undefined)
-        );
-
-        setBase64Images(filteredBase64Images);
-
-        window.sessionStorage.setItem('PhotoEditorIndex', index.toString());
-        const clickedMediaId = store?.menuDetails?.data.product.media[index]?.id;
-
-        setMediaIds((prevMediaIds) => {
-          prevMediaIds[index] = clickedMediaId || '';
-          window.sessionStorage.setItem('MediaIds', prevMediaIds.toString());
-
-          return [...prevMediaIds];
-        });
-
-        const updatedSelectedImages: PhotoEditorModel[] = newSelectedImages.map(
-          (selectedFileOrNull, i) => {
-            if (selectedFileOrNull !== null) {
-              return {
-                file: selectedFileOrNull,
-                fileName: selectedFileOrNull.name || '',
-                size: selectedFileOrNull.size || 0,
-                typeFile: selectedFileOrNull.type || '',
-                base64Image: newBase64Images[i] || '',
-                mediaId: clickedMediaId || ''
-              };
-            }
-
-            return {
-              file: null,
-              fileName: '',
-              size: 0,
-              typeFile: '',
-              base64Image: '',
-              mediaId: ''
-            };
+        const updatedSelectedImages: PhotoEditorModel | null = selectedImages
+          ? {
+            ...selectedImages,
+            file: newImage,
+            fileName: newImage.name || '',
+            size: newImage.size || 0,
+            typeFile: newImage.type || '',
+            base64Image: base64Images || ''
           }
-        );
+          : null;
 
-        dispatch(MenuCommand.storePhotoEditorData(updatedSelectedImages));
+        // eslint-disable-next-line no-console
+        console.log(updatedSelectedImages);
 
-        const imgPreview = document.getElementById(`imgPreview_${index}`) as HTMLImageElement | null;
+        dispatch(command.profile?.updatePhotoEditorData(updatedSelectedImages || null));
+
+        const imgPreview = document.getElementById(`imgPreview_0`) as HTMLImageElement | null;
         if (imgPreview) {
           imgPreview.src = base64Image as string;
         }
 
-        window.sessionStorage.setItem(SESSION_STORAGE_FORMDATA_PRODUCT, JSON.stringify(formData));
-
-        navigate('/photoeditor');
+        navigate('/edit-photo');
       } catch (error) {
         setSnackbarProps({
           message: 'Upload Gambar gagal',
@@ -391,8 +386,8 @@ const Profile: PageComponent = () => {
               paddingX: '1.5rem'
             }}
           >
-            {/* ALERT */}
 
+            {/* ALERT */}
             {showSuccessAlert
               ? <>
               {isFail
@@ -440,6 +435,53 @@ const Profile: PageComponent = () => {
                 </>
               : null}
 
+            {/* {showSuccessAlertPicture
+              ? <>
+              {isFail
+                ? (
+                <Alert
+                  color="error"
+                  severity="error"
+                  sx={{
+                    position: 'absolute',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: '#FECDCA',
+                    top: '-4.3rem',
+                    left: '1.5rem',
+                    right: '1.5rem',
+                    paddingX: '1.5rem'
+                  }}
+                >
+                  <Typography fontSize="1rem">
+                    Kamu gagal memperbarui Profil Picture, coba beberapa saat lagi!
+                  </Typography>
+                </Alert>
+                )
+                : (
+                <Alert
+                  color="success"
+                  severity="success"
+                  sx={{
+                    position: 'absolute',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#DDFAA7',
+                    top: '-4.3rem',
+                    left: '1.5rem',
+                    right: '1.5rem',
+                    paddingX: '1.5rem'
+                  }}
+                >
+                  <Typography fontSize="1rem">
+                    Selamat, kamu berhasil memperbarui Profil Picture!
+                  </Typography>
+                </Alert>
+                )}
+                </>
+              : null} */}
+
             <Card sx={{ padding: 0 }}>
               <CardContent
                 sx={{
@@ -479,7 +521,7 @@ const Profile: PageComponent = () => {
                     <Typography color={theme.palette.grey[800]} fontWeight="bold" textAlign="start" variant="body2">{store?.profile?.phone}</Typography>
                   </Grid>
 
-                  <Grid item={true} sx={{ alignItems: 'start', display: 'flex', justifyContent: 'end' }} xs={4}>
+                  {/* <Grid item={true} sx={{ alignItems: 'start', display: 'flex', justifyContent: 'end' }} xs={4}>
                     <div
                       style={{
                         alignItems: 'start',
@@ -496,50 +538,50 @@ const Profile: PageComponent = () => {
                             style={{ maxHeight: '100%', minWidth: '100%', borderRadius: '.5rem' }} />
                         : null}
                     </div>
-                  </Grid>
+                  </Grid> */}
 
                   {/* TESTING DATA - CUSTOM COMPONENT */}
-                  <Grid container={true} spacing={1} sx={{ flexWrap: 'nowrap' }}>
-                    {[0, 1, 2, 3].map((index) => (
-                      <Grid item={true} key={index}>
-                        <Button
+                  <Grid item={true} sx={{ alignItems: 'start', display: 'flex', justifyContent: 'end' }} xs={4}>
+                    <Grid item={true}>
+                      <Button
+                        disabled={isEditProfile}
+                        style={{
+                          height: 'auto',
+                          minWidth: 0,
+                          padding: 0,
+                          textTransform: 'none',
+                          width: 'auto'
+                        }}
+                        onClick={handleButtonClick}
+                      >
+                        <img
+                          alt="Selected"
+                          id="imgPreview_0"
+                          src={getPreviewImageSrc() || ''}
                           style={{
-                            height: 'auto',
-                            minWidth: 0,
-                            padding: 0,
-                            textTransform: 'none',
-                            width: 'auto'
+                            display: 'block',
+                            height: '6rem',
+                            marginLeft: 'auto',
+                            marginRight: 'auto',
+                            objectFit: 'cover',
+                            paddingLeft: '0rem !important',
+                            width: '6rem',
+                            opacity: isEditProfile ? '0.5' : undefined,
+                            borderRadius: '.5rem'
+                          }} />
+                        <VisuallyHiddenInput
+                          accept="image/jpeg, image/jpg"
+                          ref={(el) => {
+                            fileInputRefs.current = el;
                           }}
-                          variant="outlined"
-                          onClick={() => handleButtonClick(index)}
-                        >
-                          <img
-                            alt="Selected"
-                            id={`imgPreview_${index}`}
-                            src={getPreviewImageSrc(index) || ''}
-                            style={{
-                              display: 'block',
-                              height: '60px',
-                              marginLeft: 'auto',
-                              marginRight: 'auto',
-                              objectFit: 'cover',
-                              paddingLeft: '0rem !important',
-                              width: '60px'
-                            }} />
-                          <VisuallyHiddenInput
-                            accept="image/jpeg, image/jpg"
-                            ref={(el) => {
-                              fileInputRefs.current[index] = el;
-                            }}
-                            type="file"
-                            onChange={(event) => {
-                              handleImageChange(event, index);
-                            }} />
-                        </Button>
-                      </Grid>
-
-                    ))}
+                          type="file"
+                          onChange={(event) => {
+                            handleImageChange(event);
+                          }} />
+                      </Button>
+                    </Grid>
                   </Grid>
+
                 </Grid>
 
               </CardContent>
