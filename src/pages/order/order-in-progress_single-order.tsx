@@ -127,8 +127,6 @@ const DEFAULT_ORDER_DETAILS = {
   userEmail: ''
 };
 
-const SESSION_STORAGE_ORDER = 'orderId';
-
 const Orders: PageComponent = () => {
   const navigate = useNavigate();
   const theme = useTheme();
@@ -169,7 +167,6 @@ const Orders: PageComponent = () => {
   const handleConfirmBatal = () => {
     OrderCommand.postCancelOrder({ orderId: orderId || '' }, token || '').then(() => {
       navigate('/beranda');
-      window?.sessionStorage?.removeItem(SESSION_STORAGE_ORDER);
     });
   };
 

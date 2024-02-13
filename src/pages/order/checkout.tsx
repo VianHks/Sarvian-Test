@@ -441,7 +441,7 @@ const Checkout: PageComponent = (props: Props) => {
   };
 
   useEffect(() => {
-    if (checkoutId || checkoutId) {
+    if (checkoutId) {
       dispatch(OrderCommand.getCheckoutDetails(checkoutId || '', token || ''));
       dispatch(command.productView.getCheckoutId({ checkout_id: checkoutId || '' }));
     }

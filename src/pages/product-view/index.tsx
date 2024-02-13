@@ -183,14 +183,12 @@ const ProductView = () => {
     setVariantValue((prevValues) => {
       const newValues = [...prevValues];
 
-      // Toggle the current index value
       if (newValues[index] === price) {
         newValues[index] = '';
       } else {
         newValues[index] = price;
       }
 
-      // Filter out empty values
       const filteredValues = newValues.filter((value) => value !== '');
 
       return filteredValues;
@@ -276,9 +274,9 @@ const ProductView = () => {
   }, [store?.productView?.productDetails?.data?.product?.productType, dispatch, token]);
 
   useEffect(() => {
-    if (checkoutIdFromStore !== '') {
-      dispatch(OrderCommand.getCart(checkoutIdFromStore || '', token || ''));
-      dispatch(OrderCommand.getCheckoutDetails(checkoutIdFromStore || '', token || ''));
+    if (checkoutIdFromStore) {
+      dispatch(OrderCommand.getCart(checkoutIdFromStore, token || ''));
+      dispatch(OrderCommand.getCheckoutDetails(checkoutIdFromStore, token || ''));
     }
   }, [checkoutIdFromStore, dispatch, token]);
 
@@ -306,6 +304,14 @@ const ProductView = () => {
       });
 
       setDescription(descriptionObject);
+
+      const variantMetadata = store?.order?.checkoutDetails?.data?.checkout?.lines[0]?.metadata.filter((item) => item.key === 'variant')[0];
+
+      if (variantMetadata) {
+        const parsedVariants = JSON.parse(variantMetadata.value);
+
+        setVariants(parsedVariants);
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channel, count, productId, store, variantId]);
@@ -404,9 +410,6 @@ const ProductView = () => {
         });
     }
   };
-
-  console.log('checkoutId', checkoutIdFromStore);
-  console.log('details', store?.order?.checkoutDetails?.data?.checkout);
 
   return (
     <Box sx={{ minHeight: '100vh', position: 'relative' }}>
