@@ -4,7 +4,9 @@ export interface UserProfileDataModel {
   'phone': string | null
   'email': string
   'address': string
+  'gender': string
   'profile_picture': string | null
+  'date_of_birth': Date | string
   'created_date': Date | string
   'verified_email': boolean
   'verified_phone': boolean

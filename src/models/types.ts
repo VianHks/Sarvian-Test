@@ -54,7 +54,7 @@ export interface RootModel {
   order?: OrderModel
   rating?: RatingModel
   profile?: UserModel
-  register?: RegisterModel
+  registration?: UserModel
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
