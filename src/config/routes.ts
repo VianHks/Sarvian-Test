@@ -9,7 +9,19 @@ export const routes: Route[] = [
 
   {
     path: '/',
-    redirectTo: (_location, authenticated) => (authenticated ? '/recomendation' : '/beranda')
+    redirectTo: (_location, authenticated) => (authenticated ? '/auth' : '/not-found')
+  },
+  {
+    path: '/callback',
+    redirectTo: (_location, _) => {
+      return '/';
+    }
+  },
+  {
+    path: '/login',
+    redirectTo: (_location, _) => {
+      return '/';
+    }
   },
   // ** Fallback routes, must be the last route item
   {

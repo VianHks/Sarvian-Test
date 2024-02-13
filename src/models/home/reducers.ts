@@ -48,7 +48,7 @@ const HomeReducer = (
 export const homeCommands = {
   getHomeMenu: (token: string): TAction<HomeAction, void> => {
     return (dispatch: TDispatch<HomeAction>) => {
-      return apiFetch(token).post(`/foodbuyer/0.1/channels`).then((response) => {
+      return apiFetch(token).post(`/channels`).then((response) => {
         if (response.status === 200) {
           if (response.data !== null) {
             const homeMenu: HomeModel = {
@@ -71,7 +71,7 @@ export const homeCommands = {
   },
   searchResult: (params: unknown, token: string): TAction<HomeAction, void> => {
     return (dispatch: TDispatch<HomeAction>) => {
-      return apiFetch(token).post(`/foodbuyer/0.1/products`, params).then((response) => {
+      return apiFetch(token).post(`/products`, params).then((response) => {
         if (response.status === 200) {
           if (response.data !== null) {
             const searchResult: HomeModel = {

@@ -41,6 +41,7 @@ import terhemat from '@assets/images/pages/beranda/terhemat.svg';
 import terlaris from '@assets/images/pages/beranda/terlaris.svg';
 import topRated from '@assets/images/pages/beranda/topRated.svg';
 import verifyIcon from '@assets/images/pages/beranda/verify.svg';
+import { PersonalizedRecomendationCommand } from '@models/personalized-recomendation/reducers';
 
 interface RestoItem {
   id: number
@@ -239,6 +240,11 @@ const Home: PageComponent = () => {
 
   useEffect(() => {
     if (token) {
+      const tokenKey = {
+        token
+      };
+
+      dispatch(PersonalizedRecomendationCommand.getCustomerProfile(token, tokenKey));
       dispatch(command.home.getHomeMenu(token || ''));
     }
   }, [dispatch]);
@@ -466,6 +472,8 @@ const Home: PageComponent = () => {
     }, 1000);
     // Navigate(`/dana/bind`);
   };
+
+  console.log('cekstore', store);
 
   return (
     <Box sx={{ margin: '1rem 1.5rem' }}>

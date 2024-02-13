@@ -192,7 +192,7 @@ const Profile: PageComponent = () => {
   };
 
   const handleNavigateLogin = () => {
-    navigate('/');
+    navigate('/logout');
   };
 
   const handleOpenModal = () => {
