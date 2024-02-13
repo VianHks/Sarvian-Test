@@ -703,6 +703,7 @@ const ProductView = () => {
               {isLoad === true ? <Loader /> : 'Tambah Keranjang' }
             </Button>
           </Box>
+          </Box>
         </Card>
 
     </Box>
