@@ -269,10 +269,9 @@ const Checkout: PageComponent = (props: Props) => {
   const theme = useTheme();
   const { windowProps } = props;
   const [searchParams] = useSearchParams();
-  const checkoutId = searchParams.get('checkoutId');
+  const checkoutId = searchParams.get('checkoutId') || '';
+  const channel = searchParams.get('channel') || '';
   const command = useCommand((cmd) => cmd);
-  const idUser = 'tokrum:b5bbc271-1cc2-4cc9-9b07-8f0dd92966e1';
-  const userName = 'Ridwan Azis';
 
   const [store, dispatch] = useStore((state) => state);
   const [checkoutDetails, setCheckoutDetails] = useState<ChekoutDetailDataModel>(DEFAULT_CHECKOUT_DETAILS);
@@ -389,18 +388,17 @@ const Checkout: PageComponent = (props: Props) => {
     setOpenModal(!openModal);
     setIsLoad(true);
     const payloadOrder = {
-      buyerName: userName,
-      channel: 'makan',
-      checkoutId: checkoutId || checkoutId,
-      customerId: idUser,
+      channel,
+      checkoutId,
       estimation: formOrder.estimation.format('HH:mm'),
       note: formOrder.note,
       orderType: formOrder.orderType,
+      token,
       transactionReference: ''
     };
     if (store?.order?.checkoutDetails?.data?.checkout !== checkoutDetails) {
       const payload = {
-        checkoutId: checkoutId || checkoutId,
+        checkoutId,
         lines: checkoutDetails?.lines.map((item) => ({
           lineId: item?.id,
           note: item?.metafields?.note,

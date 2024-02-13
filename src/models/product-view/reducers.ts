@@ -94,7 +94,7 @@ const ProductViewsCommand = {
   ): TAction<ProductViewsAction, void> => {
     return (dispatch: TDispatch<ProductViewsAction>) => {
       return apiFetch(token)
-        .get(`/foodbuyer/0.1/product/${productId}`)
+        .get(`/product/${productId}`)
         .then((response) => {
           if (response.status === 200) {
             if (response.data !== null) {
@@ -122,7 +122,7 @@ const ProductViewsCommand = {
   ): TAction<ProductViewsAction, void> => {
     return (dispatch: TDispatch<ProductViewsAction>) => {
       return apiFetch(token)
-        .get(`/foodbuyer/0.1/product-type/${productTypeId}`)
+        .get(`/product-type/${productTypeId}`)
         .then((response) => {
           if (response.status === 200) {
             if (response.data !== null) {
@@ -147,7 +147,7 @@ const ProductViewsCommand = {
   postCreateCheckout: (payload: unknown, token: string): Promise<string> => {
     return (
       apiFetch(token)
-        .post(`/foodbuyer/0.1/checkout`, payload)
+        .post(`/checkout`, payload)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .then((response: any) => {
           const id: string = response?.data?.checkout_id;
@@ -166,7 +166,7 @@ const ProductViewsCommand = {
   putCheckout: (payload: unknown, token: string): Promise<string> => {
     return (
       apiFetch(token)
-        .put(`/foodbuyer/0.1/checkout`, payload)
+        .put(`/checkout`, payload)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .then((response: any) => {
           const id: string = response?.data?.checkoutId;

@@ -79,10 +79,7 @@ const DEFAULT_FORM_DATA: FormData = {
 };
 
 interface Payload {
-  after: string
   channel: string
-  deliveryMethodId: string
-  first: number
   lines: {
     metadata:
     {
@@ -93,7 +90,7 @@ interface Payload {
     quantity: number
     variantId: string
   }[]
-  userId: string
+  token: string
 }
 
 interface VariantValueModel {
@@ -109,17 +106,17 @@ interface VariantModel {
 
 const ProductView = () => {
   const { auth } = useAuth();
-  const token = useMemo(() => auth?.token.accessToken, [auth]);
+  const token = useMemo(() => auth?.token.accessToken, [auth]) || '';
   const navigate = useNavigate();
   const theme = useTheme();
   const [searchParams] = useSearchParams();
-  const channel = searchParams.get('channel');
   const productId = searchParams.get('productId');
   const variantId = searchParams.get('variantId') || 'UHJvZHVjdFZhcmlhbnQ6NDEy';
   const idUser = 'VXNlcjoyMDUwMjQwNjE5';
   const command = useCommand((cmd) => cmd);
 
   const [store, dispatch] = useStore((state) => state);
+  const channel = store?.productView?.productDetails?.data?.product?.channelListings[0]?.channel?.slug || '';
   const [formData, setFormData] = useState<FormData>(DEFAULT_FORM_DATA);
   const [variants, setVariants] = useState<VariantModel[]>([]);
   const [description, setDescription] = useState<DescriptionDataModel>(DEFAULT_DESCRIPTION);
@@ -323,7 +320,7 @@ const ProductView = () => {
 
       if (variantIndex !== -1) {
         const processedFormData = {
-          channel: 'makan',
+          channel: channel || 'makan',
           deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
           lineId: lines[variantIndex]?.id,
           price: lines[variantIndex]?.totalPrice?.gross?.amount.toString() || '',
@@ -369,10 +366,7 @@ const ProductView = () => {
         });
     } else {
       const payload: Payload = {
-        after: '',
-        channel: 'makan',
-        deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
-        first: 100,
+        channel,
         lines: [
           {
             metadata: [
@@ -394,7 +388,7 @@ const ProductView = () => {
             variantId: formData.variantId
           }
         ],
-        userId: idUser
+        token
       };
 
       command.productView.postCreateCheckout(payload, token || '')
@@ -404,7 +398,7 @@ const ProductView = () => {
             setIsLoad(false);
             setTimeout(() => {
               setIsLoad(false);
-              navigate(`/checkout-dinein?checkoutId=${response}`);
+              navigate(`/checkout-dinein?checkoutId=${response}&channel=${channel}`);
             }, 1000);
           }
         });
@@ -702,7 +696,6 @@ const ProductView = () => {
             >
               {isLoad === true ? <Loader /> : 'Tambah Keranjang' }
             </Button>
-          </Box>
           </Box>
         </Card>
 

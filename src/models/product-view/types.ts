@@ -3,6 +3,7 @@ interface ChannelListingsDataModel {
   channel: {
     id: string
     name: string
+    slug: string
   }
   id: string
   isAvailableForPurchase: boolean
