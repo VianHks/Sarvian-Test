@@ -418,10 +418,10 @@ const ProductView = () => {
           </Grid>
           <Box sx={{ bottom: 0, left: 0, padding: '1rem 1.5rem', position: 'fixed', right: 0, width: '100%' }}>
             <Button
-              color="primary"
               disabled={isLoad === true}
               fullWidth={true}
               size="medium"
+              sx={{ background: theme.palette.primary.gradient }}
               variant="contained"
               onClick={handleAddToCart}
             >

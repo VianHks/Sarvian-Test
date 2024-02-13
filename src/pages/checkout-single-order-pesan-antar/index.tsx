@@ -35,12 +35,7 @@ import {
 } from '@nxweb/icons/material';
 import type { PageComponent } from '@nxweb/react';
 
-import {
-  Card,
-  CardContent,
-  Grid,
-  Typography
-} from '@components/material.js';
+import { Card, CardContent, Grid, Typography } from '@components/material.js';
 
 import Bakar from '@assets/images/Bakar.png';
 import Bike from '@assets/images/Bike.svg';
@@ -139,9 +134,15 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
   const [totalmenuCost, settotalMenuCost] = useState(0);
   const [totalPembayaran, settotalPembayaran] = useState(0);
   const [orders, setOrders] = useState<PesananDataModel[]>([DEFAULT_PESANAN]);
-  const [selectedDeliveryTypes, setSelectedDeliveryTypes] = useState<Set<string>>(new Set());
-  const [selectedDelivery, setSelectedDelivery] = useState<Set<string>>(new Set());
-  const [selectedItemDelivery, setSelectedItemDelivery] = useState<string[]>([]);
+  const [selectedDeliveryTypes, setSelectedDeliveryTypes] = useState<
+  Set<string>
+  >(new Set());
+  const [selectedDelivery, setSelectedDelivery] = useState<Set<string>>(
+    new Set()
+  );
+  const [selectedItemDelivery, setSelectedItemDelivery] = useState<string[]>(
+    []
+  );
   const [selectedTime, setSelectedTime] = useState(dayjs());
   const [open, setOpen] = useState(false),
     [openSummary, setOpenSummary] = useState(false),
@@ -255,7 +256,10 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
       setOrders(DUMMY_PESANAN);
     }
 
-    const menuCost = orders.reduce((acc, order) => acc + order.harga * order.count, 0);
+    const menuCost = orders.reduce(
+      (acc, order) => acc + order.harga * order.count,
+      0
+    );
 
     settotalMenuCost(menuCost);
 
@@ -267,43 +271,56 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
 
   return (
     <Container>
-        <Grid container={true} spacing={1} sx={{ marginBottom: '1rem', justifyContent: 'space-between' }}>
-            <Grid
-              item={true}
-              sx={{
-                alignItems: 'center',
-                display: 'flex',
-                justifyContent: 'flex-start'
-              }}
-              xs={6}
-            >
-            <Typography
-              sx={{ fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '0.25rem', textAlign: 'start' }}
-              variant="body1"
-            >
-                Alamat Pengantaran:
-            </Typography>
-            </Grid>
-            <Box
-              sx={{
-                alignItems: 'center',
-                display: 'flex',
-                gap: '0.5rem',
-                justifyContent: 'flex-end'
-              }}
-            >
-            <Typography
-              color="primary"
-              sx={{ fontSize: '0.9rem', fontWeight: 'bold' }}
-              variant="body1"
-            >
-              Ganti Alamat
-            </Typography>
-            <ChevronRightFilled color={theme.palette.primary.main} size={20} />
-            </Box>
+      <Grid
+        container={true}
+        spacing={1}
+        sx={{ marginBottom: '1rem', justifyContent: 'space-between' }}
+      >
+        <Grid
+          item={true}
+          sx={{
+            alignItems: 'center',
+            display: 'flex',
+            justifyContent: 'flex-start'
+          }}
+          xs={6}
+        >
+          <Typography
+            sx={{
+              fontSize: '0.9rem',
+              fontWeight: 'bold',
+              marginBottom: '0.25rem',
+              textAlign: 'start'
+            }}
+            variant="body1"
+          >
+            Alamat Pengantaran:
+          </Typography>
         </Grid>
+        <Box
+          sx={{
+            alignItems: 'center',
+            display: 'flex',
+            gap: '0.5rem',
+            justifyContent: 'flex-end'
+          }}
+        >
+          <Typography
+            color="primary"
+            sx={{ fontSize: '0.9rem', fontWeight: 'bold' }}
+            variant="body1"
+          >
+            Ganti Alamat
+          </Typography>
+          <ChevronRightFilled color={theme.palette.primary.main} size={20} />
+        </Box>
+      </Grid>
 
-      <Grid container={true} spacing={2} sx={{ marginBottom: '1rem', backgroundColor: '#D5ECFE' }}>
+      <Grid
+        container={true}
+        spacing={2}
+        sx={{ marginBottom: '1rem', backgroundColor: '#D5ECFE' }}
+      >
         <Grid
           item={true}
           sx={{
@@ -333,36 +350,40 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
         </Grid>
       </Grid>
       <Typography
-        sx={{ fontWeight: 'medium', textAlign: 'start', marginBottom: '0.5rem' }}
+        sx={{
+          fontWeight: 'medium',
+          textAlign: 'start',
+          marginBottom: '0.5rem'
+        }}
         variant="h6"
       >
         Patokan:
       </Typography>
-        <Box
-          sx={{
-            alignItems: 'center',
-            display: 'flex',
-            marginBottom: '1.5rem',
-            gap: '0.5rem',
-            justifyContent: 'start'
+      <Box
+        sx={{
+          alignItems: 'center',
+          display: 'flex',
+          marginBottom: '1.5rem',
+          gap: '0.5rem',
+          justifyContent: 'start'
+        }}
+      >
+        <TextField
+          InputProps={{
+            startAdornment: (
+              <MailOutlineRoundedIcon
+                sx={{ height: '24px', width: '24px', marginRight: '0.5rem' }} />
+            ),
+            endAdornment: (
+              <HelpOutlineIcon
+                sx={{ height: '24px', width: '24px', marginLeft: '0.5rem' }} />
+            )
           }}
-        >
-            <TextField
-              InputProps={{
-                startAdornment: (
-        <MailOutlineRoundedIcon
-          sx={{ height: '24px', width: '24px', marginRight: '0.5rem' }} />
-                ),
-                endAdornment: (
-                    <HelpOutlineIcon
-                      sx={{ height: '24px', width: '24px', marginLeft: '0.5rem' }} />
-                )
-              }}
-              fullWidth={true}
-              placeholder="Pinggir Ismile"
-              size="small"
-              variant="outlined" />
-        </Box>
+          fullWidth={true}
+          placeholder="Pinggir Ismile"
+          size="small"
+          variant="outlined" />
+      </Box>
       <Card
         sx={{ borderColor: theme.palette.primary.main, marginBottom: '1rem' }}
         onClick={toggleDrawer(true)}
@@ -565,20 +586,20 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
               </div>
             );
           })}
-              <Typography
-                sx={{ fontWeight: 'bold', marginBottom: '0.5rem' }}
-                variant="body1"
-              >
-                Catatan buat Resto:
-              </Typography>
-              <Box sx={{ marginBottom: '1rem' }}>
-                <TextField
-                  fullWidth={true}
-                  id="detail"
-                  size="small"
-                  value="Jangan terlalu Gosong"
-                  variant="outlined" />
-              </Box>
+          <Typography
+            sx={{ fontWeight: 'bold', marginBottom: '0.5rem' }}
+            variant="body1"
+          >
+            Catatan buat Resto:
+          </Typography>
+          <Box sx={{ marginBottom: '1rem' }}>
+            <TextField
+              fullWidth={true}
+              id="detail"
+              size="small"
+              value="Jangan terlalu Gosong"
+              variant="outlined" />
+          </Box>
         </AccordionDetails>
       </Accordion>
       <Typography
@@ -588,7 +609,12 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
         Tambah resto
       </Typography>
       <Box sx={{ marginBottom: '1rem' }}>
-        <Button color="primary" fullWidth={true} variant="contained" onClick={toggleOpenModalTambahResto}>
+        <Button
+          color="secondary"
+          fullWidth={true}
+          variant="contained"
+          onClick={toggleOpenModalTambahResto}
+        >
           Tambah Resto
         </Button>
       </Box>
@@ -701,7 +727,7 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
               }}
               variant="body2"
             >
-            Rp. {biayaOngkir.toLocaleString('id-ID')}
+              Rp. {biayaOngkir.toLocaleString('id-ID')}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -722,7 +748,6 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
               Rp. {fasPembayaran.toLocaleString('id-ID')}
             </Typography>
           </Box>
-
         </CardContent>
       </Card>
       <Global
@@ -771,7 +796,9 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
                   size="small"
                   sx={{
                     alignItems: 'center',
-                    backgroundColor: selectedDeliveryTypes.has(obj.text) ? 'rgba(0, 0, 0, 0.1)' : 'transparent',
+                    backgroundColor: selectedDeliveryTypes.has(obj.text)
+                      ? 'rgba(0, 0, 0, 0.1)'
+                      : 'transparent',
                     '&:hover': {
                       backgroundColor: 'rgba(0, 0, 0, 0.1)'
                     },
@@ -780,9 +807,10 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
                     justifyContent: 'start',
                     marginBottom: '0.5rem'
                   }}
-                  variant={selectedDeliveryTypes.has(obj.text) ? 'contained' : 'text'}
+                  variant={
+                    selectedDeliveryTypes.has(obj.text) ? 'contained' : 'text'
+                  }
                   onClick={() => handleDeliveryType(obj.text)}
-
                 >
                   <img alt={obj.text} src={obj.icon} />
                   <Typography>{obj.text}</Typography>
@@ -804,7 +832,9 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
                   size="small"
                   sx={{
                     alignItems: 'center',
-                    backgroundColor: selectedDelivery.has(obj.text) ? 'rgba(0, 0, 0, 0.1)' : 'transparent',
+                    backgroundColor: selectedDelivery.has(obj.text)
+                      ? 'rgba(0, 0, 0, 0.1)'
+                      : 'transparent',
                     '&:hover': {
                       backgroundColor: 'rgba(0, 0, 0, 0.1)'
                     },
@@ -813,7 +843,9 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
                     justifyContent: 'start',
                     marginBottom: '0.5rem'
                   }}
-                  variant={selectedDelivery.has(obj.text) ? 'contained' : 'text'}
+                  variant={
+                    selectedDelivery.has(obj.text) ? 'contained' : 'text'
+                  }
                   onClick={() => handleDelivery(obj.text)}
                 >
                   <img alt={obj.text} src={obj.icon} />
@@ -822,18 +854,18 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
               );
             })}
             <Button
-              color="primary"
               fullWidth={true}
+              sx={{ background: theme.palette.primary.gradient }}
               variant="contained"
               onClick={() => handlePilihDelivery()}
             >
-            Pilih
+              Pilih
             </Button>
           </Box>
         </StyledBox>
       </SwipeableDrawer>
 
-      <Global
+      {/* <Global
         styles={{
           '.MuiDrawer-root > .MuiPaper-root': {
             height: `calc(50% - ${drawerBleeding}px)`,
@@ -863,22 +895,103 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
           }}
         >
           <Puller />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1rem 0rem 1rem' }}>
-            <Typography sx={{ fontWeight: 'bold', marginTop: '1rem' }} variant="h5">Total Pembayaran</Typography>
-            <Typography sx={{ fontWeight: 'bold', marginTop: '1rem' }} variant="h5">Rp. {totalPembayaran.toLocaleString('id-ID')}</Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: '1rem 1rem 0rem 1rem'
+            }}
+          >
+            <Typography
+              sx={{ fontWeight: 'bold', marginTop: '1rem' }}
+              variant="h5"
+            >
+              Total Pembayaran
+            </Typography>
+            <Typography
+              sx={{ fontWeight: 'bold', marginTop: '1rem' }}
+              variant="h5"
+            >
+              Rp. {totalPembayaran.toLocaleString('id-ID')}
+            </Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1rem 1rem 1rem' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: '1rem 1rem 1rem 1rem'
+            }}
+          >
+            <Button
+              color="primary"
+              fullWidth={true}
+              variant="contained"
+              onClick={
+                !isCheckout
+                  ? toggleOpenModalCheckout
+                  : () => navigate('./order-in-progress')
+              }
+            >
+              {isCheckout ? 'Checkout' : 'Proses Pesanan'}
+            </Button>
+          </Box>
+        </StyledBox>
+      </SwipeableDrawer> */}
+
+      <div
+        style={{
+          backgroundColor: '#fff',
+          bottom: 0,
+          boxShadow: '0px -5px 15px rgba(0, 0, 0, 0.1)',
+          display: 'grid',
+          flexDirection: 'row',
+          marginInline: '-1.5rem',
+          position: 'fixed',
+          textAlign: 'center',
+          width: '100vw'
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            padding: '1rem 1rem 0rem 1rem'
+          }}
+        >
+          <Typography
+            sx={{ fontWeight: 'bold' }}
+            variant="h5"
+          >
+            Total Pembayaran
+          </Typography>
+          <Typography
+            sx={{ fontWeight: 'bold' }}
+            variant="h5"
+          >
+            Rp. {totalPembayaran.toLocaleString('id-ID')}
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            padding: '1rem 1rem 1rem 1rem'
+          }}
+        >
           <Button
-            color="primary"
             fullWidth={true}
+            sx={{ background: theme.palette.primary.gradient, padding: '0.5rem' }}
             variant="contained"
-            onClick={!isCheckout ? toggleOpenModalCheckout : () => navigate('./order-in-progress')}
+            onClick={
+              !isCheckout
+                ? toggleOpenModalCheckout
+                : () => navigate('./order-in-progress')
+            }
           >
             {isCheckout ? 'Checkout' : 'Proses Pesanan'}
           </Button>
-          </Box>
-        </StyledBox>
-      </SwipeableDrawer>
+        </Box>
+      </div>
 
       <Global
         styles={{
@@ -918,7 +1031,14 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
               Pilih Waktu Penyiapan Pesanan
             </Typography>
             <hr />
-            <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', marginTop: '3rem' }}>
+            <Box
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                justifyContent: 'center',
+                marginTop: '3rem'
+              }}
+            >
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <MobileTimePicker
                   value={selectedTime}
@@ -926,10 +1046,25 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
               </LocalizationProvider>
             </Box>
           </Box>
-          <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center' }}>
-            <Typography sx={{ textAlign: 'center' }}>Pesanan kamu akan disiapkan pada pukul <br /> {selectedTime.format('HH:mm')}</Typography>
+          <Box
+            sx={{
+              alignItems: 'center',
+              display: 'flex',
+              justifyContent: 'center'
+            }}
+          >
+            <Typography sx={{ textAlign: 'center' }}>
+              Pesanan kamu akan disiapkan pada pukul <br />{' '}
+              {selectedTime.format('HH:mm')}
+            </Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1rem 1rem 1rem' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: '1rem 1rem 1rem 1rem'
+            }}
+          >
             <Button
               color="primary"
               fullWidth={true}
@@ -951,7 +1086,12 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
           <Typography
             component="h3"
             id="modal-modal-title"
-            sx={{ color: `${theme?.palette?.error}`, fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'center' }}
+            sx={{
+              color: `${theme?.palette?.error}`,
+              fontWeight: 'bold',
+              marginBottom: '0.5rem',
+              textAlign: 'center'
+            }}
             variant="h3"
           >
             Udah yakin dengan pesananmu?
@@ -963,11 +1103,17 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
           >
             Sebelum pesan, pastiin pesananmu udah bener-bener sesuai, ya!
           </Typography>
-          <Box gap={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <Box
+            gap={2}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}
+          >
             <Button
-              color="primary"
               size="medium"
-              sx={{ width: '100%' }}
+              sx={{ background: theme.palette.primary.gradient, width: '100%' }}
               variant="contained"
               onClick={handleConfirmCheckout}
             >
@@ -996,7 +1142,13 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
           <Typography
             component="h3"
             id="modal-modal-title"
-            sx={{ color: `${theme?.palette?.error}`, fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'center' }}
+            sx={{
+              color: `${theme?.palette?.error}`,
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              marginBottom: '0.5rem',
+              textAlign: 'center'
+            }}
             variant="h3"
           >
             Mau beli di resto lain?
@@ -1006,13 +1158,21 @@ const CheckoutSinglePesanAntar: PageComponent = (props: Props) => {
             sx={{ marginBottom: '0.5rem', textAlign: 'center' }}
             variant="body1"
           >
-            Yuk, pesan makanan kesukaanmu dengan mudah! Dengan multi order, kamu dapat pesan makanan melalui resto yang searah, gak perlu muter-muter!
+            Yuk, pesan makanan kesukaanmu dengan mudah! Dengan multi order, kamu
+            dapat pesan makanan melalui resto yang searah, gak perlu
+            muter-muter!
           </Typography>
-          <Box gap={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <Box
+            gap={2}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}
+          >
             <Button
-              color="primary"
               size="medium"
-              sx={{ width: '100%' }}
+              sx={{ background: theme.palette.primary.gradient, width: '100%' }}
               variant="contained"
               onClick={handleConfirmTambahResto}
             >

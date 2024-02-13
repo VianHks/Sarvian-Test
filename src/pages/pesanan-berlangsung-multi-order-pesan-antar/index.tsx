@@ -759,9 +759,8 @@ const MultiOrderInProgressPesanAntar: PageComponent = () => {
           </Typography>
           <Box gap={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <Button
-              color="primary"
               size="medium"
-              sx={{ width: '100%' }}
+              sx={{ background: theme.palette.primary.gradient, width: '100%' }}
               variant="contained"
               onClick={handleConfirmBatal}
             >
@@ -847,9 +846,8 @@ const MultiOrderInProgressPesanAntar: PageComponent = () => {
           </Typography>
           <Box gap={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <Button
-              color="primary"
               size="medium"
-              sx={{ width: '100%', textTransform: 'none', fontSize: '1rem' }}
+              sx={{ background: theme.palette.primary.gradient, fontSize: '1rem', textTransform: 'none', width: '100%' }}
               variant="contained"
               onClick={toggleOpenModalDriverFail}
             >
@@ -858,7 +856,7 @@ const MultiOrderInProgressPesanAntar: PageComponent = () => {
             <Button
               color="primary"
               size="medium"
-              sx={{ width: '100%', textTransform: 'none', fontSize: '1rem' }}
+              sx={{ fontSize: '1rem', textTransform: 'none', width: '100%' }}
               variant="outlined"
               onClick={toggleOpenModalDriverFail}
             >
@@ -929,9 +927,8 @@ const MultiOrderInProgressPesanAntar: PageComponent = () => {
               Pilih Resto Lain
             </Button>
             <Button
-              color="primary"
               size="medium"
-              sx={{ width: '100%' }}
+              sx={{ background: theme.palette.primary.gradient, width: '100%' }}
               variant="contained"
               onClick={handleConfirmBatal}
             >
@@ -965,22 +962,21 @@ const MultiOrderInProgressPesanAntar: PageComponent = () => {
             Maaf, Resto Holliwings lagi gak bisa konfirmasi pesanan. Mau diulang lagi atau batal pesan dan pilih resto lain?
           <Box gap={2} sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Button
-              color="primary"
+              color="error"
               size="medium"
               sx={{ width: '100%' }}
               variant="outlined"
               onClick={toggleOpenModalBatal}
             >
-              Pilih Resto Lain
+              Batal Pesan
             </Button>
             <Button
-              color="primary"
               size="medium"
-              sx={{ width: '100%' }}
+              sx={{ background: theme.palette.primary.gradient, width: '100%' }}
               variant="contained"
               onClick={handleConfirmBatal}
             >
-              Ulang
+              Lanjut
             </Button>
           </Box>
         </Box>

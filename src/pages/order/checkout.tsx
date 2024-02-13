@@ -938,8 +938,8 @@ const Checkout: PageComponent = (props: Props) => {
               }}
             >
               <Button
-                color="primary"
                 fullWidth={true}
+                sx={{ background: theme.palette.primary.gradient }}
                 variant="contained"
                 onClick={
                   checkoutIdFromStorage
@@ -1148,8 +1148,8 @@ const Checkout: PageComponent = (props: Props) => {
                 }}
               >
                 <Button
-                  color="primary"
                   fullWidth={true}
+                  sx={{ background: theme.palette.primary.gradient }}
                   variant="contained"
                   onClick={handlePilihButtonClick}
                 >
@@ -1199,9 +1199,8 @@ const Checkout: PageComponent = (props: Props) => {
                   Cek Ulang
                 </Button>
                 <Button
-                  color="primary"
                   size="medium"
-                  sx={{ width: '100%' }}
+                  sx={{ background: theme.palette.primary.gradient, width: '100%' }}
                   variant="contained"
                   onClick={handleConfirmOrder}
                 >
@@ -1252,9 +1251,8 @@ const Checkout: PageComponent = (props: Props) => {
                   Batalkan
                 </Button>
                 <Button
-                  color="primary"
                   size="medium"
-                  sx={{ width: '100%' }}
+                  sx={{ background: theme.palette.primary.gradient, width: '100%' }}
                   variant="contained"
                   onClick={handleConfirmChangeResto}
                 >

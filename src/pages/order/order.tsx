@@ -216,11 +216,11 @@ interface OrderItem {
 }
 
 const Order: PageComponent = () => {
+  const theme = useTheme();
+  const navigate = useNavigate();
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
   const [store, dispatch] = useStore((state) => state?.order);
-  const navigate = useNavigate();
-  const theme = useTheme();
   const [tabValue, setTabValue] = useState('Diproses');
   /*
    * Const [statusFilterUnConfirmed, setStatusFilterUnConfirmed] = useState('All');
@@ -546,10 +546,9 @@ const Order: PageComponent = () => {
                     </Grid>
                     <Box>
                       <Button
-                        color="primary"
                         fullWidth={true}
                         size="medium"
-                        sx={{ padding: '0.6rem' }}
+                        sx={{ background: theme.palette.primary.gradient, padding: '0.6rem' }}
                         variant="contained"
                         onClick={() => handleLihatPesanana(order?.id)}
                       >
@@ -1121,11 +1120,10 @@ const Order: PageComponent = () => {
                         Lihat Penilaian
                       </Button>
                       <Button
-                        color="primary"
                         endIcon={false}
                         size="medium"
                         startIcon={false}
-                        sx={{ flex: 1, padding: '0.5rem 1.375rem' }}
+                        sx={{ background: theme.palette.primary.gradient, flex: 1, padding: '0.5rem 1.375rem' }}
                         variant="contained"
                       >
                         Beli Lagi

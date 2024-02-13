@@ -1,7 +1,7 @@
 import React from 'react';
 
 import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
-import { Button } from '@mui/material';
+import { Button, useTheme } from '@mui/material';
 
 import type { ButtonProps } from '@mui/material';
 
@@ -10,12 +10,15 @@ interface FloatingShoppingButtonProps extends ButtonProps {
 }
 
 const FloatingShoppingButton: React.FC<FloatingShoppingButtonProps> = ({ onClick, ...buttonProps }) => {
+  const theme = useTheme();
+
   return (
     <Button
-      color="primary"
       sx={{
+        background: theme.palette.primary.gradient,
         borderRadius: '100%',
         bottom: '8rem',
+        boxShadow: '2px -2px 8px 0px rgba(37, 105, 206, 0.24) inset, 0px 4px 4px 0px #8DBAFF inset',
         height: '65px',
         position: 'fixed',
         right: '2.75rem',

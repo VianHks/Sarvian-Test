@@ -21,12 +21,7 @@ import { KeyboardArrowDownFilled, QRCodeFilled } from '@nxweb/icons/material';
 import { Check } from '@nxweb/icons/tabler';
 import type { PageComponent } from '@nxweb/react';
 
-import {
-  Card,
-  CardContent,
-  Grid,
-  Typography
-} from '@components/material.js';
+import { Card, CardContent, Grid, Typography } from '@components/material.js';
 import { useAuth } from '@hooks/use-auth';
 import { OrderCommand } from '@models/order/reducers';
 import type { OrderDataModel } from '@models/order/types';
@@ -129,15 +124,17 @@ const DEFAULT_ORDER_DETAILS = {
 const SESSION_STORAGE_ORDER = 'orderId';
 
 const Orders: PageComponent = () => {
-  const navigate = useNavigate();
   const theme = useTheme();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get('id');
   const { auth } = useAuth();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
 
   const [store, dispatch] = useStore((state) => state);
-  const [detailOrder, setDetailOrder] = useState<OrderDataModel>(DEFAULT_ORDER_DETAILS);
+  const [detailOrder, setDetailOrder] = useState<OrderDataModel>(
+    DEFAULT_ORDER_DETAILS
+  );
   const [openModal, setOpenModal] = useState(false);
   const [openQR, setOpenQR] = useState(false);
   const [restoCountdown, setRestoCountdown] = useState(120);
@@ -159,10 +156,12 @@ const Orders: PageComponent = () => {
   };
 
   const handleConfirmBatal = () => {
-    OrderCommand.postCancelOrder({ orderId: orderId || '' }, token || '').then(() => {
-      navigate('/beranda');
-      window?.sessionStorage?.removeItem(SESSION_STORAGE_ORDER);
-    });
+    OrderCommand.postCancelOrder({ orderId: orderId || '' }, token || '').then(
+      () => {
+        navigate('/beranda');
+        window?.sessionStorage?.removeItem(SESSION_STORAGE_ORDER);
+      }
+    );
   };
 
   const toggleOpenModalQR = () => {
@@ -174,9 +173,7 @@ const Orders: PageComponent = () => {
   };
 
   useEffect(() => {
-    dispatch(
-      OrderCommand.getOrderDetails(orderId || '', token || '')
-    );
+    dispatch(OrderCommand.getOrderDetails(orderId || '', token || ''));
   }, [dispatch]);
 
   useEffect(() => {
@@ -203,7 +200,16 @@ const Orders: PageComponent = () => {
         >
           <Avatar src={MieBaso} sx={{ height: '40px', width: '40px' }} />
         </Grid>
-        <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'start', paddingTop: '0rem!important' }} xs={orderApproved ? 6 : 8}>
+        <Grid
+          item={true}
+          sx={{
+            alignItems: 'center',
+            display: 'flex',
+            justifyContent: 'start',
+            paddingTop: '0rem!important'
+          }}
+          xs={orderApproved ? 6 : 8}
+        >
           <Box>
             <Typography
               color={theme.palette.grey[900]}
@@ -217,7 +223,16 @@ const Orders: PageComponent = () => {
             </Typography>
           </Box>
         </Grid>
-        <Grid item={true} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', paddingTop: '0rem!important' }} xs={orderApproved ? 4 : 2}>
+        <Grid
+          item={true}
+          sx={{
+            alignItems: 'center',
+            display: 'flex',
+            justifyContent: 'center',
+            paddingTop: '0rem!important'
+          }}
+          xs={orderApproved ? 4 : 2}
+        >
           {/* ORDER APPROVED */}
           {/* {orderApproved
             ? <Box gap={2} sx={{ alignItems: 'center', display: 'flex', justifyContent: 'end' }}>
@@ -289,16 +304,29 @@ const Orders: PageComponent = () => {
           </Grid>
         : null} */}
       {detailOrder?.metafields?.order_type === 'pickUp' && orderApproved
-        ? <>
+        ? (
+        <>
           <Box marginBlock="1rem">
-            <Alert severity="info" sx={{ alignItems: 'center', backgroundColor: '#D5ECFE', display: 'flex' }} variant="filled">
+            <Alert
+              severity="info"
+              sx={{
+                alignItems: 'center',
+                backgroundColor: '#D5ECFE',
+                display: 'flex'
+              }}
+              variant="filled"
+            >
               <Typography color="primary" variant="body2">
-                Perlihatkan kode dibawah kepada resto untuk mengkonfirmasi pesananmu
+                Perlihatkan kode dibawah kepada resto untuk mengkonfirmasi
+                pesananmu
               </Typography>
             </Alert>
           </Box>
           <Card
-            sx={{ borderColor: theme.palette.primary.main, marginBottom: '1rem' }}
+            sx={{
+              borderColor: theme.palette.primary.main,
+              marginBottom: '1rem'
+            }}
             onClick={toggleOpenModalQR}
           >
             <CardContent
@@ -327,52 +355,77 @@ const Orders: PageComponent = () => {
               </Box>
             </CardContent>
           </Card>
-          </>
-        : detailOrder?.metafields?.order_type === 'delivery' && orderApproved && isDriverOnTheWay
-          ? <>
-            <Box marginBlock="1rem">
-              <Alert severity="info" sx={{ alignItems: 'center', backgroundColor: '#D5ECFE', display: 'flex' }} variant="filled">
-                <Typography color="primary" variant="body2">
-                  Perlihatkan kode dibawah kepada resto untuk mengkonfirmasi pesananmu
-                </Typography>
-              </Alert>
-            </Box>
-            <Card
-              sx={{ borderColor: theme.palette.primary.main, marginBottom: '1rem' }}
-              onClick={toggleOpenModalQR}
+        </>
+        )
+        : detailOrder?.metafields?.order_type === 'delivery' &&
+        orderApproved &&
+        isDriverOnTheWay
+          ? (
+        <>
+          <Box marginBlock="1rem">
+            <Alert
+              severity="info"
+              sx={{
+                alignItems: 'center',
+                backgroundColor: '#D5ECFE',
+                display: 'flex'
+              }}
+              variant="filled"
             >
-              <CardContent
+              <Typography color="primary" variant="body2">
+                Perlihatkan kode dibawah kepada resto untuk mengkonfirmasi
+                pesananmu
+              </Typography>
+            </Alert>
+          </Box>
+          <Card
+            sx={{
+              borderColor: theme.palette.primary.main,
+              marginBottom: '1rem'
+            }}
+            onClick={toggleOpenModalQR}
+          >
+            <CardContent
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '0.5rem 1rem 0.5rem 1rem!important'
+              }}
+            >
+              <Typography
+                sx={{ fontWeight: 'bold', textAlign: 'start' }}
+                variant="h5"
+              >
+                GHP230
+              </Typography>
+              <Box
                 sx={{
                   alignItems: 'center',
                   display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '0.5rem 1rem 0.5rem 1rem!important'
+                  gap: '0.5rem',
+                  justifyContent: 'end'
                 }}
               >
-                <Typography
-                  sx={{ fontWeight: 'bold', textAlign: 'start' }}
-                  variant="h5"
-                >
-                  GHP230
-                </Typography>
-                <Box
-                  sx={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    gap: '0.5rem',
-                    justifyContent: 'end'
-                  }}
-                >
-                  <QRCodeFilled color={theme.palette.primary.main} size={20} />
-                </Box>
-              </CardContent>
-            </Card>
-            </>
+                <QRCodeFilled color={theme.palette.primary.main} size={20} />
+              </Box>
+            </CardContent>
+          </Card>
+        </>
+          )
           : null}
-      <Typography color={theme.palette.grey[900]} fontWeight="bold" marginBlock="1rem" variant="h5">
+      <Typography
+        color={theme.palette.grey[900]}
+        fontWeight="bold"
+        marginBlock="1rem"
+        variant="h5"
+      >
         Pesanan Kamu
       </Typography>
-      <Accordion expanded={true} sx={{ borderRadius: '0.5rem', marginBottom: '1rem' }}>
+      <Accordion
+        expanded={true}
+        sx={{ borderRadius: '0.5rem', marginBottom: '1rem' }}
+      >
         <AccordionSummary
           aria-controls="panel1a-content"
           expandIcon={<KeyboardArrowDownFilled />}
@@ -388,7 +441,11 @@ const Orders: PageComponent = () => {
             }}
           >
             <Avatar src={MieBaso} sx={{ height: '24px', width: '24px' }} />
-            <Typography color={theme.palette.grey[900]} fontWeight="bold" variant="body1">
+            <Typography
+              color={theme.palette.grey[900]}
+              fontWeight="bold"
+              variant="body1"
+            >
               {detailOrder?.channel?.name}
             </Typography>
           </Box>
@@ -421,7 +478,11 @@ const Orders: PageComponent = () => {
                       <img
                         alt={obj.productName}
                         src={obj.thumbnail?.url}
-                        style={{ borderRadius: '8px', maxHeight: '100%', maxWidth: '100%' }} />
+                        style={{
+                          borderRadius: '8px',
+                          maxHeight: '100%',
+                          maxWidth: '100%'
+                        }} />
                     </div>
                   </Grid>
                   <Grid
@@ -461,7 +522,8 @@ const Orders: PageComponent = () => {
                         sx={{ fontWeight: 'bold', textAlign: 'start' }}
                         variant="body2"
                       >
-                        Rp. {obj.unitPrice?.gross?.amount.toLocaleString('id-ID')}
+                        Rp.{' '}
+                        {obj.unitPrice?.gross?.amount.toLocaleString('id-ID')}
                       </Typography>
                       <Box sx={{ textAlign: 'center' }}>
                         <Typography
@@ -538,7 +600,12 @@ const Orders: PageComponent = () => {
           </Stepper>
         </CardContent>
       </Card> */}
-      <Typography color={theme.palette.grey[900]} fontWeight="Bold" marginBottom="1rem" variant="h5">
+      <Typography
+        color={theme.palette.grey[900]}
+        fontWeight="Bold"
+        marginBottom="1rem"
+        variant="h5"
+      >
         Metode Pembayaran
       </Typography>
       <Box
@@ -569,7 +636,10 @@ const Orders: PageComponent = () => {
             sx={{ fontWeight: 'bold' }}
             variant="h5"
           >
-            Rp. {detailOrder?.lines[0]?.totalPrice?.gross?.amount?.toLocaleString('id-ID')}
+            Rp.{' '}
+            {detailOrder?.lines[0]?.totalPrice?.gross?.amount?.toLocaleString(
+              'id-ID'
+            )}
           </Typography>
         </Box>
       </Box>
@@ -600,7 +670,10 @@ const Orders: PageComponent = () => {
               }}
               variant="body2"
             >
-              Rp. {detailOrder?.lines[0]?.totalPrice?.gross?.amount?.toLocaleString('id-ID')}
+              Rp.{' '}
+              {detailOrder?.lines[0]?.totalPrice?.gross?.amount?.toLocaleString(
+                'id-ID'
+              )}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -691,10 +764,26 @@ const Orders: PageComponent = () => {
         </CardContent>
       </Card>
       <Box marginTop="2rem">
-        <Button color="error" fullWidth={true} sx={{ borderRadius: '0.5rem', marginBottom: '1rem', padding: '8px 22px' }} variant="contained" onClick={toggleOpenModalBatal}>
+        <Button
+          color="error"
+          fullWidth={true}
+          sx={{
+            borderRadius: '0.5rem',
+            marginBottom: '1rem',
+            padding: '8px 22px'
+          }}
+          variant="contained"
+          onClick={toggleOpenModalBatal}
+        >
           Batalkan Pesanan
         </Button>
-        <Button color="primary" fullWidth={true} sx={{ borderRadius: '0.5rem', padding: '8px 22px' }} variant="outlined" onClick={() => navigate('/pusat-bantuan')}>
+        <Button
+          color="primary"
+          fullWidth={true}
+          sx={{ borderRadius: '0.5rem', padding: '8px 22px' }}
+          variant="outlined"
+          onClick={() => navigate('/pusat-bantuan')}
+        >
           Pusat Bantuan
         </Button>
       </Box>
@@ -709,7 +798,11 @@ const Orders: PageComponent = () => {
           <Typography
             component="h3"
             id="modal-modal-title"
-            sx={{ color: `${theme?.palette?.error}`, fontWeight: 'bold', textAlign: 'center' }}
+            sx={{
+              color: `${theme?.palette?.error}`,
+              fontWeight: 'bold',
+              textAlign: 'center'
+            }}
             variant="h3"
           >
             Yakin mau batalin pesanan kamu?
@@ -719,13 +812,13 @@ const Orders: PageComponent = () => {
             sx={{ marginBlock: '1rem', textAlign: 'center' }}
             variant="body1"
           >
-            Inget, ya. Pesanan yang kamu batalin akan hilang dari daftar manapun. Masih yakin mau batalin pesanan?
+            Inget, ya. Pesanan yang kamu batalin akan hilang dari daftar
+            manapun. Masih yakin mau batalin pesanan?
           </Typography>
           <Box gap={2} sx={{ display: 'flex', flexDirection: 'column' }}>
             <Button
-              color="primary"
               size="medium"
-              sx={{ width: '100%' }}
+              sx={{ background: theme.palette.primary.gradient, width: '100%' }}
               variant="contained"
               onClick={handleConfirmBatal}
             >
@@ -778,9 +871,8 @@ const Orders: PageComponent = () => {
                 Pilih Resto Lain
               </Button>
               <Button
-                color="primary"
                 size="medium"
-                sx={{ width: '100%' }}
+                sx={{ background: theme.palette.primary.gradient, width: '100%' }}
                 variant="contained"
                 onClick={() => { setRestoCountdown(120); setOrderApproved(false); }}
               >
@@ -846,7 +938,12 @@ const Orders: PageComponent = () => {
           <Typography
             component="h3"
             id="modal-modal-title"
-            sx={{ color: `${theme?.palette?.error}`, fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'center' }}
+            sx={{
+              color: `${theme?.palette?.error}`,
+              fontWeight: 'bold',
+              marginBottom: '0.5rem',
+              textAlign: 'center'
+            }}
             variant="h3"
           >
             Kode QR Pesanan
@@ -897,9 +994,8 @@ const Orders: PageComponent = () => {
                   Pilih Resto Lain
                 </Button>
                 <Button
-                  color="primary"
                   size="medium"
-                  sx={{ width: '100%' }}
+                  sx={{ background: theme.palette.primary.gradient, width: '100%' }}
                   variant="contained"
                   onClick={handleConfirmBatal}
                 >

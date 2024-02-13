@@ -4,8 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Card,
-  CardContent,
-  CardMedia,
   Chip,
   Divider,
   Grid,
@@ -31,11 +29,11 @@ import type { ChannelsDataModel } from '@models/home/types';
 import { useCommand, useStore } from '@models/store';
 import FloatingShoppingButton from '@pages/halaman-resto/floatingshopping-button';
 
-import danaIcon from '@assets/images/pages/beranda/dana.png';
 import dineInIcon from '@assets/images/pages/beranda/DineIn.svg';
 import pesanAntarIcon from '@assets/images/pages/beranda/PesanAntar.svg';
 import pickUpIcon from '@assets/images/pages/beranda/PickUp.svg';
 import recomendationIcon from '@assets/images/pages/beranda/Rekomendasi 1.svg';
+import danaIcon from '@assets/images/pages/beranda/dana.png';
 import jajananLokalIcon from '@assets/images/pages/beranda/jajananLokalIcon.svg';
 import recomendationImage from '@assets/images/pages/beranda/recomandation.svg';
 import terdekat from '@assets/images/pages/beranda/terdekat.svg';
@@ -460,12 +458,13 @@ const Home: PageComponent = () => {
   };
 
   const handleBindDANA = () => {
-    const url = 'https://m.sandbox.dana.id/m/portal/oauth?clientId=2022021611522186783288&scopes=QUERY_BALANCE,DEFAULT_BASIC_PROFILE,AGREEMENT_PAY,MINI_DANA&requestId=180fa418-f4fd-45ae-9e99-8deb07c2059d&state=2345555&terminalType=APP&lang=id&redirectUrl=https://www.tokrum.com/oauthdana/callback&seamlessData=%7B%22mobile%22%3A%2208579512345688%22%2C%22verifiedTime%22%3A%222024-02-07T03%3A56%3A46%2B00%3A00%22%2C%22externalUid%22%3A%22customerId%22%2C%22reqTime%22%3A%222024-02-07T03%3A56%3A46%2B00%3A00%22%2C%22reqMsgId%22%3A%22180fa418-f4fd-45ae-9e99-8deb07c2059d%22%7D&seamlessSign=GGB2gUKtCktDY2%2BmFZ6X4jwQTGCCm5TwClCRRuTEryKuxan5xSmHQ7dT1H7811GbAP2mIfGrNo7Z75a%2BkCN7v8UNYMG7E3PMrrEDv78tevTwny5cFI3PyrZMDGZGed3rVUrw9ZIehp%2FuEvC%2B74YToj9a8%2BGLu3cZ07mSl3HTPfaNptemDYZ8iSwV2tCIGMzsjNe09Pq0oWf2laI7GFOJz8bXx3jonpVxwIumYDiiS3zosnorRQd%2F3wED%2FdVK56Ub2EwmpszVIoHQHaKQ4nq1O6neRJQwTGP3iUsXWtnkKpDDsGvTe7e%2F5xsasAo7fP706qIGUs1uceMWAbow9AhUsQ%3D%3D';
+    const url =
+      'https://m.sandbox.dana.id/m/portal/oauth?clientId=2022021611522186783288&scopes=QUERY_BALANCE,DEFAULT_BASIC_PROFILE,AGREEMENT_PAY,MINI_DANA&requestId=180fa418-f4fd-45ae-9e99-8deb07c2059d&state=2345555&terminalType=APP&lang=id&redirectUrl=https://www.tokrum.com/oauthdana/callback&seamlessData=%7B%22mobile%22%3A%2208579512345688%22%2C%22verifiedTime%22%3A%222024-02-07T03%3A56%3A46%2B00%3A00%22%2C%22externalUid%22%3A%22customerId%22%2C%22reqTime%22%3A%222024-02-07T03%3A56%3A46%2B00%3A00%22%2C%22reqMsgId%22%3A%22180fa418-f4fd-45ae-9e99-8deb07c2059d%22%7D&seamlessSign=GGB2gUKtCktDY2%2BmFZ6X4jwQTGCCm5TwClCRRuTEryKuxan5xSmHQ7dT1H7811GbAP2mIfGrNo7Z75a%2BkCN7v8UNYMG7E3PMrrEDv78tevTwny5cFI3PyrZMDGZGed3rVUrw9ZIehp%2FuEvC%2B74YToj9a8%2BGLu3cZ07mSl3HTPfaNptemDYZ8iSwV2tCIGMzsjNe09Pq0oWf2laI7GFOJz8bXx3jonpVxwIumYDiiS3zosnorRQd%2F3wED%2FdVK56Ub2EwmpszVIoHQHaKQ4nq1O6neRJQwTGP3iUsXWtnkKpDDsGvTe7e%2F5xsasAo7fP706qIGUs1uceMWAbow9AhUsQ%3D%3D';
 
     setTimeout(() => {
       window.location.replace(url);
     }, 1000);
-    // navigate(`/dana/bind`);
+    // Navigate(`/dana/bind`);
   };
 
   return (
@@ -487,7 +486,10 @@ const Home: PageComponent = () => {
         </Grid>
         <Grid item={true}>
           <Typography color="neutral-90" fontWeight="bold" variant="h5">
-            {store?.personalizedRec?.customerProfile?.data?.user?.defaultShippingAddress?.streetAddress1}
+            {
+              store?.personalizedRec?.customerProfile?.data?.user
+                ?.defaultShippingAddress?.streetAddress1
+            }
           </Typography>
         </Grid>
         <Grid item={true}>
@@ -520,41 +522,46 @@ const Home: PageComponent = () => {
         value={searchValue}
         variant="outlined"
         onClick={handleSearch} />
-        <Box
-          sx={{
-            px: '8px',
-            py: '16px',
-            marginBottom: '16px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            boxShadow: '0px 4px 8px 0px rgba(49, 127, 242, 0.08)',
-            border: '1px solid',
-            borderRadius: '8px',
-            borderColor: '#5698FB'
-          }}
-        >
-          <Box sx={{ display: 'flex'}}>
-            <img alt="dana" src={danaIcon} height={24} width={24}/>
-            <Typography
-              color="#475467"
-              marginLeft="6px"
-              variant="h6"
-            >
-              Saldo DANA
-            </Typography>
-          </Box>
-          <Typography
-            color="#1050AE"
-            fontWeight="bold"
-            sx={{ cursor: 'pointer' }}
-            variant="h6"
-            onClick={handleBindDANA}
-          >
-            Hubungkan
+      <Box
+        sx={{
+          alignItems: 'center',
+          border: '1px solid',
+          borderColor: '#5698FB',
+          borderRadius: '8px',
+          boxShadow: '0px 4px 8px 0px rgba(49, 127, 242, 0.08)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginBottom: '16px',
+          px: '8px',
+          py: '16px'
+        }}
+      >
+        <Box sx={{ display: 'flex' }}>
+          <img alt="dana" height={24} src={danaIcon} width={24} />
+          <Typography color="#475467" marginLeft="6px" variant="h6">
+            Saldo DANA
           </Typography>
         </Box>
-      <Grid container={true} spacing={1} sx={{ display: isSmallScreen ? 'grid' : 'flex', justifyContent: 'space-evenly', marginBottom: shipmentMethode === 'Pesan Antar' ? '1rem' : '1rem' }}>
+        <Typography
+          color="#1050AE"
+          fontWeight="bold"
+          sx={{ cursor: 'pointer' }}
+          variant="h6"
+          onClick={handleBindDANA}
+        >
+          Hubungkan
+        </Typography>
+      </Box>
+      <Grid
+        container={true}
+        spacing={1}
+        sx={{
+          // display: isSmallScreen ? 'grid' : 'flex',
+          display: 'flex',
+          justifyContent: 'space-evenly',
+          marginBottom: shipmentMethode === 'Pesan Antar' ? '1rem' : '1rem'
+        }}
+      >
         {/* <Grid item={true}>
           <Chip
             disabled={true}
@@ -611,7 +618,6 @@ const Home: PageComponent = () => {
               padding: '0.5rem',
               width: isSmallScreen ? '100%' : 'none'
             }}
-
             onClick={() => handleShipmentMethodChange('Dine In')} />
         </Grid>
       </Grid>
@@ -855,7 +861,9 @@ const Home: PageComponent = () => {
               marginBottom: '1rem',
               padding: '0.5rem'
             }}
-            onClick={() => { handleCardToRestoClick(resto.id); }}
+            onClick={() => {
+              handleCardToRestoClick(resto.id);
+            }}
           >
             <Grid container={true} spacing={2}>
               <Grid item={true} xs={4}>
