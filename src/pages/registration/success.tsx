@@ -20,9 +20,8 @@ const RegistrationSuccess: PageComponent = () => {
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       handleNavigationRecomendation();
-    }, 2000); // 2 seconds delay
+    }, 2000);
 
-    // Clean up the timeout to prevent memory leaks
     return () => clearTimeout(timeoutId);
   }, []);
 
