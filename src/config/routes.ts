@@ -272,5 +272,21 @@ export const routes: Route[] = [
     layout: 'blank',
     path: '/edit-photo',
     search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/registration/index.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/registration_info',
+    search: true
+  },
+  {
+    auth: false,
+    element: lazy(() => import('@pages/registration/success.js')),
+    hash: true,
+    layout: 'blank',
+    path: '/registration_success',
+    search: true
   }
 ];

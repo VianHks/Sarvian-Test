@@ -12,7 +12,9 @@ const DEFAULT_USER_INFO: UserProfileDataModel = {
   phone: '+62 821 008868888',
   email: 'Doe@gmail.com',
   address: 'Jalan, Majapahit I No.10',
+  gender: 'Wanita',
   profile_picture: profilePicture,
+  date_of_birth: '2020-01-01T00:00:00.000Z',
   created_date: '2024-02-06T00:00:00.000Z',
   verified_email: false,
   verified_phone: false

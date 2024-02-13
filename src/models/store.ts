@@ -21,6 +21,7 @@ import { productsCommand } from './products/commands.js';
 import { productsReducer } from './products/reducers.js';
 import { RatingCommand } from './rating/commands.js';
 import { RatingReducer } from './rating/reducers.js';
+import { RegistrationCommand, RegistrationDefault, RegistrationReducer } from './registration/reducers.js';
 import { UserCommand, UserDefault, UsersReducer } from './user-profile/reducers.js';
 
 import type { RootAction, RootModel } from './types.js';
@@ -48,7 +49,7 @@ const rootModel: RootModel = {
   productView: ProductViewsDefault,
   rating: {},
   profile: UserDefault,
-  register: DEFAULT_REGISTER
+  registration: RegistrationDefault
 };
 
 // ** Init commands
@@ -64,7 +65,7 @@ const rootCommand = {
   productView: ProductViewsCommand,
   rating: RatingCommand,
   profile: UserCommand,
-  register: RegisterCommand
+  registration: RegistrationCommand
 };
 
 // ** Create store
