@@ -441,7 +441,7 @@ export const OrderCommand = {
   ): Promise<string> => {
     return (
       fetch(
-        `https://apigateway-dev.tokrum.com:8081/foodbuyer/0.1/checkout/${checkoutId}`,
+        `https://apigateway-dev.tokrum.com:8081/checkout/${checkoutId}`,
         {
           method: 'DELETE',
           headers: {
@@ -476,7 +476,7 @@ export const OrderCommand = {
   getCart: (checkoutId: string, token: string): TAction<OrderAction, void> => {
     return (dispatch: TDispatch<OrderAction>) => {
       return apiFetch(token)
-        .get(`/foodbuyer/0.1/checkout/${checkoutId}`)
+        .get(`/checkout/${checkoutId}`)
         .then((response) => {
           if (response.status === 200) {
             if (response.data !== null) {
@@ -504,7 +504,7 @@ export const OrderCommand = {
   ): TAction<OrderAction, void> => {
     return (dispatch: TDispatch<OrderAction>) => {
       return apiFetch(token)
-        .get(`/foodbuyer/0.1/checkout/details/${checkoutId}`)
+        .get(`/checkout/details/${checkoutId}`)
         .then((response) => {
           if (response.status === 200) {
             if (response.data !== null) {
@@ -532,7 +532,7 @@ export const OrderCommand = {
   ): TAction<OrderAction, void> => {
     return (dispatch: TDispatch<OrderAction>) => {
       return apiFetch(token)
-        .post(`/foodbuyer/0.1/checkouts`, payload)
+        .post(`/checkouts`, payload)
         .then((response) => {
           if (response.status === 200) {
             if (response.data !== null) {
@@ -560,7 +560,7 @@ export const OrderCommand = {
   ): TAction<OrderAction, void> => {
     return (dispatch: TDispatch<OrderAction>) => {
       return apiFetch(token)
-        .get(`/foodbuyer/0.1/order/${orderId}`)
+        .get(`/order/${orderId}`)
         .then((response) => {
           if (response.status === 200) {
             if (response.data !== null) {
@@ -585,7 +585,7 @@ export const OrderCommand = {
   postCancelOrder: (payload: unknown, token: string): Promise<string> => {
     return (
       apiFetch(token)
-        .post(`/foodbuyer/0.1/order/cancel`, payload)
+        .post(`/order/cancel`, payload)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .then((response: any) => {
           const id: string = response?.data?.orderId;
@@ -607,7 +607,7 @@ export const OrderCommand = {
   ): Promise<string> => {
     return (
       apiFetch(token)
-        .post(`/foodbuyer/0.1/checkout/detach`, payload)
+        .post(`/checkout/detach`, payload)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .then((response: any) => {
           const id: string = response?.data?.orderId;
@@ -626,7 +626,7 @@ export const OrderCommand = {
   postCreateOrder: (payload: unknown, token: string): Promise<string> => {
     return (
       apiFetch(token)
-        .post(`/foodbuyer/0.1/order`, payload)
+        .post(`/order`, payload)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .then((response: any) => {
           const id: string = response?.data?.orderId;
@@ -648,7 +648,7 @@ export const OrderCommand = {
   ): TAction<OrderAction, void> => {
     return (dispatch: TDispatch<OrderAction>) => {
       return apiFetch(token)
-        .post(`/foodbuyer/0.1/orders`, params)
+        .post(`/orders`, params)
         .then((response) => {
           if (response.status === 200) {
             if (response.data !== null) {
@@ -673,7 +673,7 @@ export const OrderCommand = {
   getOrderDetail: (id: string, token: string): TAction<OrderAction, void> => {
     return (dispatch: TDispatch<OrderAction>) => {
       return apiFetch(token)
-        .get(`/foodbuyer/0.1/order/${id}`)
+        .get(`/order/${id}`)
         .then((response) => {
           if (response.status === 200) {
             if (response.data !== null) {

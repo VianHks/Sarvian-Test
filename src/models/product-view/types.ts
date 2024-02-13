@@ -3,6 +3,7 @@ interface ChannelListingsDataModel {
   channel: {
     id: string
     name: string
+    slug: string
   }
   id: string
   isAvailableForPurchase: boolean
@@ -60,28 +61,66 @@ interface ProductDetailsDataModel {
   }
 }
 
-interface CreateCheckoutDataModel {
+interface CheckoutIdModel {
   checkout_id: string
 }
 
+interface VariantAttributesModel {
+  choices: {
+    edges: {
+      node: {
+        id: string
+        name: string
+        slug: string
+        value: string
+      }
+    }[]
+  }
+  id: string
+  inputType: string
+  name: string
+}
+
+interface ProductTypeModel {
+  data: {
+    productType: {
+      name: string
+      variantAttributes: VariantAttributesModel[]
+    }
+  }
+}
+
 interface ProductViewsModel {
+  checkoutId?: CheckoutIdModel
   productDetails?: ProductDetailsDataModel
-  responseCreateCheckout?: CreateCheckoutDataModel
+  productTypeDetails?: ProductTypeModel
 }
 
 enum ProductViewsActionType {
   GetProductDetails = '⌘➝Product-View➝GetProductDetails',
-  GetCheckoutId = '⌘➝Product-View➝GetCheckoutId'
-
+  GetCheckoutId = '⌘➝Product-View➝GetCheckoutId',
+  GetProductTypeDetails = '⌘➝Product-View➝GetProductTypeDetails'
 }
 
-type ProductViewsAction = {
-  data: ProductViewsModel
-  type: ProductViewsActionType.GetCheckoutId
-} | {
-  data: ProductViewsModel
-  type: ProductViewsActionType.GetProductDetails
-};
+type ProductViewsAction =
+  | {
+    data: ProductViewsModel
+    type: ProductViewsActionType.GetCheckoutId
+  }
+  | {
+    data: ProductViewsModel
+    type: ProductViewsActionType.GetProductDetails
+  } | {
+    data: ProductViewsModel
+    type: ProductViewsActionType.GetProductTypeDetails
+  };
 
 export { ProductViewsActionType };
-export type { ProductViewsModel, ProductViewsAction, ProductDetailsDataModel, CreateCheckoutDataModel };
+export type {
+  ProductViewsModel,
+  ProductViewsAction,
+  ProductDetailsDataModel,
+  CheckoutIdModel,
+  ProductTypeModel,
+  VariantAttributesModel
+};

@@ -123,8 +123,6 @@ const Keranjang: PageComponent = () => {
     }
   }, [store?.checkouts]);
 
-  console.log('HERE', orders)
-
   return (
     <>
       <Snackbar autoHideDuration={3000} open={alert} sx={{ left: 'auto', position: 'relative', right: 'auto' }} onClose={handleDelete}>
