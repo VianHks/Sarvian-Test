@@ -122,8 +122,6 @@ const DEFAULT_ORDER_DETAILS = {
   userEmail: ''
 };
 
-const SESSION_STORAGE_ORDER = 'orderId';
-
 const Orders: PageComponent = () => {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -162,12 +160,9 @@ const Orders: PageComponent = () => {
   };
 
   const handleConfirmBatal = () => {
-    OrderCommand.postCancelOrder({ orderId: orderId || '' }, token || '').then(
-      () => {
-        navigate('/beranda');
-        window?.sessionStorage?.removeItem(SESSION_STORAGE_ORDER);
-      }
-    );
+    OrderCommand.postCancelOrder({ orderId: orderId || '' }, token || '').then(() => {
+      navigate('/beranda');
+    });
   };
 
   const toggleOpenModalQR = () => {
