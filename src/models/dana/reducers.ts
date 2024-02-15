@@ -18,7 +18,7 @@ const DANAReducer = (
 
 export const DanaCommands = {
   getBindingURL: (params: unknown, token: string): string => {
-    apiFetch(token).post(`/foodbuyer/0.1/dana/get-binding-url`, params).then((response: any) => {
+    apiFetch(token).post(`/dana/get-binding-url`, params).then((response: any) => {
       if (response.status === 200) {
         if (response.data !== null) {
           const url = (response.data.url as string);

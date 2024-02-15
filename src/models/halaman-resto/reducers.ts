@@ -332,7 +332,7 @@ export const ChannelCommand = {
   getCheckoutList: (params: unknown, token: string): TAction<HalamanRestoAction, void> => {
     return (dispatch: TDispatch<HalamanRestoAction>) => {
       return apiFetch(token)
-        .post(`/foodbuyer/0.1/checkout-by-channel`, params)
+        .post(`/checkout-by-channel`, params)
         .then((response) => {
           if (response.status === 200) {
             if (response.data !== null) {
@@ -357,7 +357,7 @@ export const ChannelCommand = {
   getChannelDetail: (id: string, token: string): TAction<HalamanRestoAction, void> => {
     return (dispatch: TDispatch<HalamanRestoAction>) => {
       return apiFetch(token)
-        .get(`/foodbuyer/0.1/channel/${id}`)
+        .get(`/channel/${id}`)
         .then((response) => {
           if (response.status === 200) {
             if (response.data !== null) {
@@ -382,7 +382,7 @@ export const ChannelCommand = {
   getCollections: (params: unknown, token: string): TAction<HalamanRestoAction, void> => {
     return (dispatch: TDispatch<HalamanRestoAction>) => {
       return apiFetch(token)
-        .post(`/foodbuyer/0.1/collections`, params)
+        .post(`/collections`, params)
         .then((response) => {
           if (response.status === 200) {
             if (response.data !== null) {
@@ -407,7 +407,7 @@ export const ChannelCommand = {
   getCollectionsbyMetadata: (params: unknown, token: string): TAction<HalamanRestoAction, void> => {
     return (dispatch: TDispatch<HalamanRestoAction>) => {
       return apiFetch(token)
-        .post(`/foodbuyer/0.1/products/by-metadata`, params)
+        .post(`/products/by-metadata`, params)
         .then((response) => {
           if (response.status === 200) {
             if (response.data !== null) {
@@ -440,7 +440,7 @@ export const ChannelCommand = {
   getproductbyCollection: (params: unknown, token: string): TAction<HalamanRestoAction, void> => {
     return (dispatch: TDispatch<HalamanRestoAction>) => {
       return apiFetch(token)
-        .post(`/foodbuyer/0.1/products/by-collection`, params)
+        .post(`/products/by-collection`, params)
         .then((response) => {
           if (response.status === 200) {
             if (response.data !== null) {
@@ -463,7 +463,7 @@ export const ChannelCommand = {
     };
   },
   postCreateCheckout: (payload: unknown, token: string): Promise<string> => {
-    return apiFetch(token).post(`/foodbuyer/0.1/checkout`, payload)
+    return apiFetch(token).post(`/checkout`, payload)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .then((response: any) => {
         const id: string = response?.data?.checkout_id;
@@ -478,7 +478,7 @@ export const ChannelCommand = {
       });
   },
   putCheckoutLines: (payload: unknown, token: string): Promise<string> => {
-    return apiFetch(token).put(`/foodbuyer/0.1/checkout`, payload)
+    return apiFetch(token).put(`/checkout`, payload)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .then((response: any) => {
         const id: string = response?.data?.checkoutId;
