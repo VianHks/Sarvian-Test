@@ -22,16 +22,14 @@ const AuthChecks = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (token && store?.personalizedRec?.customerProfile?.data?.user?.metadata) {
-      const { metadata } = store?.personalizedRec?.customerProfile?.data?.user || [];
-
-      if (metadata && metadata.length > 1) {
-        navigate(`/beranda`);
-      } else {
-        navigate(`/personalized-recomendation`);
-      }
+    const metadata = store?.personalizedRec?.customerProfile?.data?.user?.metadata;
+    const lunchMetadata = metadata?.find((meta) => meta.key === 'lunch');
+    if (token && lunchMetadata === undefined) {
+      navigate(`/personalized-recomendation`);
+    } else {
+      navigate(`/beranda`);
     }
-  }, [token, store?.personalizedRec?.customerProfile?.data, dispatch]);
+  }, [token, store?.personalizedRec?.customerProfile?.data?.user?.metadata]);
 
   /*
    *   UseEffect(() => {

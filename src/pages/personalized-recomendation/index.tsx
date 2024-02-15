@@ -131,8 +131,9 @@ const PersonalizedRecomendation: PageComponent = () => {
 
   useEffect(() => {
     if (token && store?.customerProfile?.data?.user?.metadata) {
-      const { metadata } = store?.customerProfile?.data?.user || [];
-      if (metadata && metadata.length > 1) {
+      const metadata = store?.customerProfile?.data?.user?.metadata;
+      const lunchMetadata = metadata?.find((meta) => meta.key === 'lunch');
+      if (lunchMetadata) {
         navigate(`/beranda`);
       } else {
         dispatch(PersonalizedRecomendationCommand.getPersonalizeRecomendation());
