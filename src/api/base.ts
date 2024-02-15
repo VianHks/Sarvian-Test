@@ -3,7 +3,7 @@ import type { FetchURLOptions } from '@nxweb/core';
 
 import { apiMock } from './mock.js';
 
-export const getApiURL = () => `${window.NX?.env?.API_URL}${window.NX?.env?.API_FOOD_BUYER}`;
+export const getApiURL = () => `${window.NX?.env?.API_URL}/${window.NX?.env?.API_FOOD_BUYER}`;
 
 export const apiURL = (endpoint: string, options: Readonly<FetchURLOptions> = {}) => {
   return createFetchURL(
