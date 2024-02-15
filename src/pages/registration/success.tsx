@@ -14,7 +14,7 @@ const RegistrationSuccess: PageComponent = () => {
   const navigate = useNavigate();
 
   const handleNavigationRecomendation = () => {
-    navigate('/recomendation');
+    navigate('/personalized-recomendation');
   };
 
   useEffect(() => {

@@ -54,7 +54,7 @@ export const routes: Route[] = [
     hash: true,
     layout: 'blank',
     meta: { appBarId: 'recommendation' },
-    path: '/recomendation',
+    path: '/personalized-recomendation',
     search: true
   },
   {

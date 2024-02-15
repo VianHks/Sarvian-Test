@@ -24,12 +24,11 @@ const AuthChecks = () => {
   useEffect(() => {
     if (token && store?.personalizedRec?.customerProfile?.data?.user?.metadata) {
       const { metadata } = store?.personalizedRec?.customerProfile?.data?.user || [];
-      console.log('MASUK SINI', metadata);
 
       if (metadata && metadata.length > 1) {
         navigate(`/beranda`);
       } else {
-        navigate(`/recommendation`);
+        navigate(`/personalized-recomendation`);
       }
     }
   }, [token, store?.personalizedRec?.customerProfile?.data, dispatch]);
