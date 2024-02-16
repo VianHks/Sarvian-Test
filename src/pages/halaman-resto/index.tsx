@@ -101,10 +101,9 @@ const HalamanResto: PageComponent = () => {
   const checkoutIdFromStorage =
     window.sessionStorage.getItem(SESSION_STORAGE_KEYS.CHECKOUT) ?? '';
   const [isLoading, setIsLoading] = useState(false);
-
+  const [slug, setSlug] = useState('');
   const [searchParams] = useSearchParams();
   const channelId = searchParams.get('id');
-  const channelName = 'makan';
   const daysOfWeek = [
     'minggu',
     'senin',
@@ -202,6 +201,38 @@ const HalamanResto: PageComponent = () => {
     }
   }, [store?.halamanResto?.linesOutput]);
 
+  useEffect(() => {
+    if (store?.halamanResto?.channelDetailOutput?.data?.channel.slug) {
+      setSlug(store?.halamanResto?.channelDetailOutput?.data?.channel.slug || '');
+    }
+
+    if (slug !== '') {
+      const paramMetadata = {
+        after: '',
+        channel: slug,
+        filterKey: 'recomendation',
+        filterValue: 'true',
+        first: 10
+      };
+
+      dispatch(
+        ChannelCommand.getCollectionsbyMetadata(paramMetadata, token || '')
+      );
+      const param = {
+        after: '',
+        channel: slug,
+        direction: 'ASC',
+        field: 'NAME',
+        first: 100,
+        published: 'PUBLISHED'
+      };
+
+      dispatch(ChannelCommand.getCollections(param, token || ''));
+    }
+  }, [store?.halamanResto?.channelDetailOutput]);
+
+  console.log('cekslug', slug);
+
   const handleShoppingButtonClick = () => {
     navigate('/keranjang');
   };
@@ -265,10 +296,10 @@ const HalamanResto: PageComponent = () => {
       })
       .filter((line) => line.quantity > 0 && !line.lineId);
 
-    if (filteredPostLines.length > 0) {
+    if (filteredPostLines.length > 0 && slug !== '') {
       const paramCreate = {
         after: '',
-        channel: 'makan',
+        channel: slug,
         deliveryMethodId:
           'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
         first: 100,
@@ -319,36 +350,13 @@ const HalamanResto: PageComponent = () => {
    */
 
   useEffect(() => {
-    const param = {
-      after: '',
-      channel: 'makan',
-      direction: 'ASC',
-      field: 'NAME',
-      first: 100,
-      published: 'PUBLISHED'
-    };
-
-    dispatch(ChannelCommand.getCollections(param, token || ''));
-
-    const paramMetadata = {
-      after: '',
-      channel: 'makan',
-      filterKey: 'recomendation',
-      filterValue: 'true',
-      first: 10
-    };
-
-    dispatch(
-      ChannelCommand.getCollectionsbyMetadata(paramMetadata, token || '')
-    );
-
-    const emailUser = 'ridwan.azis@navcore.com';
+    // Const emailUser = 'ridwan.azis@navcore.com';
     const paramChekoutList = {
-      channel: channelName,
-      customer: emailUser
+      channel: slug,
+      token
     };
 
-    if (emailUser) {
+    if (token) {
       dispatch(ChannelCommand.getCheckoutList(paramChekoutList, token || ''));
     }
 
@@ -396,6 +404,7 @@ const HalamanResto: PageComponent = () => {
             left: 0,
             paddingInline: '1rem',
             position: 'fixed',
+            width: '100%',
             top: 0,
             zIndex: 100
           }}

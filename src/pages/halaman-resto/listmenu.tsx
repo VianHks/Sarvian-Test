@@ -8,7 +8,6 @@ import {
   CircularProgress,
   Grid,
   IconButton,
-  SelectChangeEvent,
   Typography
 } from '@mui/material';
 
@@ -23,6 +22,8 @@ import { useAuth } from '@hooks/use-auth';
 import { ChannelCommand } from '@models/halaman-resto/reducers';
 import { OrderCommand } from '@models/order/reducers';
 import { useStore } from '@models/store';
+
+import type { SelectChangeEvent } from '@mui/material';
 
 interface LinesModel {
   metadata: [
@@ -75,7 +76,7 @@ interface PayloadDataModel {
 
 const DATA: PayloadDataModel = {
   after: '',
-  channel: 'makan',
+  channel: '',
   deliveryMethodId: 'string',
   first: 100,
   lines: [DefaultLines],
@@ -83,7 +84,7 @@ const DATA: PayloadDataModel = {
 };
 
 interface ListMenuProps {
-  scrollToKategoriMenu: (event: SelectChangeEvent<string>) => void;
+  scrollToKategoriMenu: (event: SelectChangeEvent<string>) => void
 }
 
 const ListMenu: React.FC<ListMenuProps> = ({ scrollToKategoriMenu }) => {
@@ -93,11 +94,10 @@ const ListMenu: React.FC<ListMenuProps> = ({ scrollToKategoriMenu }) => {
   const [store, dispatch] = useStore((state) => state);
   const listMenuElementRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
-
+  const [slug, setSlug] = useState('');
   const [colIds, setColIds] = useState<{ id: string, name: string }[]>([]);
-
+  const [colIdsOnly, setcolIdsOnly] = useState(['']);
   const [formData, setFormData] = useState(DATA);
-
 
   useEffect(() => {
     // Menambahkan event listener untuk meng-handle perubahan selectedValue
@@ -105,15 +105,21 @@ const ListMenu: React.FC<ListMenuProps> = ({ scrollToKategoriMenu }) => {
       console.log('cekEvent', event);
       scrollToKategoriMenu(event as SelectChangeEvent<string>);
     };
-  
+
     // Mendengarkan event scroll pada elemen listMenuElement
     listMenuElementRef.current?.addEventListener('scroll', handleScroll);
-  
+
     // Membersihkan event listener saat komponen unmount
     return () => {
       listMenuElementRef.current?.removeEventListener('scroll', handleScroll);
     };
   }, [scrollToKategoriMenu]);
+
+  useEffect(() => {
+    if (store?.halamanResto?.channelDetailOutput?.data?.channel.slug) {
+      setSlug(store?.halamanResto?.channelDetailOutput?.data?.channel.slug || '');
+    }
+  }, [store?.halamanResto?.channelDetailOutput]);
 
   useEffect(() => {
     const collectionIds = (store?.halamanResto?.productListOutput?.data || [])
@@ -124,13 +130,15 @@ const ListMenu: React.FC<ListMenuProps> = ({ scrollToKategoriMenu }) => {
       }));
 
     setColIds(collectionIds);
+  }, [store?.halamanResto?.productListOutput?.data]);
 
-    const colIdsOnly = colIds.map((colObj) => colObj.id);
+  useEffect(() => {
     if (colIds.length > 0) {
+      const mapColIds = colIds.map((colObj) => colObj.id);
       const paramCollection = {
         after: '',
-        channel: 'makan',
-        collection: colIdsOnly,
+        channel: slug,
+        collection: mapColIds,
         direction: 'ASC',
         field: 'NAME',
         first: 100
@@ -140,8 +148,7 @@ const ListMenu: React.FC<ListMenuProps> = ({ scrollToKategoriMenu }) => {
         ChannelCommand.getproductbyCollection(paramCollection, token || '')
       );
     }
-  }, [store?.halamanResto?.productListOutput?.data]);
-
+  }, [colIds]);
   useEffect(() => {
     const checkoutIdfromStore = store?.halamanResto?.checkoutListOutput?.data?.checkouts?.edges[0]?.node?.id || '';
 
@@ -234,9 +241,56 @@ const ListMenu: React.FC<ListMenuProps> = ({ scrollToKategoriMenu }) => {
   ]);
 
   console.log('cekstore', store);
+  console.log('cekLinesUpdate', formData);
 
   const handleCardClick = (variantId: string, productId: string) => {
     navigate(`/product-view?productId=${productId}&variantId?=${variantId}`);
+  };
+
+  const handleIncrement = (variantId: string, prodId: string) => {
+    setFormData((prevFormData) => {
+      const newLines = prevFormData.lines.map((line) => {
+        if (line.productId === prodId) {
+          if (line.lineId) {
+            return {
+              ...line,
+              quantity: line.quantity + 1
+            };
+          }
+
+          navigate(`/product-view?productId=${prodId}&variantId=${variantId}`);
+
+          return line;
+        }
+
+        return line;
+      });
+
+      return { ...prevFormData, lines: newLines };
+    });
+  };
+
+  const handleDecrement = (variantId: string, prodId: string) => {
+    setFormData((prevFormData) => {
+      const newLines = prevFormData.lines.map((line) => {
+        if (line.productId === prodId) {
+          if (line.lineId) {
+            return {
+              ...line,
+              quantity: Math.max(line.quantity - 1, 0)
+            };
+          }
+
+          navigate(`/product-view?productId=${prodId}&variantId=${variantId}`);
+
+          return line;
+        }
+
+        return line;
+      });
+
+      return { ...prevFormData, lines: newLines };
+    });
   };
 
   return (
@@ -315,10 +369,12 @@ const ListMenu: React.FC<ListMenuProps> = ({ scrollToKategoriMenu }) => {
                           display: 'flex',
                           justifyContent: 'space-between'
                         }}
+
                         onClick={() => handleCardClick(
                           obj?.variantId,
                           obj?.productId || ''
                         )}
+
                       >
                         <Typography
                           sx={{
@@ -398,7 +454,8 @@ const ListMenu: React.FC<ListMenuProps> = ({ scrollToKategoriMenu }) => {
                                 aria-label="min"
                                 size="small"
                                 sx={{ color: 'black' }}
-                                onClick={() => handleCardClick(obj.variantId, obj?.productId || '')}
+                                onClick={() => handleDecrement(obj.variantId, obj.productId)}
+                                // onClick={() => handleCardClick(obj.variantId, obj?.productId || '')}
                               >
                                 <IndeterminateCheckBoxFilled size={24} />
                               </IconButton>
@@ -418,7 +475,8 @@ const ListMenu: React.FC<ListMenuProps> = ({ scrollToKategoriMenu }) => {
                                 aria-label="plus"
                                 size="small"
                                 sx={{ color: 'black' }}
-                                onClick={() => handleCardClick(obj.variantId, obj?.productId || '')}
+                                onClick={() => handleIncrement(obj.variantId, obj.productId)}
+                                // onClick={() => handleCardClick(obj.variantId, obj?.productId || '')}
                               >
                                 <AddBoxFilled size={24} />
                               </IconButton>
@@ -438,7 +496,7 @@ const ListMenu: React.FC<ListMenuProps> = ({ scrollToKategoriMenu }) => {
           );
         })}
         </>
-        
+
       )}
     </>
   );

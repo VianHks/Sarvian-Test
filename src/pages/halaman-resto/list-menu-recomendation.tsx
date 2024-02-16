@@ -1,5 +1,4 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
-
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -75,7 +74,7 @@ interface PayloadDataModel {
 
 const DATA: PayloadDataModel = {
   after: '',
-  channel: 'makan',
+  channel: '',
   deliveryMethodId: 'string',
   first: 100,
   lines: [DefaultLines],
@@ -87,25 +86,31 @@ const ListMenuRecomendation: PageComponent = () => {
   const [isLoading, setIsLoading] = useState(true);
   const token = useMemo(() => auth?.token.accessToken, [auth]);
   const [store, dispatch] = useStore((state) => state);
-
+  const [slug, setSlug] = useState('');
 
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState(DATA);
 
   useEffect(() => {
-    const paramMetadata = {
-      after: '',
-      channel: 'makan',
-      filterKey: 'recomendation',
-      filterValue: 'true',
-      first: 10
-    };
+    if (store?.halamanResto?.channelDetailOutput?.data?.channel.slug) {
+      setSlug(store?.halamanResto?.channelDetailOutput?.data?.channel.slug || '');
+    }
 
-    dispatch(
-      ChannelCommand.getCollectionsbyMetadata(paramMetadata, token || '')
-    );
-  }, [dispatch, token]);
+    if (slug !== '') {
+      const paramMetadata = {
+        after: '',
+        channel: slug,
+        filterKey: 'recomendation',
+        filterValue: 'true',
+        first: 10
+      };
+
+      dispatch(
+        ChannelCommand.getCollectionsbyMetadata(paramMetadata, token || '')
+      );
+    }
+  }, [dispatch, token, store?.halamanResto?.channelDetailOutput]);
 
   /*
    * UseEffect(() => {
