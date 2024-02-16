@@ -58,22 +58,20 @@ const DEFAULT_DESCRIPTION: DescriptionDataModel = {
 
 interface FormData {
   channel: string
-  deliveryMethodId: string
   lineId: string
   price: string
   quantity: number
-  userId: string
+  token: string
   value: string
   variantId: string
 }
 
 const DEFAULT_FORM_DATA: FormData = {
   channel: '',
-  deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
   lineId: '',
   price: '',
   quantity: 0,
-  userId: '',
+  token: '',
   value: '',
   variantId: ''
 };
@@ -111,9 +109,11 @@ const ProductView = () => {
   const theme = useTheme();
   const [searchParams] = useSearchParams();
   const productId = searchParams.get('productId');
-  const variantId = searchParams.get('variantId') || 'UHJvZHVjdFZhcmlhbnQ6NDEy';
-  const idUser = 'VXNlcjoyMDUwMjQwNjE5';
+  const variantId = searchParams.get('variantId') || '';
   const command = useCommand((cmd) => cmd);
+
+  console.log('variant', variantId);
+  console.log('prod', productId);
 
   const [store, dispatch] = useStore((state) => state);
   const channel = store?.productView?.productDetails?.data?.product?.channelListings[0]?.channel?.slug || '';
@@ -288,7 +288,7 @@ const ProductView = () => {
         setFormData({
           ...formData,
           channel: channel || 'makan',
-          userId: idUser,
+          token,
           variantId: variantId || ''
         });
       }
@@ -296,8 +296,8 @@ const ProductView = () => {
       setFormData({
         ...formData,
         channel: channel || 'makan',
-        userId: idUser,
-        variantId: variantId || 'UHJvZHVjdFZhcmlhbnQ6NDEy'
+        token,
+        variantId
       });
 
       setDescription(descriptionObject);
@@ -321,11 +321,10 @@ const ProductView = () => {
       if (variantIndex !== -1) {
         const processedFormData = {
           channel: channel || 'makan',
-          deliveryMethodId: 'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
           lineId: lines[variantIndex]?.id,
           price: lines[variantIndex]?.totalPrice?.gross?.amount.toString() || '',
           quantity: lines[variantIndex]?.quantity || 0,
-          userId: idUser,
+          token,
           value: lines[variantIndex]?.metafields?.note || '',
           variantId: variantId || ''
         };
@@ -420,7 +419,7 @@ const ProductView = () => {
         </IconButton>
       </Box>
         <SwipeableTextMobileStepper images={store?.productView?.productDetails?.data?.product?.media || []} />
-        <Card sx={{ borderRadius: '1rem', bottom: 0, height: '650px', left: 0, overflowY: 'auto', padding: '1rem 1.5rem', position: 'fixed', right: 0 }}>
+        <Card sx={{ borderRadius: '1rem', bottom: 0, height: '28.75rem', left: 0, overflowY: 'auto', padding: '1rem 1.5rem', position: 'fixed', right: 0 }}>
           <Typography sx={{ fontWeight: 'bold', marginBottom: '0.5rem' }} variant="h3">
             {store?.productView?.productDetails?.data?.product?.name}
           </Typography>

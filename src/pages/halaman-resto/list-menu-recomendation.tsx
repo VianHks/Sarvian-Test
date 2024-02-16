@@ -224,7 +224,10 @@ const ListMenuRecomendation: PageComponent = () => {
   }, [store?.halamanResto?.productByMetadataOutput, store?.order?.checkoutDetails?.data?.checkout]);
 
   const handleCardClick = (variantId: string, productId: string) => {
-    navigate(`/product-view?productId=${productId}&variantId?=${variantId}`);
+    const idProduct = encodeURIComponent(productId);
+    const idVariant = encodeURI(variantId);
+
+    navigate(`/product-view?productId=${idProduct}&variantId=${idVariant}`);
   };
 
   console.log('cekformdatarecomend', formData);

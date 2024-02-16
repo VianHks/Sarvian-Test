@@ -240,14 +240,17 @@ const ListMenu: React.FC<ListMenuProps> = ({ scrollToKategoriMenu }) => {
     store?.order?.checkoutDetails?.data?.checkout
   ]);
 
-  console.log('cekstore', store);
-  console.log('cekLinesUpdate', formData);
-
   const handleCardClick = (variantId: string, productId: string) => {
-    navigate(`/product-view?productId=${productId}&variantId?=${variantId}`);
+    const idProduct = encodeURIComponent(productId);
+    const idVariant = atob(variantId);
+
+    navigate(`/product-view?productId=${idProduct}&variantId=${idVariant}`);
   };
 
   const handleIncrement = (variantId: string, prodId: string) => {
+    const idProduct = encodeURIComponent(prodId);
+    const idVariant = encodeURI(variantId);
+
     setFormData((prevFormData) => {
       const newLines = prevFormData.lines.map((line) => {
         if (line.productId === prodId) {
@@ -258,7 +261,7 @@ const ListMenu: React.FC<ListMenuProps> = ({ scrollToKategoriMenu }) => {
             };
           }
 
-          navigate(`/product-view?productId=${prodId}&variantId=${variantId}`);
+          navigate(`/product-view?productId=${idProduct}&variantId=${variantId}`);
 
           return line;
         }
@@ -271,6 +274,8 @@ const ListMenu: React.FC<ListMenuProps> = ({ scrollToKategoriMenu }) => {
   };
 
   const handleDecrement = (variantId: string, prodId: string) => {
+    const idProduct = encodeURIComponent(prodId);
+
     setFormData((prevFormData) => {
       const newLines = prevFormData.lines.map((line) => {
         if (line.productId === prodId) {
@@ -281,7 +286,7 @@ const ListMenu: React.FC<ListMenuProps> = ({ scrollToKategoriMenu }) => {
             };
           }
 
-          navigate(`/product-view?productId=${prodId}&variantId=${variantId}`);
+          navigate(`/product-view?productId=${idProduct}&variantId=${variantId}`);
 
           return line;
         }
