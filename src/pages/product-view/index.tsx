@@ -16,7 +16,6 @@ import {
   useTheme
 } from '@mui/material';
 
-import { ConsoleLogger } from '@nxweb/core';
 import {
   AddBoxFilled,
   IndeterminateCheckBoxFilled,
@@ -111,9 +110,6 @@ const ProductView = () => {
   const productId = searchParams.get('productId');
   const variantId = searchParams.get('variantId') || '';
   const command = useCommand((cmd) => cmd);
-
-  console.log('variant', variantId);
-  console.log('prod', productId);
 
   const [store, dispatch] = useStore((state) => state);
   const channel = store?.productView?.productDetails?.data?.product?.channelListings[0]?.channel?.slug || '';
@@ -216,7 +212,6 @@ const ProductView = () => {
         return updatedVariants;
       }
 
-      // For 'MULTISELECT' type, allow multiple choices
       const newVariant: VariantModel = {
         id,
         variant: name,
@@ -250,7 +245,7 @@ const ProductView = () => {
   useEffect(() => {
     dispatch(
       command.productView?.getProductDetails(
-        productId || 'UHJvZHVjdDoxNzM=',
+        productId || '',
         token || ''
       )
     );
@@ -271,7 +266,7 @@ const ProductView = () => {
   }, [store?.productView?.productDetails?.data?.product?.productType, dispatch, token]);
 
   useEffect(() => {
-    if (checkoutIdFromStore) {
+    if (checkoutIdFromStore !== '') {
       dispatch(OrderCommand.getCart(checkoutIdFromStore, token || ''));
       dispatch(OrderCommand.getCheckoutDetails(checkoutIdFromStore, token || ''));
     }

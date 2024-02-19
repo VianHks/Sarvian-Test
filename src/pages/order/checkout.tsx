@@ -318,6 +318,7 @@ const Checkout: PageComponent = (props: Props) => {
 
   const toggleOpenChangeResto = () => {
     setOpenChangeResto(!openChangeResto);
+    dispatch(command.productView.getCheckoutId({ checkout_id: '' }));
   };
 
   const handleIncrement = (index: number) => {
@@ -670,7 +671,7 @@ const Checkout: PageComponent = (props: Props) => {
                     color="primary"
                     fullWidth={true}
                     size="small"
-                    sx={{ paddingInline: '0.5rem' }}
+                    sx={{ width: 'max-content' }}
                     variant="outlined"
                   >
                     Tambah Pesanan
