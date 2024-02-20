@@ -114,6 +114,7 @@ const ProductView = () => {
   const [store, dispatch] = useStore((state) => state);
   const channel = store?.productView?.productDetails?.data?.product?.channelListings[0]?.channel?.slug || '';
   const [formData, setFormData] = useState<FormData>(DEFAULT_FORM_DATA);
+  const [isVariant, setIsVariant] = useState(false);
   const [variants, setVariants] = useState<VariantModel[]>([]);
   const [description, setDescription] = useState<DescriptionDataModel>(DEFAULT_DESCRIPTION);
   const checkoutIdFromStore = store?.productView?.checkoutId?.checkout_id || '';
@@ -331,6 +332,14 @@ const ProductView = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkoutIdFromStore, store?.order]);
 
+  useEffect(() => {
+    if (store?.productView?.productTypeDetails?.data?.productType?.variantAttributes.length === 0) {
+      setIsVariant(false);
+    } else {
+      setIsVariant(true);
+    }
+  }, [store?.productView?.productTypeDetails?.data?.productType?.variantAttributes]);
+
   const handleAddToCart = () => {
     setIsLoad(true);
 
@@ -407,11 +416,6 @@ const ProductView = () => {
             <WestFilled size={24} />
           </Avatar>
         </IconButton>
-        <IconButton aria-label="add to shopping cart" color="primary">
-          <Avatar sx={{ bgcolor: theme.palette.grey[100] }}>
-            <ShareFilled size={24} />
-          </Avatar>
-        </IconButton>
       </Box>
         <SwipeableTextMobileStepper images={store?.productView?.productDetails?.data?.product?.media || []} />
         <Card sx={{ borderRadius: '1rem', bottom: 0, height: '28.75rem', left: 0, overflowY: 'auto', padding: '1rem 1.5rem', position: 'fixed', right: 0 }}>
@@ -440,7 +444,7 @@ const ProductView = () => {
             >
               {description.blocks[0]?.data?.text}
             </Typography>
-            {store?.productView?.productDetails?.data?.product?.productType?.hasVariants === true
+            {isVariant
               ? (
               <>
                 <Typography
@@ -680,16 +684,31 @@ const ProductView = () => {
                 </Typography>
               </Grid>
             </Grid>
-            <Button
-              disabled={isLoad === true}
-              fullWidth={true}
-              size="medium"
-              sx={{ background: theme.palette.primary.gradient }}
-              variant="contained"
-              onClick={handleAddToCart}
+            <Box
+              sx={{
+                alignItems: 'center',
+                bottom: 0,
+                display: 'flex',
+                justifyContent: 'center',
+                left: 0,
+                marginTop: '5rem',
+                padding: '1rem',
+                position: 'absolute',
+                textAlign: 'center',
+                width: '100%'
+              }}
             >
-              {isLoad === true ? <Loader /> : 'Tambah Keranjang' }
-            </Button>
+              <Button
+                color="primary"
+                disabled={isLoad === true || count === 0}
+                fullWidth={true}
+                size="medium"
+                variant="contained"
+                onClick={handleAddToCart}
+              >
+                {isLoad === true ? <Loader /> : 'Tambah Keranjang' }
+              </Button>
+            </Box>
           </Box>
         </Card>
 
