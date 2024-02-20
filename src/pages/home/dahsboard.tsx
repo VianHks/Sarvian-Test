@@ -26,6 +26,7 @@ import type { PageComponent } from '@nxweb/react';
 
 import { useAuth } from '@hooks/use-auth';
 import type { ChannelsDataModel } from '@models/home/types';
+import { PersonalizedRecomendationCommand } from '@models/personalized-recomendation/reducers';
 import { useCommand, useStore } from '@models/store';
 import FloatingShoppingButton from '@pages/halaman-resto/floatingshopping-button';
 
@@ -41,7 +42,7 @@ import terhemat from '@assets/images/pages/beranda/terhemat.svg';
 import terlaris from '@assets/images/pages/beranda/terlaris.svg';
 import topRated from '@assets/images/pages/beranda/topRated.svg';
 import verifyIcon from '@assets/images/pages/beranda/verify.svg';
-import { PersonalizedRecomendationCommand } from '@models/personalized-recomendation/reducers';
+import iconPhoto from '@assets/images/unggahfoto.svg';
 
 interface RestoItem {
   id: number
@@ -473,8 +474,6 @@ const Home: PageComponent = () => {
     // Navigate(`/dana/bind`);
   };
 
-  console.log('cekstore', store);
-
   return (
     <Box sx={{ margin: '1rem 1.5rem' }}>
       <Typography
@@ -564,7 +563,7 @@ const Home: PageComponent = () => {
         container={true}
         spacing={1}
         sx={{
-          // display: isSmallScreen ? 'grid' : 'flex',
+          // Display: isSmallScreen ? 'grid' : 'flex',
           display: 'flex',
           justifyContent: 'space-evenly',
           marginBottom: shipmentMethode === 'Pesan Antar' ? '1rem' : '1rem'
@@ -887,7 +886,7 @@ const Home: PageComponent = () => {
                 >
                   <img
                     alt="test"
-                    src={resto.metafields.media}
+                    src={resto.metafields.media || iconPhoto}
                     style={{ maxHeight: '100%', maxWidth: '100%' }} />
                   {resto.metafields.verified === 'true' && (
                     <img

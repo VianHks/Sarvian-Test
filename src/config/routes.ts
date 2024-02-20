@@ -165,7 +165,8 @@ export const routes: Route[] = [
     auth: false,
     element: lazy(() => import('@pages/location/add-location')),
     hash: true,
-    layout: 'blank',
+    layout: 'appbar',
+    meta: { description: 'Tambah Alamat' },
     path: '/add-location',
     search: true
   },
