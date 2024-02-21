@@ -351,7 +351,7 @@ const ProductView = () => {
             lineId: formData.lineId,
             note: formData?.value,
             price: formData.price,
-            quantity: formData.quantity
+            quantity: count
           }
         ]
       };
@@ -362,8 +362,11 @@ const ProductView = () => {
             dispatch(command.productView.getCheckoutId({ checkout_id: response }));
             setTimeout(() => {
               setIsLoad(false);
-              // Navigate(`/keranjang`, { state: { CheckoutId: response } });
-              navigate(`/checkout-dinein?checkoutId=${response}`, { state: { CheckoutId: response } });
+              /*
+               * Navigate(`/keranjang`, { state: { CheckoutId: response } });
+               * navigate(`/checkout-dinein?checkoutId=${response}`, { state: { CheckoutId: response } });
+               */
+              navigate(-1);
             }, 1000);
           }
         });
@@ -401,12 +404,16 @@ const ProductView = () => {
             setIsLoad(false);
             setTimeout(() => {
               setIsLoad(false);
-              navigate(`/checkout-dinein?checkoutId=${response}&channel=${channel}`);
+              // Navigate(`/checkout-dinein?checkoutId=${response}&channel=${channel}`);
+              navigate(-1);
             }, 1000);
           }
         });
     }
   };
+
+  console.log('form qty', formData.quantity)
+  console.log('count', count)
 
   return (
     <Box sx={{ minHeight: '100vh', position: 'relative' }}>

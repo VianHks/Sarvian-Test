@@ -38,7 +38,7 @@ import { ChannelCommand } from '@models/halaman-resto/reducers';
 import { RatingCommand } from '@models/rating/commands';
 import { useStore } from '@models/store';
 
-import FloatingShoppingButton from './floatingshopping-button';
+// import FloatingShoppingButton from './floatingshopping-button';
 import ListMenuRecomendation from './list-menu-recomendation';
 import ListMenu from './listmenu';
 import Rating from './rating';
@@ -98,8 +98,8 @@ const HalamanResto: PageComponent = () => {
   const navigate = useNavigate();
 
   const [colIds, setColIds] = useState<{ id: string, name: string }[]>([]);
-  const checkoutIdFromStorage =
-    window.sessionStorage.getItem(SESSION_STORAGE_KEYS.CHECKOUT) ?? '';
+  // const checkoutIdFromStore = store?.productView?.checkoutId?.checkout_id || '';
+  const checkoutIdFromStore = store?.order?.checkoutDetails?.data?.checkout?.id || '';
   const [isLoading, setIsLoading] = useState(false);
   const [slug, setSlug] = useState('');
   const [searchParams] = useSearchParams();
@@ -150,7 +150,7 @@ const HalamanResto: PageComponent = () => {
         JSON.stringify(colIds)
       );
 
-      navigate('/keranjang');
+      navigate(`/checkout-dinein?checkoutId=${res}&channel=${slug}`);
     } else {
       setIsLoading(true);
     }
@@ -231,8 +231,6 @@ const HalamanResto: PageComponent = () => {
     }
   }, [store?.halamanResto?.channelDetailOutput]);
 
-  console.log('cekslug', slug);
-
   const handleShoppingButtonClick = () => {
     navigate('/keranjang');
   };
@@ -258,12 +256,10 @@ const HalamanResto: PageComponent = () => {
       })
       .filter((line) => line.quantity > 0 && line.lineId);
 
-    const checkoutIdFromStorage = sessionStorage.getItem('CheckoutId');
-
-    if (checkoutIdFromStorage) {
+    if (checkoutIdFromStore) {
       const linesToUpdate = filteredPutLines.filter((line) => line.lineId);
       const paramUpdate = {
-        checkoutId: checkoutIdFromStorage,
+        checkoutId: checkoutIdFromStore,
         lines: linesToUpdate.map((line) => ({
           lineId: line.lineId,
           note: line.note,
@@ -298,18 +294,14 @@ const HalamanResto: PageComponent = () => {
 
     if (filteredPostLines.length > 0 && slug !== '') {
       const paramCreate = {
-        after: '',
         channel: slug,
-        deliveryMethodId:
-          'V2FyZWhvdXNlOjRhYjM1NjU4LTQ2MTMtNGUwYS04MWNlLTA4NjVlNjMyMzIwMA==',
-        first: 100,
         lines: filteredPostLines.map((line) => ({
           metadata: line.metadata,
           price: line.price,
           quantity: line.quantity,
           variantId: line.variantId
         })),
-        userId: 'VXNlcjoyMDUwMjQwNjE5'
+        token
       };
 
       ChannelCommand.postCreateCheckout(paramCreate, token || '').then(
@@ -392,8 +384,6 @@ const HalamanResto: PageComponent = () => {
       return () => clearTimeout(timeoutId);
     }
   }, [isLoading, showAlert]);
-
-  console.log('MAINPAGESTORE', store);
 
   return (
     <>
@@ -829,8 +819,8 @@ const HalamanResto: PageComponent = () => {
           </Typography>
           <ListMenuRecomendation />
           <ListMenu scrollToKategoriMenu={scrollToKategoriMenu} />
-          {!checkoutIdFromStorage &&
-            <FloatingShoppingButton onClick={handleShoppingButtonClick} />}
+          {/* {!checkoutIdFromStore &&
+            <FloatingShoppingButton onClick={handleShoppingButtonClick} />} */}
         </Box>
       </div>
       <Card
