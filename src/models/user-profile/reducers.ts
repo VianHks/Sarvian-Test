@@ -1,11 +1,11 @@
-import { apiFetch } from '@api/base';
+import { API, apiFetch } from '@api/base';
 import type { TAction, TDispatch } from '@models/types';
 
 import {  UserActionType   } from './types';
 
 import  profilePicture  from '@assets/images/girl_picture.jpg';
 
-import type { AddressDetailModel, CitiesModel, CountryAreaModel, DistrictModel, PhotoEditorModel, ProvincesModel, SubDistrictModel, UserAction, UserModel, UserProfileDataModel } from './types';
+import type { AddressDetailModel, CitiesModel, CountryAreaModel, DistrictModel, PhotoEditorModel, ProvincesModel, SubDistrictModel, UpdateCustomer, UserAction, UserModel, UserProfileDataModel } from './types';
 
 const DEFAULT_USER_INFO: UserProfileDataModel = {
   id: '1',
@@ -65,6 +65,20 @@ const DEFAULT_ADDRESS_DETAILS: AddressDetailModel = {
   }
 };
 
+const DEFAULT_UPDATE_CUSTOMER: UpdateCustomer = {
+  data: {
+    customerUpdate: {
+      user: {
+        firstName: '',
+        lastName: '',
+        metafields: {
+          profileUrl: ''
+        }
+      }
+    }
+  }
+};
+
 export const UserDefault: UserModel = {
   addressDetails: DEFAULT_ADDRESS_DETAILS,
   cities: {
@@ -83,7 +97,8 @@ export const UserDefault: UserModel = {
   },
   subdistrict: {
     subdistricts: []
-  }
+  },
+  updateCustomer: DEFAULT_UPDATE_CUSTOMER
 };
 
 export const UsersReducer = (state: UserModel = UserDefault, action: UserAction): UserModel => {
@@ -103,6 +118,8 @@ export const UsersReducer = (state: UserModel = UserDefault, action: UserAction)
     case UserActionType.GetProvinces:
       return { ...state, ...action.data };
     case UserActionType.GetAddressDetails:
+      return { ...state, ...action.data };
+    case UserActionType.UpdateCustomer:
       return { ...state, ...action.data };
 
     default:
@@ -346,5 +363,44 @@ export const UserCommand = {
         type: UserActionType.PhotoeditorDelete
       });
     };
+  },
+  putUpdateCustomer: (payload: unknown, token: string): Promise<string> => {
+    return apiFetch(token).put(`/customer-update`, payload)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .then((response: any) => {
+        const data: string = response?.data;
+
+        if (response.status === 200) {
+          return data || 'err';
+        }
+
+        return 'err';
+      }).catch(() => {
+        return 'err';
+      });
+  },
+  uploadFile: (token: string, base64File: string, filename: string, custId: string, typeFile: string): Promise<string> => {
+    const minioPayload = {
+      body: {
+        content_type: typeFile,
+        data: base64File
+      },
+      bucket: `/treats-dev/buyer/${custId}`,
+      filename
+    };
+
+    return API('').post(`/simplestorageservice/0.1/upload`, { ...minioPayload, token })
+      .then((response: any) => {
+        const data: string = response?.data?.message;
+
+        if (response.status === 200) {
+          return data || 'err';
+        }
+
+        return 'err';
+      })
+      .catch(() => {
+        return 'err';
+      });
   }
 };
