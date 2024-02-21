@@ -687,7 +687,7 @@ const ProductView = () => {
             <Box
               sx={{
                 alignItems: 'center',
-                bottom: 0,
+                bottom: isVariant ? 'unset' : 0,
                 display: 'flex',
                 justifyContent: 'center',
                 left: 0,
