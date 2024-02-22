@@ -385,14 +385,14 @@ export const UserCommand = {
         content_type: typeFile,
         data: base64File
       },
-      bucket: `/treats-dev/buyer/${custId}`,
+      bucket: `/${window.NX?.env?.BUCKET}/buyer/${custId}`,
       filename
     };
 
     return API('').post(`/simplestorageservice/0.1/upload`, { ...minioPayload, token })
       .then((response: any) => {
         const data: string = response?.data?.message;
-        const profileUrl = `${window.NX?.env?.API_URL}/simplestorageservice/0.1/download?bucket=/treats-dev/buyer/${custId}&filename=${filename}`;
+        const profileUrl = `${window.NX?.env?.API_URL}/simplestorageservice/0.1/download?bucket=${minioPayload.bucket}${custId}&filename=${filename}`;
         if (response.status === 200 && data) {
           return profileUrl || 'err';
         }

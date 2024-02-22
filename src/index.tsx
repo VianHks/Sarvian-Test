@@ -63,6 +63,7 @@ ServiceWorker.unregister();
 export default {
   env: {
     API_FOOD_BUYER: process.env.API_FOOD_BUYER,
-    API_URL: process.env.API_URL
+    API_URL: process.env.API_URL,
+    BUCKET: process.env.BUCKET
   }
 };
