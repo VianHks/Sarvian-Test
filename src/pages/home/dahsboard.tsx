@@ -887,7 +887,7 @@ const Home: PageComponent = () => {
                   <img
                     alt="test"
                     src={resto.metafields.media || iconPhoto}
-                    style={{ maxHeight: '100%', maxWidth: '100%' }} />
+                    style={{ borderRadius: '0.5rem', height: '6rem', maxHeight: '100%', maxWidth: '100%', width: '6rem' }} />
                   {resto.metafields.verified === 'true' && (
                     <img
                       alt="Verified"

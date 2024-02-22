@@ -280,6 +280,25 @@ export const PersonalizedRecomendationCommand = {
       }).catch(() => {
         return 'err';
       });
+  },
+  isEmailRegistered: (token: string): Promise<boolean> => {
+    return (
+      apiFetch(token)
+        .post(`/customer/isregistered`, { token })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .then((response: any) => {
+          const { isRegistered } = response.data;
+
+          if (response.status === 200) {
+            return isRegistered;
+          }
+
+          return 'err';
+        })
+        .catch(() => {
+          return 'err';
+        })
+    );
   }
 };
 

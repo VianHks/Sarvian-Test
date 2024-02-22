@@ -1,9 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, import/order
-import type { TAction, TDispatch } from '@models/types';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, import/order
-import {  UserActionType   } from '@models/user-profile/types';
-
+import { apiFetch } from '@api/base';
 import type { UserAction, UserModel, UserProfileDataModel } from '@models/user-profile/types';
 
 const DEFAULT_USER_INFO: UserProfileDataModel = {
@@ -32,16 +27,21 @@ export const RegistrationReducer = (state: UserModel = RegistrationDefault, acti
 };
 
 export const RegistrationCommand = {
-  createUserProfile: (payload: unknown): Promise<string | undefined> => {
-    // CreateTicket: async (payload: unknown, token: string): Promise<string | undefined> => {
-    return Promise.resolve(payload).then(() => {
-      /*
-       * If (response.status === 200) {
-       * notify.success(`Ticket successfully created`);
-       */
+  createUserProfile: (payload: unknown, token: string): Promise<string> => {
+    return (
+      apiFetch(token)
+        .post(`/customer/registration`, payload)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .then((response: any) => {
+          if (response.status === 200) {
+            return 'success';
+          }
 
-      return 'ok';
-      // }
-    });
+          return 'err';
+        })
+        .catch(() => {
+          return 'err';
+        })
+    );
   }
 };
