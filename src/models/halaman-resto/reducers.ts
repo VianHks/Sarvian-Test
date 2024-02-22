@@ -9,12 +9,7 @@ import type { ChannelDetailDataModel, CheckoutListByEmail, HalamanRestoAction, H
 const DefaultLines: LinesModel[] =
 [
   {
-    metadata: [
-      {
-        key: 'note',
-        value: ''
-      }
-    ],
+    metadata: [],
     lineId: '',
     note: '',
     price: '',

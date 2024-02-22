@@ -144,22 +144,23 @@ const ProductViewsCommand = {
         });
     };
   },
-  postCreateCheckout: (payload: unknown, token: string): Promise<string> => {
+  postCreateCheckout: (payload: unknown, token: string): Promise<{ action: string, id: string }> => {
     return (
       apiFetch(token)
         .post(`/checkout`, payload)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .then((response: any) => {
           const id: string = response?.data?.checkout_id;
+          const action: string = response?.data?.action;
 
           if (response.status === 200) {
-            return id;
+            return { action, id };
           }
 
-          return 'err';
+          throw new Error('Failed to create checkout');
         })
         .catch(() => {
-          return 'err';
+          throw new Error('Failed to create checkout');
         })
     );
   },

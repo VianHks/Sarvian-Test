@@ -344,7 +344,33 @@ const ProductView = () => {
     setIsLoad(true);
 
     if (checkoutIdFromStore) {
-      const payload = {
+      const payload: Payload = {
+        channel,
+        lines: [
+          {
+            metadata: [
+              {
+                key: 'note',
+                value: formData.value
+              },
+              {
+                key: 'variant',
+                value: JSON.stringify(variants)
+              },
+              {
+                key: 'total',
+                value: String(total / count)
+              }
+            ],
+            price: calculateTotalPrice(count, productPrice),
+            quantity: count,
+            variantId: formData.variantId
+          }
+        ],
+        token
+      };
+
+      const payloadUpdate = {
         checkoutId: checkoutIdFromStore,
         lines: [
           {
@@ -356,10 +382,24 @@ const ProductView = () => {
         ]
       };
 
-      command.productView.putCheckout(payload, token || '')
-        .then((response) => {
-          if (response) {
-            dispatch(command.productView.getCheckoutId({ checkout_id: response }));
+      command.productView.postCreateCheckout(payload, token || '')
+        .then((resp) => {
+          if (resp.action === 'lineAdd' && formData.lineId !== '') {
+            command.productView.putCheckout(payloadUpdate, token || '')
+              .then((response) => {
+                if (response) {
+                  dispatch(command.productView.getCheckoutId({ checkout_id: response }));
+                  setTimeout(() => {
+                    setIsLoad(false);
+                    /*
+                     * Navigate(`/keranjang`, { state: { CheckoutId: response } });
+                     * navigate(`/checkout-dinein?checkoutId=${response}`, { state: { CheckoutId: response } });
+                     */
+                    navigate(-1);
+                  }, 1000);
+                }
+              });
+          } else {
             setTimeout(() => {
               setIsLoad(false);
               /*
@@ -400,7 +440,7 @@ const ProductView = () => {
       command.productView.postCreateCheckout(payload, token || '')
         .then((response) => {
           if (response) {
-            dispatch(command.productView.getCheckoutId({ checkout_id: response }));
+            dispatch(command.productView.getCheckoutId({ checkout_id: response.id }));
             setIsLoad(false);
             setTimeout(() => {
               setIsLoad(false);
@@ -411,9 +451,6 @@ const ProductView = () => {
         });
     }
   };
-
-  console.log('form qty', formData.quantity)
-  console.log('count', count)
 
   return (
     <Box sx={{ minHeight: '100vh', position: 'relative' }}>

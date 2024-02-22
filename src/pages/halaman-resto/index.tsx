@@ -1,9 +1,9 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
-import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
+// import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
 import {
   Alert,
   Avatar,
@@ -17,7 +17,6 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  styled,
   TextField,
   Toolbar,
   Typography,
@@ -64,23 +63,42 @@ interface RestoSchedule {
 }
 
 interface LinesModel {
-  colectionId: string
-  isAvailableForPurchase: boolean
-  lineId: string
-  metadata: [
-    {
-      key: string
-      value: string
-    }
-  ]
-  name: string
-  note: string
-  price: string
-  productId: string
+  id: string
+  metadata: {
+    key: string
+    value: string
+  }[]
+  metafields: {
+    note: string
+  }
   quantity: number
-  thumbnail: string
-  update: string
-  variantId: string
+  totalPrice: {
+    gross: {
+      amount: number
+      currency: string
+    }
+  }
+  variant: {
+    id: string
+    name: string
+    pricing: {
+      price: {
+        gross: {
+          amount: number
+          currency: string
+        }
+      }
+    }
+    product: {
+      id: string
+      name: string
+      slug: string
+      thumbnail: {
+        alt: string
+        url: string
+      }
+    }
+  }
 }
 
 const SESSION_STORAGE_KEYS = {
@@ -98,8 +116,8 @@ const HalamanResto: PageComponent = () => {
   const navigate = useNavigate();
 
   const [colIds, setColIds] = useState<{ id: string, name: string }[]>([]);
-  // const checkoutIdFromStore = store?.productView?.checkoutId?.checkout_id || '';
-  const checkoutIdFromStore = store?.order?.checkoutDetails?.data?.checkout?.id || '';
+  const checkoutIdFromStore = store?.productView?.checkoutId?.checkout_id || '';
+  // const checkoutIdFromStore = store?.order?.checkoutDetails?.data?.checkout?.id || '';
   const [isLoading, setIsLoading] = useState(false);
   const [slug, setSlug] = useState('');
   const [searchParams] = useSearchParams();
@@ -180,7 +198,8 @@ const HalamanResto: PageComponent = () => {
     let totalQuantity = 0;
 
     lines.forEach((line) => {
-      const price = parseFloat(line.price);
+      const metadataPrice = line?.metadata?.find((prc) => prc.key === 'total')?.value || '0';
+      const price = parseFloat(metadataPrice);
       const quantity = line.quantity || 0;
 
       totalAmount += price * quantity;
@@ -191,15 +210,15 @@ const HalamanResto: PageComponent = () => {
   };
 
   useEffect(() => {
-    if (store?.halamanResto?.linesOutput) {
+    if (store?.order?.checkoutDetails?.data?.checkout?.lines) {
       const { totalAmount, totalQuantity } = calculateTotal(
-        store.halamanResto.linesOutput
+        store?.order?.checkoutDetails?.data?.checkout?.lines
       );
 
       setTotalAmount(totalAmount);
       setTotalItems(totalQuantity);
     }
-  }, [store?.halamanResto?.linesOutput]);
+  }, [store?.order?.checkoutDetails?.data?.checkout?.lines]);
 
   useEffect(() => {
     if (store?.halamanResto?.channelDetailOutput?.data?.channel.slug) {

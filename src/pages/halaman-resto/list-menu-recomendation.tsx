@@ -84,12 +84,12 @@ const DATA: PayloadDataModel = {
 const ListMenuRecomendation: PageComponent = () => {
   const { auth } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
   const token = useMemo(() => auth?.token.accessToken, [auth]);
   const [store, dispatch] = useStore((state) => state);
   const [slug, setSlug] = useState('');
 
-  const navigate = useNavigate();
-
+  const checkoutIdfromStore = store?.halamanResto?.checkoutListOutput?.data?.checkouts?.edges[0]?.node?.id || '';
   const [formData, setFormData] = useState(DATA);
 
   useEffect(() => {
@@ -146,14 +146,12 @@ const ListMenuRecomendation: PageComponent = () => {
    */
 
   useEffect(() => {
-    const checkoutIdfromStore = store?.halamanResto?.checkoutListOutput?.data?.checkouts?.edges[0]?.node?.id || '';
-
-    if (checkoutIdfromStore) {
+    if (checkoutIdfromStore !== '') {
       dispatch(
         OrderCommand.getCheckoutDetails(checkoutIdfromStore, token || '')
       );
     }
-  }, [store?.halamanResto?.checkoutListOutput]);
+  }, [checkoutIdfromStore, token]);
 
   useEffect(() => {
     if (store?.halamanResto?.productByMetadataOutput) {
@@ -229,8 +227,6 @@ const ListMenuRecomendation: PageComponent = () => {
 
     navigate(`/product-view?productId=${idProduct}&variantId=${idVariant}`);
   };
-
-  console.log('cekformdatarecomend', formData);
 
   return (
     <>

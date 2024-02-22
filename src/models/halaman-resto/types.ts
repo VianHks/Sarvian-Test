@@ -333,13 +333,13 @@ interface CheckoutDetailsDataModel {
     }
   }
 }
+
+export interface MetadataModel {
+  key: string
+  value: string
+}
 export interface LinesModel {
-  metadata: [
-    {
-      key: string
-      value: string
-    }
-  ]
+  metadata: MetadataModel[]
   lineId: string
   note: string
   price: string
