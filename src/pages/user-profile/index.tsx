@@ -1,8 +1,9 @@
 import type { ChangeEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { Check, ChevronRight, PowerSettingsNew } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import {
   Alert,
   Box,
@@ -72,6 +73,8 @@ const Profile: PageComponent = () => {
   const navigate = useNavigate();
   const [store, dispatch] = useStore((state) => state);
   const { action } = useParams();
+  const location = useLocation();
+  const stateLocation = location.state?.balik;
 
   const [formData, setFormData] = useState<UpdateUserProfile>(DEFAULT_USER_DATA);
 
@@ -117,6 +120,11 @@ const Profile: PageComponent = () => {
 
         const response = await command.profile.uploadFile(token || '', base64Data, fileName, custId, fileType);
 
+        /*
+         * If (response) {
+         *   console.log('cekDownload', response);
+         * }
+         */
         const payload = {
           firstName,
           lastName,
@@ -151,10 +159,22 @@ const Profile: PageComponent = () => {
 
         return photoModel.base64Image;
       }
+
+      const profileUrl = store?.personalizedRec?.customerProfile?.data?.user?.metadata.find((item) => item.key === 'profileUrl')?.value;
+
+      if (profileUrl) {
+        return profileUrl;
+      }
     }
 
     return iconPhoto;
   }
+
+  useEffect(() => {
+    if (stateLocation) {
+      setIsEditProfile(stateLocation);
+    }
+  }, [stateLocation]);
 
   useEffect(() => {
     if (token) {
@@ -168,7 +188,7 @@ const Profile: PageComponent = () => {
 
   useEffect(() => {
     const user = store?.personalizedRec?.customerProfile?.data?.user;
-    const profileUrl = store?.personalizedRec?.customerProfile?.data?.user?.metadata.find(item => item.key === 'profileUrl')?.value;
+    const profileUrl = store?.personalizedRec?.customerProfile?.data?.user?.metadata.find((item) => item.key === 'profileUrl')?.value;
 
     if (user && user.firstName !== undefined && user.lastName !== undefined) {
       const transformedProfile: UpdateUserProfile = {
@@ -306,7 +326,7 @@ const Profile: PageComponent = () => {
           imgPreview.src = base64Image as string;
         }
 
-        navigate('/edit-photo');
+        navigate('/edit-photo', { state: { key: isEditProfile } });
       } catch (error) {
         setSnackbarProps({
           message: 'Upload Gambar gagal',
@@ -596,7 +616,7 @@ const Profile: PageComponent = () => {
                   <Grid item={true} sx={{ alignItems: 'start', display: 'flex', justifyContent: 'end' }} xs={4}>
                     <Grid item={true}>
                       <Button
-                        disabled={isEditProfile}
+                        disabled={false}
                         style={{
                           height: 'auto',
                           minWidth: 0,
@@ -604,7 +624,6 @@ const Profile: PageComponent = () => {
                           textTransform: 'none',
                           width: 'auto'
                         }}
-                        onClick={handleButtonClick}
                       >
                         <img
                           alt="Selected"
@@ -621,15 +640,33 @@ const Profile: PageComponent = () => {
                             opacity: isEditProfile ? '0.5' : undefined,
                             borderRadius: '.5rem'
                           }} />
-                        <VisuallyHiddenInput
-                          accept="image/jpeg, image/jpg"
-                          ref={(el) => {
-                            fileInputRefs.current = el;
-                          }}
-                          type="file"
-                          onChange={(event) => {
-                            handleImageChange(event);
-                          }} />
+                        {
+  isEditProfile
+    ? (
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          color: 'white',
+          opacity: '1'
+        }}
+      >
+        <EditIcon onClick={handleButtonClick}/>
+      </div>
+    )
+    : null
+}
+      <VisuallyHiddenInput
+        accept="image/jpeg, image/jpg"
+        ref={(el) => {
+          fileInputRefs.current = el;
+        }}
+        type="file"
+        onChange={(event) => {
+          handleImageChange(event);
+        }} />
                       </Button>
                     </Grid>
                   </Grid>

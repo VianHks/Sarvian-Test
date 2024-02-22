@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { ArrowBackFilled } from '@nxweb/icons/material';
 import { Photo } from '@nxweb/icons/tabler';
@@ -26,6 +26,9 @@ const EditPhoto: PageComponent = () => {
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
 
+  const location = useLocation();
+  const cekState = location.state?.key;
+
   const photoEditorData = store?.photoeditor;
   const photoEditorIndex = window.sessionStorage.getItem('fileName');
 
@@ -38,7 +41,7 @@ const EditPhoto: PageComponent = () => {
 
   const handleNavigateBack = () => {
     setShowPreview(false);
-    navigate(-1);
+    navigate('/profile', { state: { balik: showPreview } });
   };
 
   const handleBack = () => {
@@ -46,8 +49,11 @@ const EditPhoto: PageComponent = () => {
       dispatch(command.profile?.deletePhotoEditorData(store.photoeditor));
     }
 
-    navigate(-1);
+    navigate('/profile', { state: { key: cekState } });
   };
+
+  console.log('cekStateUseLoc', cekState);
+  console.log('cekShowPreview', showPreview);
 
   return (
     <AppBar position="static" sx={{ background, elevation: 0, width: '100%', zIndex: '10' }}>
