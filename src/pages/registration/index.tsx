@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Box, Button, Card, FormControl, FormHelperText, Grid, InputAdornment, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 
 import type { PageComponent } from '@nxweb/react';
 
+import { useAuth } from '@hooks/use-auth';
 import { useCommand, useStore } from '@models/store';
 
 import bilo_registration from '@assets/images/bilo_regis_info.svg';
@@ -40,6 +41,8 @@ const RegistrationInfo: PageComponent = () => {
   const command = useCommand((cmd) => cmd);
   const [store, dispatch] = useStore((state) => state?.registration);
   const maxDate = dayjs().subtract(13, 'year').endOf('year');
+  const { auth } = useAuth();
+  const token = useMemo(() => auth?.token.accessToken, [auth]);
 
   const [formData, setFormData] = useState<RegistrationModel>(DEFAULT_REGISTRATION),
     [isInvalid, setIsInvalid] = useState(false),
@@ -98,15 +101,17 @@ const RegistrationInfo: PageComponent = () => {
       if (formData.first_name !== 'fail') {
         try {
           await command.registration.createUserProfile({
-            name: `${formData.first_name} ${formData.last_name}`,
+            birthDate: formData.dob,
+            firstName: formData.first_name,
+            gender: formData.gender,
+            lastName: formData.last_name,
             phone: `0${formData.phone}`,
-            created_date: new Date(),
-            date_of_birth: formData.dob,
-            gender: formData.gender
-          });
+            token
+          }, token || '');
 
           if (store?.profile) {
-            store.profile.name = `${formData.first_name} ${formData.last_name}`;
+            store.profile.name = formData.first_name;
+            store.profile.name = formData.last_name;
             store.profile.phone = `0${formData.phone}`;
             store.profile.created_date = new Date();
             store.profile.date_of_birth = formData.dob;
@@ -128,11 +133,6 @@ const RegistrationInfo: PageComponent = () => {
       setFormSubmitted(true);
     }
   };
-
-  // eslint-disable-next-line no-console
-  console.log('store', store);
-  // eslint-disable-next-line no-console
-  // console.log('formData', formData);
 
   return (
     <Box
