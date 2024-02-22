@@ -392,7 +392,7 @@ export const UserCommand = {
     return API('').post(`/simplestorageservice/0.1/upload`, { ...minioPayload, token })
       .then((response: any) => {
         const data: string = response?.data?.message;
-        const profileUrl = `https://apigateway-dev.tokrum.com:8081/simplestorageservice/0.1/download?bucket=/treats-dev/buyer/${custId}&filename=${filename}`;
+        const profileUrl = `${window.NX?.env?.API_URL}/simplestorageservice/0.1/download?bucket=/treats-dev/buyer/${custId}&filename=${filename}`;
         if (response.status === 200 && data) {
           return profileUrl || 'err';
         }
