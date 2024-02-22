@@ -82,6 +82,21 @@ export interface AddressDetailModel {
   }
 }
 
+export interface UpdateCustomer {
+
+  data: {
+    customerUpdate: {
+      user: {
+        firstName: string
+        lastName: string
+        metafields: {
+          profileUrl: string
+        }
+      }
+    }
+  }
+
+}
 export interface UserModel {
   addressDetails?: AddressDetailModel
   cities?: CitiesModel
@@ -91,6 +106,7 @@ export interface UserModel {
   province?: CountryAreaModel
   provinces?: ProvincesModel
   subdistrict?: SubDistrictModel
+  updateCustomer?: UpdateCustomer
 }
 
 export enum UserActionType {
@@ -102,7 +118,8 @@ export enum UserActionType {
   GetDistrict = '⌘➝Profile➝GetDistrict',
   GetSubDistrict = '⌘➝Profile➝GetSubDistrict',
   GetProvinces = '⌘➝Profile➝GetProvinces',
-  GetAddressDetails = '⌘➝Profile➝GetAddressDetails'
+  GetAddressDetails = '⌘➝Profile➝GetAddressDetails',
+  UpdateCustomer = '⌘➝Profile➝UpdateCustomer'
 }
 
 export type UserAction =
@@ -133,4 +150,7 @@ export type UserAction =
   } | {
     data: UserModel
     type: UserActionType.PhotoeditorDelete
+  } | {
+    data: UserModel
+    type: UserActionType.UpdateCustomer
   };

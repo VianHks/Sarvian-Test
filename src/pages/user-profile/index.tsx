@@ -1,8 +1,9 @@
 import type { ChangeEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { Check, ChevronRight, PowerSettingsNew } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import {
   Alert,
   Box,
@@ -31,6 +32,8 @@ import {
 import type { PageComponent } from '@nxweb/react';
 
 import type { CustSnackBarProps } from '@components/custom-component/snackbar';
+import { useAuth } from '@hooks/use-auth';
+import { PersonalizedRecomendationCommand } from '@models/personalized-recomendation/reducers';
 import { useCommand, useStore } from '@models/store';
 import type { PhotoEditorModel } from '@models/user-profile/types';
 
@@ -54,20 +57,24 @@ const VisuallyHiddenInput = styled('input')({
 interface UpdateUserProfile {
   [key: string]: unknown
   name: string
-  // profile_picture: string | null
+  profileUrl: string
+  // Profile_picture: string | null
 }
 
 const DEFAULT_USER_DATA: UpdateUserProfile = {
-  name: ''
-  // profile_picture: ''
+  name: '',
+  profileUrl: ''
+  // Profile_picture: ''
 };
 
 const Profile: PageComponent = () => {
   const theme = useTheme();
   const command = useCommand((cmd) => cmd);
   const navigate = useNavigate();
-  const [store, dispatch] = useStore((state) => state.profile);
+  const [store, dispatch] = useStore((state) => state);
   const { action } = useParams();
+  const location = useLocation();
+  const stateLocation = location.state?.balik;
 
   const [formData, setFormData] = useState<UpdateUserProfile>(DEFAULT_USER_DATA);
 
@@ -84,6 +91,8 @@ const Profile: PageComponent = () => {
   const [snackbarProps, setSnackbarProps] = useState<CustSnackBarProps | null>(null);
 
   const fileInputRefs = useRef<(HTMLInputElement | null)>(null);
+  const { auth } = useAuth();
+  const token = useMemo(() => auth?.token.accessToken, [auth]);
 
   const handleEditProfile = () => {
     setIsEditProfile(true);
@@ -96,30 +105,65 @@ const Profile: PageComponent = () => {
       setShowSuccessAlert(true);
       setFormData({ ...formData, name: originalName });
     } else {
-      await command.profile.updateProfileInfo({
-        name: formData.name
-        // Profile_picture: store?.photoeditor?.fileName
-      }).then(() => {
-        if (store?.profile) {
-          store.profile.name = formData.name;
-          // Store.profile.profile_picture = store?.photoeditor?.fileName || null;
-        }
+      console.log(formData.name);
 
-        setIsFail(false);
-        setShowSuccessAlert(true);
-      });
+      const [firstName, ...lastNameArray] = formData.name.split(' ');
+      const lastName = lastNameArray.join(' ');
+
+      const file = store?.profile?.photoeditor?.file;
+      const custId = store?.personalizedRec?.customerProfile?.data?.user?.id || '';
+
+      if (base64Images && file) {
+        const base64Data = base64Images.split(',')[1];
+        const fileName = file?.name || '';
+        const fileType = file?.type || 'image/png';
+
+        const response = await command.profile.uploadFile(token || '', base64Data, fileName, custId, fileType);
+
+        /*
+         * If (response) {
+         *   console.log('cekDownload', response);
+         * }
+         */
+        const payload = {
+          firstName,
+          lastName,
+          profileUrl: response || '',
+          token
+        };
+
+        await command.profile.putUpdateCustomer(payload, token || '').then((res) => {
+          console.log('cekRespUpdate', res);
+
+          setIsFail(false);
+          setShowSuccessAlert(true);
+        });
+        const transformedProfile: UpdateUserProfile = {
+          name: `${firstName} ${lastName}` || formData.name,
+          profileUrl: `${response}` || formData.profileUrl
+          // Profile_picture: store?.photoeditor?.fileName || null
+        };
+
+        setFormData(transformedProfile);
+      }
     }
 
     setIsEditProfile(false);
   };
 
   function getPreviewImageSrc(): string | undefined {
-    if (store?.photoeditor) {
-      const photoModel = store.photoeditor;
+    if (store?.profile?.photoeditor) {
+      const photoModel = store?.profile?.photoeditor;
       if (photoModel?.base64Image) {
-        // setShowSuccessAlertPicture(true);
+        // SetShowSuccessAlertPicture(true);
 
         return photoModel.base64Image;
+      }
+
+      const profileUrl = store?.personalizedRec?.customerProfile?.data?.user?.metadata.find((item) => item.key === 'profileUrl')?.value;
+
+      if (profileUrl) {
+        return profileUrl;
       }
     }
 
@@ -127,12 +171,34 @@ const Profile: PageComponent = () => {
   }
 
   useEffect(() => {
-    const transformedProfile: UpdateUserProfile = {
-      name: store?.profile?.name || formData.name
-      // profile_picture: store?.photoeditor?.fileName || null
-    };
+    if (stateLocation) {
+      setIsEditProfile(stateLocation);
+    }
+  }, [stateLocation]);
 
-    setFormData(transformedProfile);
+  useEffect(() => {
+    if (token) {
+      const tokenKey = {
+        token
+      };
+
+      dispatch(PersonalizedRecomendationCommand.getCustomerProfile(token, tokenKey));
+    }
+  }, [dispatch]);
+
+  useEffect(() => {
+    const user = store?.personalizedRec?.customerProfile?.data?.user;
+    const profileUrl = store?.personalizedRec?.customerProfile?.data?.user?.metadata.find((item) => item.key === 'profileUrl')?.value;
+
+    if (user && user.firstName !== undefined && user.lastName !== undefined) {
+      const transformedProfile: UpdateUserProfile = {
+        name: `${user.firstName} ${user.lastName}` || formData.name,
+        profileUrl: `${profileUrl}`
+        // Profile_picture: store?.photoeditor?.fileName || null
+      };
+
+      setFormData(transformedProfile);
+    }
   }, [store]);
 
   useEffect(() => {
@@ -148,21 +214,25 @@ const Profile: PageComponent = () => {
     };
   }, [showSuccessAlert]);
 
-  // useEffect(() => {
-  //   let timer: NodeJS.Timeout | null = null;
-  //   if (showSuccessAlertPicture) {
-  //     timer = setTimeout(() => {
-  //       setShowSuccessAlert(false);
-  //     }, 2000);
-  //   }
+  /*
+   * UseEffect(() => {
+   *   let timer: NodeJS.Timeout | null = null;
+   *   if (showSuccessAlertPicture) {
+   *     timer = setTimeout(() => {
+   *       setShowSuccessAlert(false);
+   *     }, 2000);
+   *   }
+   */
 
-  //   return () => {
-  //     if (timer) clearTimeout(timer);
-  //   };
-  // }, [showSuccessAlertPicture]);
+  /*
+   *   return () => {
+   *     if (timer) clearTimeout(timer);
+   *   };
+   * }, [showSuccessAlertPicture]);
+   */
 
   useEffect(() => {
-    const storedFileInfo = store?.photoeditor;
+    const storedFileInfo = store?.profile?.photoeditor;
 
     if (storedFileInfo !== null && typeof storedFileInfo === 'object') {
       const fileInfo = storedFileInfo;
@@ -175,7 +245,7 @@ const Profile: PageComponent = () => {
 
       setBase64Images(base64Image as string);
     }
-  }, [store?.photoeditor]);
+  }, [store?.profile?.photoeditor]);
 
   /*
    * Const handleCloseSnackbar = () => {
@@ -256,7 +326,7 @@ const Profile: PageComponent = () => {
           imgPreview.src = base64Image as string;
         }
 
-        navigate('/edit-photo');
+        navigate('/edit-photo', { state: { key: isEditProfile } });
       } catch (error) {
         setSnackbarProps({
           message: 'Upload Gambar gagal',
@@ -275,7 +345,8 @@ const Profile: PageComponent = () => {
    */
 
   // eslint-disable-next-line no-console
-  console.log(store, formData);
+  console.log('cekstore', store);
+  console.log('cekFormData', formData);
 
   return (
     <Container
@@ -510,16 +581,16 @@ const Profile: PageComponent = () => {
                       <>
                         <Typography color={theme.palette.grey[600]} textAlign="start" variant="caption">Nama:</Typography>
                         <Typography color={theme.palette.grey[800]} fontWeight="bold" textAlign="start" variant="body2">
-                          {store?.profile?.name}
+                        {formData.name}
                         </Typography>
                       </>
                       )}
 
                     <Typography color={theme.palette.grey[600]} textAlign="start" variant="caption">Email:</Typography>
-                    <Typography color={theme.palette.grey[800]} fontWeight="bold" textAlign="start" variant="body2">{store?.profile?.email}</Typography>
+                    <Typography color={theme.palette.grey[800]} fontWeight="bold" textAlign="start" variant="body2">{store?.personalizedRec?.customerProfile?.data?.user?.email}</Typography>
 
                     <Typography color={theme.palette.grey[600]} textAlign="start" variant="caption">No. Handphone:</Typography>
-                    <Typography color={theme.palette.grey[800]} fontWeight="bold" textAlign="start" variant="body2">{store?.profile?.phone}</Typography>
+                    <Typography color={theme.palette.grey[800]} fontWeight="bold" textAlign="start" variant="body2">{store?.personalizedRec?.customerProfile?.data?.user?.metadata.find((meta) => meta.key === 'phone')?.value}</Typography>
                   </Grid>
 
                   {/* <Grid item={true} sx={{ alignItems: 'start', display: 'flex', justifyContent: 'end' }} xs={4}>
@@ -545,7 +616,7 @@ const Profile: PageComponent = () => {
                   <Grid item={true} sx={{ alignItems: 'start', display: 'flex', justifyContent: 'end' }} xs={4}>
                     <Grid item={true}>
                       <Button
-                        disabled={isEditProfile}
+                        disabled={false}
                         style={{
                           height: 'auto',
                           minWidth: 0,
@@ -553,7 +624,6 @@ const Profile: PageComponent = () => {
                           textTransform: 'none',
                           width: 'auto'
                         }}
-                        onClick={handleButtonClick}
                       >
                         <img
                           alt="Selected"
@@ -570,15 +640,33 @@ const Profile: PageComponent = () => {
                             opacity: isEditProfile ? '0.5' : undefined,
                             borderRadius: '.5rem'
                           }} />
-                        <VisuallyHiddenInput
-                          accept="image/jpeg, image/jpg"
-                          ref={(el) => {
-                            fileInputRefs.current = el;
-                          }}
-                          type="file"
-                          onChange={(event) => {
-                            handleImageChange(event);
-                          }} />
+                        {
+  isEditProfile
+    ? (
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          color: 'white',
+          opacity: '1'
+        }}
+      >
+        <EditIcon onClick={handleButtonClick}/>
+      </div>
+    )
+    : null
+}
+      <VisuallyHiddenInput
+        accept="image/jpeg, image/jpg"
+        ref={(el) => {
+          fileInputRefs.current = el;
+        }}
+        type="file"
+        onChange={(event) => {
+          handleImageChange(event);
+        }} />
                       </Button>
                     </Grid>
                   </Grid>
