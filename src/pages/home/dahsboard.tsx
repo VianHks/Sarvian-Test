@@ -31,12 +31,9 @@ import { useCommand, useStore } from '@models/store';
 import FloatingShoppingButton from '@pages/halaman-resto/floatingshopping-button';
 
 import dineInIcon from '@assets/images/pages/beranda/DineIn.svg';
-import pesanAntarIcon from '@assets/images/pages/beranda/PesanAntar.svg';
 import pickUpIcon from '@assets/images/pages/beranda/PickUp.svg';
-import recomendationIcon from '@assets/images/pages/beranda/Rekomendasi 1.svg';
 import danaIcon from '@assets/images/pages/beranda/dana.png';
 import jajananLokalIcon from '@assets/images/pages/beranda/jajananLokalIcon.svg';
-import recomendationImage from '@assets/images/pages/beranda/recomandation.svg';
 import terdekat from '@assets/images/pages/beranda/terdekat.svg';
 import terhemat from '@assets/images/pages/beranda/terhemat.svg';
 import terlaris from '@assets/images/pages/beranda/terlaris.svg';
@@ -248,7 +245,7 @@ const Home: PageComponent = () => {
       dispatch(PersonalizedRecomendationCommand.getCustomerProfile(token, tokenKey));
       dispatch(command.home.getHomeMenu(token || ''));
     }
-  }, [dispatch]);
+  }, [dispatch, token]);
 
   useEffect(() => {
     if (store?.home?.HomeRestoOutput?.data?.channels) {
@@ -482,7 +479,7 @@ const Home: PageComponent = () => {
     if (!hasBreakfast && !hasLunch && !hasDinner) {
       navigate('/personalized-recomendation');
     }
-  }, []);
+  }, [store.personalizedRec?.customerProfile?.data.user.metadata]);
 
   return (
     <Box sx={{ margin: '1rem 1.5rem' }}>
