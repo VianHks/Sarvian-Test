@@ -316,9 +316,6 @@ const Profile: PageComponent = () => {
           }
           : null;
 
-        // eslint-disable-next-line no-console
-        console.log(updatedSelectedImages);
-
         dispatch(command.profile?.updatePhotoEditorData(updatedSelectedImages || null));
 
         const imgPreview = document.getElementById(`imgPreview_0`) as HTMLImageElement | null;
@@ -343,10 +340,6 @@ const Profile: PageComponent = () => {
    *   setModalCloseProfileOpen(false);
    * };
    */
-
-  // eslint-disable-next-line no-console
-  console.log('cekstore', store);
-  console.log('cekFormData', formData);
 
   return (
     <Container

@@ -28,8 +28,6 @@ const checkoutCommand = {
             type: CheckoutActionType.CheckoutMenuLoad,
             value
           });
-
-          console.log('masuk sini', value);
         }
       } catch (err) {
         console.error(err);
@@ -53,8 +51,6 @@ const checkoutCommand = {
             type: CheckoutActionType.RestoListLoad,
             value
           });
-
-          console.log('masuk sini', value);
         }
       } catch (err) {
         console.error(err);
@@ -78,8 +74,6 @@ const checkoutCommand = {
             type: CheckoutActionType.DanaLoad,
             value
           });
-
-          console.log('masuk sini', value);
         }
       } catch (err) {
         console.error(err);

@@ -474,6 +474,16 @@ const Home: PageComponent = () => {
     // Navigate(`/dana/bind`);
   };
 
+  useEffect(() => {
+    const hasBreakfast = store.personalizedRec?.customerProfile?.data.user.metadata.some((item) => item.key === 'breakfast');
+    const hasLunch = store.personalizedRec?.customerProfile?.data.user.metadata.some((item) => item.key === 'lunch');
+    const hasDinner = store.personalizedRec?.customerProfile?.data.user.metadata.some((item) => item.key === 'dinner');
+
+    if (!hasBreakfast && !hasLunch && !hasDinner) {
+      navigate('/personalized-recomendation');
+    }
+  }, []);
+
   return (
     <Box sx={{ margin: '1rem 1.5rem' }}>
       <Typography

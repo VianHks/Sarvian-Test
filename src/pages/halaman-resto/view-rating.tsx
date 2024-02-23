@@ -74,8 +74,6 @@ const UlasandanRating: PageComponent = () => {
     }
   }, [dispatch, token]);
 
-  console.log('cekrating', store);
-
   return (
     <Box sx={{ margin: '0.5rem 0.5rem' }}>
    {store?.data && store.data.length > 0

@@ -105,9 +105,6 @@ const PersonalizedRecomendation: PageComponent = () => {
       const updatedFoodsList = { ...prevFoodsList };
       const selectedItems = updatedFoodsList[mealType];
 
-      console.log('cekitem', updatedFoodsList);
-      console.log('cekSELECTEDitem', selectedItems);
-
       const isItemAlreadySelected = selectedItems.some(
         (item) => item.id === clickedItem.id
       );
@@ -178,9 +175,6 @@ const PersonalizedRecomendation: PageComponent = () => {
       setActiveStep(1);
     }
   };
-
-  console.log('cekstore', store);
-  console.log('cekstore', userid);
 
   const renderCard = (mealType: string) => {
     const selectedFoodsList = getFoodsList(mealType);

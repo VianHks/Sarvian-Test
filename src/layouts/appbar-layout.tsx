@@ -68,7 +68,6 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
   };
 
   const handleBack = () => {
-    console.log('cek');
     navigate(-1);
   };
 
