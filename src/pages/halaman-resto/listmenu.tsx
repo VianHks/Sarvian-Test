@@ -100,16 +100,12 @@ const ListMenu: React.FC<ListMenuProps> = ({ scrollToKategoriMenu }) => {
   const [formData, setFormData] = useState(DATA);
 
   useEffect(() => {
-    // Menambahkan event listener untuk meng-handle perubahan selectedValue
     const handleScroll = (event: Event) => {
-      console.log('cekEvent', event);
       scrollToKategoriMenu(event as SelectChangeEvent<string>);
     };
 
-    // Mendengarkan event scroll pada elemen listMenuElement
     listMenuElementRef.current?.addEventListener('scroll', handleScroll);
 
-    // Membersihkan event listener saat komponen unmount
     return () => {
       listMenuElementRef.current?.removeEventListener('scroll', handleScroll);
     };
