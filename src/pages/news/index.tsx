@@ -6,6 +6,7 @@ import {
   Card,
   CardContent,
   CardMedia,
+  CircularProgress,
   FormControl,
   InputLabel,
   MenuItem,
@@ -74,7 +75,10 @@ const NewsPage: PageComponent = () => {
     if (filterDispatch !== 0) {
       const endpoint = getEndpoint(filterDispatch.toString());
 
-      dispatch(ChannelCommand.getAppleNews(endpoint));
+      setIsLoading(true);
+      dispatch(ChannelCommand.getAppleNews(endpoint)).finally(() => {
+        setIsLoading(false);
+      });
     }
   }, [dispatch, filterDispatch]);
 
@@ -85,6 +89,9 @@ const NewsPage: PageComponent = () => {
       setIsLoading(false);
     }
   }, [store]);
+
+  console.log('cekvalue', selectedValue);
+  console.log('cekLoad', isLoading);
 
   return (
     <div>
@@ -201,11 +208,19 @@ const NewsPage: PageComponent = () => {
     </Card>
           ))}
       </Box>
-      {isLoading
-        ? <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'center', minHeight: '100vh' }}>
-          <img alt="Logo" src={logo} style={{ height: '100px', width: '80px' }} />
-          </div>
-        : null}
+      {isLoading && selectedValue !== ''
+        ? (
+  <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', minHeight: '100vh' }}>
+    <CircularProgress />
+  </Box>
+        )
+        : selectedValue === ''
+          ? (
+  <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', minHeight: '100vh' }}>
+    <img alt="Logo" src={logo} style={{ height: '100px', width: '80px' }} />
+  </Box>
+          )
+          : null}
     </div>
   );
 };
