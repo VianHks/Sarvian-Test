@@ -26,7 +26,7 @@ export interface PagedModel<T> {
 
 export interface RootModel {
 
-  halamanResto?: NewsModel
+  newsList?: NewsModel
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

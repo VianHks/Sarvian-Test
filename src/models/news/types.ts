@@ -1,8 +1,6 @@
 /* eslint-disable import/exports-last */
 /* eslint-disable linebreak-style */
-export interface NewsList {
-  status: string
-  totalResults: number
+export interface NewsAppleList {
   articles: [
     {
       source: {
@@ -18,24 +16,29 @@ export interface NewsList {
       content: string
     }
   ]
+  status: string
+  totalResults: number
+
 }
 
 interface NewsModel {
-  newsList?: NewsList
+
+  newsAppleList?: NewsAppleList
 
 }
 
 enum NewsActionType {
-
-  NewsList = 'newslist-load'
+  ClearNews = 'clear-news',
+  NewsAppleList = 'newsapplelist-load'
 }
 
-  type NewsAction = {
-
-    data?: NewsModel
-    type: NewsActionType.NewsList
-
-  };
+type NewsAction =
+{
+  data?: NewsModel
+  type: NewsActionType.NewsAppleList
+} | {
+  type: NewsActionType.ClearNews
+};
 
 export { NewsActionType };
 export type { NewsModel, NewsAction };

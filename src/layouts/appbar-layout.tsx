@@ -1,7 +1,7 @@
-import { useRef, useState  } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import {  useState  } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-import { Avatar, Button, Dialog, DialogContent, Grid, IconButton, InputBase, Paper, styled, useTheme } from '@mui/material';
+import { Avatar, Dialog, DialogContent, Grid, IconButton, InputBase, Paper, styled, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -12,8 +12,6 @@ import { ArrowBackFilled, ContentCopyOutlined, EmailOutlined, FileDownloadOutlin
 import { Facebook, Instagram, LINE, Telegram, Twitter, WhatsApp } from '@nxweb/icons/simple';
 
 import { routes } from '@config/routes';
-
-import type { SelectChangeEvent } from '@mui/material/Select';
 
 type ActionType = 'detailpesanan' | undefined;
 
@@ -29,43 +27,15 @@ const ContentWrapper = styled('main')(({ theme }) => ({
   }
 }));
 
-const SESSION_STORAGE_CHECKOUT = 'CheckoutId';
-
 const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, readonly action?: ActionType }) => {
   const theme = useTheme();
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [selectedValue, setSelectedValue] = useState<string>('');
+
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams] = useSearchParams();
-  const action = searchParams.get('action');
-  const checkoutIdFromStorage = window.sessionStorage.getItem(SESSION_STORAGE_CHECKOUT) ?? '';
-  let dynamicIcon = null;
-  let dynamicHandler: React.ReactNode = null;
-  const selectedValueRef = useRef(null);
-
-  const colRefs: React.RefObject<HTMLDivElement>[] = [];
   const currentRoute = routes.find((route) => route.path === location.pathname);
   const pageDescription = currentRoute?.meta?.description || '';
   const pageId = currentRoute?.meta?.appBarId || '';
-  let dropDownValue = currentRoute?.meta?.dropDownValue || '';
 
-  const handleSelectChange = (event: SelectChangeEvent<string>) => {
-    const selectedCategory = event.target.value as string;
-
-    // Find the corresponding ref for the selected category
-    const selectedRef = colRefs.find(
-      (ref) => ref.current && ref.current.getAttribute('data-category') === selectedCategory
-    );
-
-    if (selectedRef && selectedRef.current) {
-      // Scroll to the selected component
-      selectedRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    dropDownValue = selectedCategory;
-    setSelectedValue(selectedCategory);
-  };
 
   const handleBack = () => {
     navigate(-1);
@@ -77,46 +47,6 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
     setIsDialogOpen(false);
   };
 
-  const openDialog = () => {
-    setIsDialogOpen(true);
-  };
-
-  switch (pageId) {
-    case 'detailpesanan':
-      dynamicIcon = <ShareFilled />;
-
-      dynamicHandler = (
-        <div>
-          <IconButton
-            aria-label="dynamic-action"
-            color="default"
-            size="large"
-            sx={{ mr: 2 }}
-            onClick={openDialog}
-          >
-            {dynamicIcon}
-          </IconButton>
-        </div>
-      );
-      break;
-    case 'keranjang':
-      dynamicHandler = (
-        <div>
-          <Button
-            color="primary"
-            disabled={!checkoutIdFromStorage}
-            variant="text"
-            onClick={() => navigate(action === 'edit' ? '/keranjang' : '/keranjang?action=edit')}
-          >
-            {action === 'edit' ? 'Selesai' : 'Edit'}
-          </Button>
-        </div>
-      );
-      break;
-
-    default:
-      break;
-  }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -163,8 +93,6 @@ const AppBarLayout = ({ children }: { readonly children?: React.ReactNode, reado
           <Typography color={pageDescription === 'Pusat Bantuan' ? theme.palette.primary.main : theme.palette.grey[900]} component="div" fontWeight="bold" sx={{ flexGrow: 1 }} variant="h4">
             {String(pageDescription)}
           </Typography>
-
-          {dynamicHandler}
           <Dialog open={isDialogOpen} onClose={closeDialog}>
             <DialogContent sx={{ width: '30rem' }}>
               <div style={{ marginBottom: '1rem', overflowY: 'auto' }}>

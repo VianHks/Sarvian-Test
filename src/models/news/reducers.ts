@@ -4,11 +4,9 @@ import type { TAction, TDispatch } from '@models/types';
 
 import { NewsActionType } from './types.js';
 
-import type { NewsAction, NewsList, NewsModel } from './types.js';
+import type { NewsAction, NewsAppleList, NewsModel } from './types.js';
 
-const DefaultNewsList: NewsList = {
-  status: '',
-  totalResults: 0,
+const DefaultNewApplesList: NewsAppleList = {
   articles: [
     {
       source: {
@@ -23,19 +21,23 @@ const DefaultNewsList: NewsList = {
       publishedAt: '',
       content: ''
     }
-  ]
+  ],
+  status: '',
+  totalResults: 0
 };
 
 const ChannelDefault: NewsModel = {
-  newsList: DefaultNewsList
+  newsAppleList: DefaultNewApplesList
 };
-const HalamanRestoReducer = (
+const NewsReducer = (
   state: NewsModel = ChannelDefault,
   action: NewsAction
 ): NewsModel => {
   switch (action.type) {
-    case NewsActionType.NewsList:
+    case NewsActionType.NewsAppleList:
       return { ...state, ...action.data };
+    case NewsActionType.ClearNews:
+      return ChannelDefault;
 
     default:
       return state;
@@ -43,31 +45,51 @@ const HalamanRestoReducer = (
 };
 
 export const ChannelCommand = {
-  getNews: (): TAction<NewsAction, void> => {
+  getAppleNews: (endpointKey: string): TAction<NewsAction, void> => {
     return (dispatch: TDispatch<NewsAction>) => {
+      dispatch({
+        type: NewsActionType.ClearNews
+      });
+
       return apiFetchNews()
-        .get(`https://newsapi.org/v2/everything?q=apple&from=2024-03-24&to=2024-03-24&sortBy=popularity&apiKey=157526369f7f4408aec5ceb566f3309b`)
-        .then((response) => {
+        .get(`${endpointKey}`)
+        .then((response: any) => {
           if (response.status === 200) {
             if (response.data !== null) {
-              const newsList: NewsModel = {
-                newsList: response.data as NewsList
+              const filteredArticles = response?.data?.articles.filter((article: any) => article.source.name !== '[Removed]');
+
+              const newsappleList: NewsModel = {
+                newsAppleList: {
+                  ...response.data,
+                  articles: filteredArticles
+                }
               };
 
               dispatch({
-                data: newsList,
-                type: NewsActionType.NewsList
+                data: newsappleList,
+                type: NewsActionType.NewsAppleList
               });
             } else {
               dispatch({
                 data: ChannelDefault,
-                type: NewsActionType.NewsList
+                type: NewsActionType.NewsAppleList
               });
             }
           }
         });
     };
+  },
+  clearNews: (): TAction<NewsAction, void> => {
+    return (dispatch: TDispatch<NewsAction>): Promise<void> => {
+      return new Promise<void>((resolve) => {
+        dispatch({
+          type: NewsActionType.ClearNews
+        });
+        resolve();
+      });
+    };
   }
+
 };
 
-export { HalamanRestoReducer, ChannelDefault };
+export { NewsReducer, ChannelDefault };

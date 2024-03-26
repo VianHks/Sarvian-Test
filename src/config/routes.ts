@@ -17,9 +17,7 @@ export const routes: Route[] = [
   },
   {
     path: '/login',
-    redirectTo: (_location, _) => {
-      return '/';
-    }
+    redirectTo: '/news-list'
   },
   // ** Fallback routes, must be the last route item
   {
@@ -33,7 +31,6 @@ export const routes: Route[] = [
     auth: false,
     element: lazy(() => import('@pages/news/index.js')),
     hash: true,
-    // meta: { appBarId: 'pageresto', dropDownValue },
     layout: 'blank',
     path: '/news-list',
     search: true

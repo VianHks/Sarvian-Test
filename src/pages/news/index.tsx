@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
 
@@ -8,52 +8,42 @@ import {
   CardMedia,
   FormControl,
   InputLabel,
-  Menu,
   MenuItem,
   Select,
   Toolbar,
   Typography
 } from '@mui/material';
-import Tooltip from '@mui/material/Tooltip';
-
-// Import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
 
 import type { PageComponent } from '@nxweb/react';
 
 import { ChannelCommand } from '@models/news/reducers';
 import { useStore } from '@models/store';
 
-// Import FloatingShoppingButton from './floatingshopping-button';
+import { categories, filterOptions,  getEndpoint } from './types';
+
+import logo from '@assets/images/logo.png';
 
 import type { SelectChangeEvent } from '@mui/material/Select';
-
-const dummyCategories = [
-  { id: '1', name: 'All articles mentioning Apple from yesterday, sorted by popular publishers first' },
-  { id: '2', name: 'All articles about Tesla from the last month, sorted by recent first' },
-  { id: '3', name: 'Top business headlines in the US right now' },
-  { id: '4', name: 'Top headlines from TechCrunch right now' },
-  { id: '5', name: 'All articles published by the Wall Street Journal in the last 6 months, sorted by recent first' }
-];
-
-const filterOptions = [
-  { value: 'showAll', label: 'Show All' },
-  { value: 'show10', label: 'Show 10' },
-  { value: 'show20', label: 'Show 20' },
-  { value: 'show50', label: 'Show 50' },
-  { value: 'show100', label: 'Show 100' }
-];
 
 const NewsPage: PageComponent = () => {
   const [store, dispatch] = useStore((state) => state);
   const [selectedValue, setSelectedValue] = useState<string>('');
   const [filterOption, setFilterOption] = useState<string>('');
+  const [filterDispatch, setFilterDispatch] = useState(0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const handleChange = (event: SelectChangeEvent<string>) => {
+    const selectedName = event.target.value;
+    const selectedCategory = categories.find((category) => category.name === selectedName);
+
+    if (selectedCategory) {
+      setFilterDispatch(parseInt(selectedCategory.id, 10));
+    }
+
     setSelectedValue(event.target.value);
   };
 
   const handleChangeFilter = (event: SelectChangeEvent<string>) => {
-    console.log('New filter value:', event.target.value);
     setFilterOption(event.target.value);
   };
 
@@ -81,10 +71,20 @@ const NewsPage: PageComponent = () => {
   };
 
   useEffect(() => {
-    dispatch(ChannelCommand.getNews());
-  }, [dispatch]);
+    if (filterDispatch !== 0) {
+      const endpoint = getEndpoint(filterDispatch.toString());
 
-  console.log('cekstore', store);
+      dispatch(ChannelCommand.getAppleNews(endpoint));
+    }
+  }, [dispatch, filterDispatch]);
+
+  useEffect(() => {
+    if (!store?.newsList?.newsAppleList?.articles || store.newsList.newsAppleList.articles.length < 2) {
+      setIsLoading(true);
+    } else {
+      setIsLoading(false);
+    }
+  }, [store]);
 
   return (
     <div>
@@ -94,8 +94,8 @@ const NewsPage: PageComponent = () => {
           left: 0,
           paddingInline: '1rem',
           position: 'fixed',
-          width: '100%',
           top: 0,
+          width: '100%',
           zIndex: 100
         }}
       >
@@ -124,7 +124,7 @@ const NewsPage: PageComponent = () => {
               value={selectedValue}
               onChange={handleChange}
             >
-              {dummyCategories.map((category) => (
+              {categories.map((category) => (
 
                 <MenuItem key={category.id} style={{ whiteSpace: 'normal' }} value={category.name}>
                   {category.name}
@@ -165,15 +165,16 @@ const NewsPage: PageComponent = () => {
 
       <Box
         sx={{
+          display: isLoading ? 'none' : 'block',
           margin: '0.5rem 0.5rem',
           marginBottom: '7rem',
           marginTop: '5rem',
           paddingInline: '1rem'
         }}
       >
-        {store?.halamanResto?.newsList?.articles
-  ?.slice(0, getFilterValue(filterOption))
-  .map((article: any, index: number) => (
+        {store?.newsList?.newsAppleList?.articles
+          ?.slice(0, getFilterValue(filterOption))
+          .map((article: any, index: number) => (
     <Card
       key={index}
       sx={{ marginBottom: '20px' }}
@@ -200,6 +201,11 @@ const NewsPage: PageComponent = () => {
     </Card>
           ))}
       </Box>
+      {isLoading
+        ? <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'center', minHeight: '100vh' }}>
+          <img alt="Logo" src={logo} style={{ height: '100px', width: '80px' }} />
+          </div>
+        : null}
     </div>
   );
 };

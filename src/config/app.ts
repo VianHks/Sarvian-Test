@@ -1,7 +1,7 @@
 import appLogo from '@assets/images/logo.svg';
 
 export const app = {
-  name: 'Tokrum Food Buyer',
+  name: 'Sarvian App',
   title: '<APP_TITLE>',
   url: '/',
 

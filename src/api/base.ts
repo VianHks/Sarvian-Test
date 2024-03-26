@@ -41,9 +41,4 @@ export const apiFetch = (token: string) => createFetch({
 
 export const apiFetchNews = () => createFetch({
   baseURL: getApiNews()
-  // q: 'apple',
-  // from: '2024-03-24',
-  // to: '2024-03-24',
-  // sortBy: 'popularity',
-  // apiKey: '157526369f7f4408aec5ceb566f3309b'
 });

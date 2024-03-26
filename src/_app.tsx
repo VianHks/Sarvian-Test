@@ -1,5 +1,6 @@
-import {  Suspense } from 'react';
 import type { FC } from 'react';
+import {  Suspense, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { CacheProvider } from '@emotion/react';
 
@@ -23,6 +24,12 @@ const clientEmotionCache = createEmotionCache();
 const App: FC<LayoutWrapperProps> = ({
   emotionCache = clientEmotionCache, ...props
 }) => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate('/news-list');
+  }, [navigate]);
+
   return (
     <CacheProvider value={emotionCache}>
       <Head>

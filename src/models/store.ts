@@ -5,36 +5,36 @@ import {
   createCommandHook, createDispatchHook, createStoreHook, createStoreProvider
 } from '@nxweb/react';
 
-import { ChannelCommand, ChannelDefault, HalamanRestoReducer } from './news/reducers.js';
+import { ChannelCommand, ChannelDefault, NewsReducer } from './news/reducers.js';
 
 import type { RootAction, RootModel } from './types.js';
 
-// ** Init reducers
+// ** Init reducer list
 const rootReducer = combineReducers({
-  halamanResto: HalamanRestoReducer
+  newsList: NewsReducer
 });
 
-// ** Init models
+// ** Init model
 const rootModel: RootModel = {
-  halamanResto: ChannelDefault
+  newsList: ChannelDefault
 };
 
-// ** Init commands
+// ** Init command
 const rootCommand = {
-  halamanResto: ChannelCommand
+  newsList: ChannelCommand
 };
 
-// ** Create store
+// *** Create store
 export const store = createStore(rootReducer, rootModel);
 
-// ** Create store provider
+// *** Create store provider
 export const StoreProvider = createStoreProvider(store);
 
-// ** Create store hook
+// *** Create store hook
 export const useStore = createStoreHook<RootModel, RootAction>();
 
-// ** Create dispatch hook
+// *** Create dispatch hook
 export const useDipatch = createDispatchHook<RootModel, RootAction>();
 
-// ** Create command hook
+// *** Create command hook
 export const useCommand = createCommandHook(rootCommand);
