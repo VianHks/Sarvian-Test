@@ -39,7 +39,7 @@ const App: FC<LayoutWrapperProps> = ({
         config={auth}
         loader={<FallbackSpinner />}
         manual={true}
-        skipRedirect={window.location.pathname === '/home'}
+        skipRedirect={window.location.pathname === '/news-list'}
       >
         <SettingsProvider>
           <Suspense fallback={<FallbackSpinner />}>

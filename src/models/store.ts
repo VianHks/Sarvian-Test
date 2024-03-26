@@ -5,29 +5,23 @@ import {
   createCommandHook, createDispatchHook, createStoreHook, createStoreProvider
 } from '@nxweb/react';
 
-import { halamanRestoCommand } from './halaman-resto/commands.js';
-import { HalamanRestoReducer } from './halaman-resto/reducers.js';
-import { PersonalizedRecomendationCommand, PersonalizedRecReducer, PersonalRecomendationDefault } from './personalized-recomendation/reducers.js';
+import { ChannelCommand, ChannelDefault, HalamanRestoReducer } from './news/reducers.js';
 
 import type { RootAction, RootModel } from './types.js';
 
 // ** Init reducers
 const rootReducer = combineReducers({
-  halamanResto: HalamanRestoReducer,
-  personalizedRec: PersonalizedRecReducer
-
+  halamanResto: HalamanRestoReducer
 });
 
 // ** Init models
 const rootModel: RootModel = {
-  personalizedRec: PersonalRecomendationDefault
+  halamanResto: ChannelDefault
 };
 
 // ** Init commands
 const rootCommand = {
-  halamanResto: halamanRestoCommand,
-  personalizedRec: PersonalizedRecomendationCommand
-
+  halamanResto: ChannelCommand
 };
 
 // ** Create store

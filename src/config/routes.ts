@@ -7,7 +7,7 @@ export const routes: Route[] = [
 
   {
     path: '/',
-    redirectTo: '/page-resto'
+    redirectTo: '/news-list'
   },
   {
     path: '/callback',
@@ -31,11 +31,11 @@ export const routes: Route[] = [
   },
   {
     auth: false,
-    element: lazy(() => import('@pages/halaman-resto/index.js')),
+    element: lazy(() => import('@pages/news/index.js')),
     hash: true,
     // meta: { appBarId: 'pageresto', dropDownValue },
     layout: 'blank',
-    path: '/page-resto',
+    path: '/news-list',
     search: true
   }
 ];

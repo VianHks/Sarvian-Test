@@ -2,8 +2,7 @@
 import type { Action } from 'redux';
 import type { ThunkAction, ThunkDispatch } from 'redux-thunk';
 
-import type { HalamanRestoAction, HalamanRestoModel } from './halaman-resto/types.js';
-import type { PersonalizedRecAction, PersonalRecomendationModel } from './personalized-recomendation/types.js';
+import type { NewsAction, NewsModel } from './news/types.js';
 
 export type SortDirection = 'asc' | 'desc';
 
@@ -27,13 +26,11 @@ export interface PagedModel<T> {
 
 export interface RootModel {
 
-  halamanResto?: HalamanRestoModel
-  personalizedRec?: PersonalRecomendationModel
-
+  halamanResto?: NewsModel
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type RootAction = HalamanRestoAction | PersonalizedRecAction | {
+export type RootAction = NewsAction | {
   type: ''
 };
 export type TAction<A extends Action, R> = ThunkAction<Promise<R>, RootModel, unknown, A>;
