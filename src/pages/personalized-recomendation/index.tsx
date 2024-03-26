@@ -55,21 +55,23 @@ const PersonalizedRecomendation: PageComponent = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [userid, setUserId] = useState('');
 
-  useEffect(() => {
-    if (token) {
-      const tokenKey = {
-        token
-      };
+  // useEffect(() => {
+  //   if (token) {
+  //     const tokenKey = {
+  //       token
+  //     };
 
-      dispatch(PersonalizedRecomendationCommand.getCustomerProfile(token, tokenKey));
-    }
-  }, [dispatch]);
+  //     dispatch(PersonalizedRecomendationCommand.getCustomerProfile(token, tokenKey));
+  //   }
+  // }, [dispatch]);
 
   useEffect(() => {
     if (store?.customerProfile?.data?.user?.id) {
       setUserId(store?.customerProfile?.data?.user?.id);
     }
   }, [store?.customerProfile?.data?.user]);
+
+ 
 
   const getFoodsList = (mealType: string) => {
     switch (mealType) {
@@ -125,6 +127,12 @@ const PersonalizedRecomendation: PageComponent = () => {
   useEffect(() => {
     dispatch(PersonalizedRecomendationCommand.getPersonalizeRecomendation());
   }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(PersonalizedRecomendationCommand.getNews());
+  }, [dispatch]);
+
+  console.log('cekstore', store);
 
   useEffect(() => {
     if (token && store?.customerProfile?.data?.user?.metadata) {

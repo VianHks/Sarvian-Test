@@ -6,6 +6,27 @@ interface PersonalizedRecMenu {
   photo: string
   title: string
 }
+
+export interface NewsList {
+  status: string
+  totalResults: number
+  articles: [
+    {
+      source: {
+        id: null
+        name: string
+      }
+      author: string
+      title: string
+      description: string
+      url: string
+      urlToImage: null
+      publishedAt: string
+      content: string
+    }
+  ]
+}
+
 export interface RecMenu {
   data: [
     {
@@ -110,12 +131,14 @@ interface PersonalRecomendationModel {
   recomendationList?: PersonalizedRecMenu[]
   recomendationMenu?: RecMenu
   customerProfile?: CustomerProfile
+  newsList?: NewsList
 }
 
 enum PersonalizedRecActionType {
   GetPersonalizedRecomendation = '⌘➝PersonalizedRecomendation➝GetPersonalizedRecomendation',
   GetRecomendationMenu = '⌘➝PersonalizedRecomendation➝RecomendationMenu',
-  GetCustomerProfile = '⌘➝PersonalizedRecomendation➝CustomerProfile'
+  GetCustomerProfile = '⌘➝PersonalizedRecomendation➝CustomerProfile',
+  GetListNews = '⌘➝GetNews➝GetListNews'
 }
 
 type PersonalizedRecAction = {
@@ -127,6 +150,9 @@ type PersonalizedRecAction = {
   data?: PersonalRecomendationModel
   type: PersonalizedRecActionType.GetCustomerProfile
 
+} | {
+  data?: PersonalRecomendationModel
+  type: PersonalizedRecActionType.GetListNews
 } | {
   data?: PersonalRecomendationModel
   type: PersonalizedRecActionType.GetRecomendationMenu

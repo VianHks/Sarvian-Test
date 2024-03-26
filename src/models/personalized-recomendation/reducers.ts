@@ -1,5 +1,5 @@
 /* eslint-disable linebreak-style */
-import { apiFetch } from '@api/base.js';
+import { apiFetch, apiFetchNews } from '@api/base.js';
 import type { TAction, TDispatch } from '@models/types.js';
 
 import { PersonalizedRecActionType } from './types.js';
@@ -17,7 +17,7 @@ import Roti from '@assets/images/Roti.png';
 import Sate from '@assets/images/Sate.png';
 import Sunda from '@assets/images/Sunda.png';
 
-import type { CustomerProfile, PersonalizedRecAction, PersonalRecomendationModel, RecMenu } from './types.js';
+import type { CustomerProfile, NewsList, PersonalizedRecAction, PersonalRecomendationModel, RecMenu } from './types.js';
 
 const DefaultMenuRec: RecMenu = {
   data: [
@@ -25,6 +25,26 @@ const DefaultMenuRec: RecMenu = {
       id: '',
       photo: '',
       title: ''
+    }
+  ]
+};
+
+const DefaultNewsList: NewsList = {
+  status: '',
+  totalResults: 0,
+  articles: [
+    {
+      source: {
+        id: null,
+        name: ''
+      },
+      author: '',
+      title: '',
+      description: '',
+      url: '',
+      urlToImage: null,
+      publishedAt: '',
+      content: ''
     }
   ]
 };
@@ -183,7 +203,8 @@ const PERSONALIZE_RECOMENDATION = [
 const PersonalRecomendationDefault: PersonalRecomendationModel = {
   recomendationList: [],
   recomendationMenu: DefaultMenuRec,
-  customerProfile: DefaultCustProfile
+  customerProfile: DefaultCustProfile,
+  newsList: DefaultNewsList
 };
 
 const PersonalizedRecReducer = (
@@ -197,6 +218,8 @@ const PersonalizedRecReducer = (
       return { ...state, ...action.data };
     case PersonalizedRecActionType.GetCustomerProfile:
       return { ...state, ...action.data };
+    case PersonalizedRecActionType.GetListNews:
+      return { ...state, ...action.data };
 
     default:
       return state;
@@ -204,6 +227,31 @@ const PersonalizedRecReducer = (
 };
 
 export const PersonalizedRecomendationCommand = {
+  getNews: (): TAction<PersonalizedRecAction, void> => {
+    return (dispatch: TDispatch<PersonalizedRecAction>) => {
+      return apiFetchNews()
+        .get(`https://newsapi.org/v2/everything?q=apple&from=2024-03-24&to=2024-03-24&sortBy=popularity&apiKey=157526369f7f4408aec5ceb566f3309b`)
+        .then((response) => {
+          if (response.status === 200) {
+            if (response.data !== null) {
+              const newsList: PersonalRecomendationModel = {
+                newsList: response.data as NewsList
+              };
+
+              dispatch({
+                data: newsList,
+                type: PersonalizedRecActionType.GetListNews
+              });
+            } else {
+              dispatch({
+                data: PersonalRecomendationDefault,
+                type: PersonalizedRecActionType.GetListNews
+              });
+            }
+          }
+        });
+    };
+  },
   getMenuRecomendation: (token: string): TAction<PersonalizedRecAction, void> => {
     return (dispatch: TDispatch<PersonalizedRecAction>) => {
       return apiFetch(token)
