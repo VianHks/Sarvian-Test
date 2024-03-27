@@ -12,3 +12,5 @@
 - NX_AUTH_TOKEN_METHOD=none
 - NX_AUTH_REDIRECT_URL=http://localhost:8080
 - NX_AUTH_LOGOUT_URL=http://localhost:8080
+# Sarvian-Test
+Tes Front End Developer PT. Eigen Tri Mahatma
